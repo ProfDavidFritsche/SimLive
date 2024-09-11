@@ -399,14 +399,16 @@ public abstract class PlaneElement extends Element {
 			coords[n] = nodes.get(elementNodes[n]).getCoords();
 		}
 		double[] dir = View.getViewDirection(modelCoords2d);
-		double[] intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coords[0], coords[1], coords[2]);
-		if (GeomUtility.isPointInTriangle3d(coords[0], coords[1], coords[2], intersect)) {
-			return intersect;
-		}
-		if (elementNodes.length > 3) {
-			intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coords[0], coords[2], coords[3]);
-			if (GeomUtility.isPointInTriangle3d(coords[0], coords[2], coords[3], intersect)) {
+		if (Math.abs(dir[0]*R0.get(0, 2)+dir[1]*R0.get(1, 2)+dir[2]*R0.get(2, 2)) > SimLive.ZERO_TOL) {
+			double[] intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coords[0], coords[1], coords[2]);
+			if (GeomUtility.isPointInTriangle3d(coords[0], coords[1], coords[2], intersect)) {
 				return intersect;
+			}
+			if (elementNodes.length > 3) {
+				intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coords[0], coords[2], coords[3]);
+				if (GeomUtility.isPointInTriangle3d(coords[0], coords[2], coords[3], intersect)) {
+					return intersect;
+				}
 			}
 		}
 		return null;
