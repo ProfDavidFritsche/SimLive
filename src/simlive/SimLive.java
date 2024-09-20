@@ -253,7 +253,7 @@ public class SimLive {
 	private static Tree tree;
 	private static Table table;
 	
-	private static SashForm sashForm, sashForm_1, sashFormMatrixView;
+	private static SashForm sashForm, sashForm_1, sashForm_2, sashFormMatrixView;
 	private static int[] sashForm_Weights;
 	private static int sashForm_SashWidth;
 	private static int[] sashForm_1_Weights;
@@ -1194,6 +1194,7 @@ public class SimLive {
 						if (tree.getItemCount() > 0) {
 							setSashFormMatrixView(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
 						}
+						sashForm_2.setWeights(new int[] {1, 3});
 					}
 				});
 				menu.setVisible(true);
@@ -1268,7 +1269,7 @@ public class SimLive {
 		tabFolderModel.setSimple(false);
 		tabFolderModel.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
-		SashForm sashForm_2 = new SashForm(tabFolderModel, SWT.VERTICAL);
+		sashForm_2 = new SashForm(tabFolderModel, SWT.VERTICAL);
 		tabItem.setControl(sashForm_2);
 		
 		modelTree = new Tree(sashForm_2, SWT.MULTI | SWT.BORDER);
