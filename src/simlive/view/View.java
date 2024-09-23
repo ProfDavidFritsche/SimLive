@@ -2463,6 +2463,7 @@ public class View extends GLCanvas {
 			if (!set.getSets().isEmpty()) {
 				for (int s1 = 0; s1 < set.getSets().size(); s1++) {
 					Set newSet = set.getSets().get(s1);
+					newSet.view = set.view;
 					SimLive.model.getSets().add(newSet);
 					sets.add(newSet);
 				}
@@ -2472,6 +2473,7 @@ public class View extends GLCanvas {
 			else if (set.getType() != Set.Type.BASIC) {
 				for (int e = 0; e < set.getElements().size(); e++) {
 					Set newSet = new Set(set.getElements().get(e), Set.Type.BASIC);
+					newSet.view = set.view;
 					SimLive.model.getSets().add(newSet);
 					sets.add(newSet);
 				}
@@ -2487,6 +2489,7 @@ public class View extends GLCanvas {
 			if (!set.getSets().isEmpty()) {
 				for (int s1 = 0; s1 < set.getSets().size(); s1++) {
 					Set newSet = set.getSets().get(s1);
+					newSet.view = set.view;
 					SimLive.model.getSets().add(newSet);
 					sets.add(newSet);
 				}
@@ -2497,6 +2500,7 @@ public class View extends GLCanvas {
 			else if (set.getType() != Set.Type.BASIC) {
 				for (int e = 0; e < set.getElements().size(); e++) {
 					Set newSet = new Set(set.getElements().get(e), Set.Type.BASIC);
+					newSet.view = set.view;
 					SimLive.model.getSets().add(newSet);
 					sets.add(newSet);
 				}
@@ -2520,6 +2524,7 @@ public class View extends GLCanvas {
 		}
 		reorderSetsByID(sets);
 		Set newSet = new Set(elements, sets, Set.Type.COMPOSITE);
+		newSet.view = sets.get(0).view;
 		SimLive.model.getSets().removeAll(sets);
 		SimLive.model.getSets().add(newSet);
 		sets.clear();
