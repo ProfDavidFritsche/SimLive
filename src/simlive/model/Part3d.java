@@ -19,9 +19,9 @@ public class Part3d implements DeepEqualsInterface {
 	public enum Render {FILL, FILL_AND_WIREFRAME, WIREFRAME};
 	public Render render = Render.FILL;
 	public boolean doubleSided = false;
+	private double[][] normals0;
 	//subject to change in increments, do not check
 	private double[][] normals;
-	private double[][] facetNormals;
 	private double[][] vertexCoords;
 	
 	public Part3d(int nrVertices, int nrFacets) {
@@ -192,9 +192,9 @@ public class Part3d implements DeepEqualsInterface {
     	}
 	}
 	
-	public void initNormals() {
-		normals = new double[getNrFacets()*3][3];
-		facetNormals = new double[getNrFacets()][];
+	private void initNormals() {
+		normals0 = new double[getNrFacets()*3][3];
+		double[][] facetNormals = new double[getNrFacets()][];
 		Stream<Facet3d> stream = Stream.of(facets).parallel();
 		stream.forEach(facet -> {
 			facetNormals[facet.getID()] = calculateFacetNormal(facet.getID());
@@ -210,16 +210,25 @@ public class Part3d implements DeepEqualsInterface {
 		    		if (dotProductNormalized(facetNormal0, facetNormal1) > 0.85) {
 		    			int k = connect[indices[i]][j*2+1];
 		    			synchronized(this){
-			    			normals[f1*3+k][0] += facetNormal0[0];
-			    			normals[f1*3+k][1] += facetNormal0[1];
-			    			normals[f1*3+k][2] += facetNormal0[2];
+			    			normals0[f1*3+k][0] += facetNormal0[0];
+			    			normals0[f1*3+k][1] += facetNormal0[1];
+			    			normals0[f1*3+k][2] += facetNormal0[2];
 		    			}
 		    		}
 		    	}
     		}
     	});
+		normals = normals0;
 	}
 	
+	public void setNormals(double[][] normals) {
+		this.normals = normals;
+	}
+	
+	public double[][] getNormals0() {
+		return normals0;
+	}
+
 	public double[][] getNormals() {
 		return normals;
 	}
@@ -237,26 +246,15 @@ public class Part3d implements DeepEqualsInterface {
 	public boolean isEdge(int facet, int i, double[] viewDir) {
 		int f = neighbourFacets[facet][i];
 		if (f == -1) return true;
-		double[] facetNormal = facetNormals[facet];
+		double[] facetNormal = calculateFacetNormal(facet);
 		double scal = facetNormal[0]*viewDir[0]+facetNormal[1]*viewDir[1]+facetNormal[2]*viewDir[2];
 		if (scal > 0) return false;
-		double[] facetNormal0 = facetNormals[f];
+		double[] facetNormal0 = calculateFacetNormal(f);
 		double scal0 = facetNormal0[0]*viewDir[0]+facetNormal0[1]*viewDir[1]+facetNormal0[2]*viewDir[2];
 		if (scal0 > 0) return true;
 		return false;
 	}
 
-	public boolean positionChanged(double[][] newVertexCoords) {
-		if (vertexCoords == null) return true;
-		for (int v = 0; v < vertices.length; v++) {
-			if (newVertexCoords[v][0] != vertexCoords[v][0] || newVertexCoords[v][1] != vertexCoords[v][1] ||
-				newVertexCoords[v][2] != vertexCoords[v][2]) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	public void rotate(double angle, double[] rotPoint, double[] axis) {
 		Matrix rot = GeomUtility.getRotationMatrix(angle, axis);
 		Matrix p = new Matrix(rotPoint, 3);
@@ -284,10 +282,8 @@ public class Part3d implements DeepEqualsInterface {
     	for (int v = 0; v < getNrVertices(); v++) {
     		vertexCoordsNew[v] = getVertex(v).getCoords();
 		}
-    	if (positionChanged(vertexCoordsNew)) {
-    		vertexCoords = vertexCoordsNew;
-    		initNormals();
-		}
+    	vertexCoords = vertexCoordsNew;
+    	initNormals();
 		
 		/*for (int f = 0; f < facets.length; f++) {
 			double[] v0 = getVertex(facets[f].getIndices()[0]).getCoords();

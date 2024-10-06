@@ -1626,13 +1626,12 @@ public class Increment {
 		return new double[]{u_global.get(dof, 0), u_global.get(dof+1, 0), u_global.get(dof+2, 0)};
 	}
 	
-	public double[] getDisplacement(double[] vertexCoords, int elementID, double t, double[] r) {
+	public double[] getDisplacement(double[] vertexCoords, int elementID, double t, double[] r, Matrix R) {
 		if (elementID >= 0) {
 			Element element = solution.getRefModel().getElements().get(elementID);
 			int[] elemNodes = element.getElementNodes();
 			if (element.isLineElement()) {
 				LineElement lineElement = (LineElement) element;
-				int elemID = lineElement.getID();
 				double[] p = SimLive.model.getNodes().get(elemNodes[0]).getCoords();
 				Matrix d = new Matrix(new double[]{vertexCoords[0]-p[0], vertexCoords[1]-p[1],
 						vertexCoords[2]-p[2]}, 3);
@@ -1640,20 +1639,7 @@ public class Increment {
 				Matrix R0x = R0.getMatrix(0, 2, 0, 0);
 				double scal = d.dotProduct(R0x);
 				d.minusEquals(R0x.times(scal));
-				Matrix Rr = new Matrix(View.Rr[elemID]);
-				if (lineElement.getType() == Element.Type.BEAM) {
-					double scaling = SimLive.post.getScaling();
-					double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(elemID);
-					double f2d = (t-1.0)*(3.0*t-1.0);
-					double f5d = t*(3.0*t-2.0);
-					double[] rot = new double[3];
-					rot[0] = (angles[1][0]-angles[0][0])*t*scaling;
-					rot[1] = Math.atan((f2d*angles[0][1]+f5d*angles[1][1])*scaling);
-					rot[2] = Math.atan((f2d*angles[0][2]+f5d*angles[1][2])*scaling);
-					Matrix R = Beam.rotationMatrixFromAngles(new Matrix(rot, 3));
-					Rr = Rr.times(R);
-				}
-				double[] disp1 = Rr.times(R0.transpose()).times(d).minus(d).getColumnPackedCopy();
+				double[] disp1 = R.times(d).minus(d).getColumnPackedCopy();
 				double disp[] = lineElement.getDispAtLocalCoordinates(t);
 				return new double[]{disp[0]+disp1[0], disp[1]+disp1[1], disp[2]+disp1[2]};
 			}
@@ -1666,17 +1652,7 @@ public class Increment {
 				Matrix R0z = R0.getMatrix(0, 2, 2, 2);
 				double scal = d.dotProduct(R0z);
 				d = R0z.times(scal);
-				double[] normal = new double[3];
-				double[] shapeFunctionValues = planeElement.getShapeFunctionValues(r[0], r[1]);
-				for (int i = 0; i < 3; i++) {
-					double[] n = new double[planeElement.getElementNodes().length];
-					for (int j = 0; j < planeElement.getElementNodes().length; j++) {
-						n[j] = View.nodeNormals[planeElement.getElementNodes()[j]][i];
-					}
-					normal[i] = planeElement.interpolateNodeValues(shapeFunctionValues, n);
-				}
-				Matrix d1 = new Matrix(normal, 3);
-				d1 = d1.times(scal/d1.normF());
+				Matrix d1 = R.times(d);
 				double[] disp1 = d1.minus(d).getColumnPackedCopy();
 				double disp[] = planeElement.getDispAtLocalCoordinates(r[0], r[1]);
 				return new double[]{disp[0]+disp1[0], disp[1]+disp1[1], disp[2]+disp1[2]};
@@ -1690,6 +1666,50 @@ public class Increment {
 			}
 		}
 		return new double[3];
+	}
+	
+	public Matrix getRotation(int elementID, double t, double[] r) {
+		if (elementID >= 0) {
+			Element element = solution.getRefModel().getElements().get(elementID);
+			if (element.isLineElement()) {
+				LineElement lineElement = (LineElement) element;
+				int elemID = lineElement.getID();
+				Matrix R0 = lineElement.getR0();
+				Matrix Rr = new Matrix(View.Rr[elemID]);
+				if (lineElement.getType() == Element.Type.BEAM) {
+					double scaling = SimLive.post.getScaling();
+					double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(elemID);
+					double f2d = (t-1.0)*(3.0*t-1.0);
+					double f5d = t*(3.0*t-2.0);
+					double[] rot = new double[3];
+					rot[0] = (angles[1][0]-angles[0][0])*t*scaling;
+					rot[1] = Math.atan((f2d*angles[0][1]+f5d*angles[1][1])*scaling);
+					rot[2] = Math.atan((f2d*angles[0][2]+f5d*angles[1][2])*scaling);
+					Matrix R = Beam.rotationMatrixFromAngles(new Matrix(rot, 3));
+					Rr = Rr.times(R);
+				}
+				return Rr.times(R0.transpose());
+			}
+			if (element.isPlaneElement()) {
+				PlaneElement planeElement = (PlaneElement) element;
+				Matrix R0 = planeElement.getR0();
+				Matrix R0z = R0.getMatrix(0, 2, 2, 2);
+				double[] normal = new double[3];
+				double[] shapeFunctionValues = planeElement.getShapeFunctionValues(r[0], r[1]);
+				for (int i = 0; i < 3; i++) {
+					double[] n = new double[planeElement.getElementNodes().length];
+					for (int j = 0; j < planeElement.getElementNodes().length; j++) {
+						n[j] = View.nodeNormals[planeElement.getElementNodes()[j]][i];
+					}
+					normal[i] = planeElement.interpolateNodeValues(shapeFunctionValues, n);
+				}
+				Matrix d1 = new Matrix(normal, 3);
+				d1 = d1.times(1.0/d1.normF());
+				return GeomUtility.getRotationMatrix(Math.acos(d1.dotProduct(R0z)),
+						R0z.crossProduct(d1).getColumnPackedCopy());
+			}
+		}
+		return Matrix.identity(3, 3);
 	}
 	
 	/*public double[] getPhiRotation(int nodeID) {

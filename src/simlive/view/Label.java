@@ -38,7 +38,7 @@ public class Label {
 		double[] px = new double[3];
 		double[] py = new double[3];
 		for (int i = 0; i < 3; i++) {
-			double[] coords = View.getCoordsWithScaledDisp(part3d.getVertex(facet3d.getIndices()[i]));
+			double[] coords = View.getCoordsWithScaledDisp(part3d.getVertex(facet3d.getIndices()[i]), null);
 			double[] screenCoords = View.modelToScreenCoordinates(coords);
 			px[i] = screenCoords[0];
 			py[i] = screenCoords[1];
@@ -275,7 +275,7 @@ public class Label {
 			double[] py = new double[3];
 			double[] pz = new double[3];
 			for (int i = 0; i < 3; i++) {
-				double[] vertexCoords = View.getCoordsWithScaledDisp(part3d.getVertex(facet3d.getIndices()[i]));
+				double[] vertexCoords = View.getCoordsWithScaledDisp(part3d.getVertex(facet3d.getIndices()[i]), null);
 				px[i] = vertexCoords[0];
 				py[i] = vertexCoords[1];
 				pz[i] = vertexCoords[2];

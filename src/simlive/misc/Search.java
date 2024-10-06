@@ -19,7 +19,6 @@ import simlive.model.Node;
 import simlive.model.Part3d;
 import simlive.model.PlaneElement;
 import simlive.model.Set;
-import simlive.model.Vertex3d;
 import simlive.view.Label;
 import simlive.view.Measurement;
 import simlive.view.View;
@@ -231,8 +230,7 @@ public abstract class Search {
 							Snap.contactPair = null;
 							double[][] coords = new double[3][3];
 							for (int i = 0; i < 3; i++) {
-								Vertex3d vertex = part3d.getVertex(facet.getIndices()[i]);
-								coords[i] = View.getCoordsWithScaledDisp(vertex);
+								coords[i] = part3d.getVertexCoords()[facet.getIndices()[i]];
 							}
 							Snap.coords3d = GeomUtility.getIntersectionLinePlane(linePoint, lineDir, coords[0], coords[1], coords[2]);
 						}

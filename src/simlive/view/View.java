@@ -2790,11 +2790,22 @@ public class View extends GLCanvas {
 		return coords;
 	}
 	
-	public static double[] getCoordsWithScaledDisp(Vertex3d vertex) {
+	public static Matrix getRotation(Vertex3d vertex) {
+		if (SimLive.mode == Mode.RESULTS && vertex.getElementID() > -1) {
+			return SimLive.post.getPostIncrement().getRotation(vertex.getElementID(),
+						vertex.getT(), vertex.getR());
+		}
+		return Matrix.identity(3, 3);
+	}
+	
+	public static double[] getCoordsWithScaledDisp(Vertex3d vertex, Matrix Rotation) {
 		double[] coords = vertex.getCoords().clone();
 		if (SimLive.mode == Mode.RESULTS && vertex.getElementID() > -1) {
+			if (Rotation == null) {
+				Rotation = getRotation(vertex);
+			}
 			double[] disp = SimLive.post.getPostIncrement().getDisplacement(coords, vertex.getElementID(),
-					vertex.getT(), vertex.getR());
+					vertex.getT(), vertex.getR(), Rotation);
 			coords[0] += disp[0];
 			coords[1] += disp[1];
 			coords[2] += disp[2];
@@ -2810,9 +2821,9 @@ public class View extends GLCanvas {
 		else {
 			int[] indices = focusPoint.getFacet3d().getIndices();
 			double[][] coords = new double[3][];
-			coords[0] = getCoordsWithScaledDisp(focusPoint.getPart3d().getVertex(indices[0]));
-			coords[1] = getCoordsWithScaledDisp(focusPoint.getPart3d().getVertex(indices[1]));
-			coords[2] = getCoordsWithScaledDisp(focusPoint.getPart3d().getVertex(indices[2]));
+			coords[0] = getCoordsWithScaledDisp(focusPoint.getPart3d().getVertex(indices[0]), null);
+			coords[1] = getCoordsWithScaledDisp(focusPoint.getPart3d().getVertex(indices[1]), null);
+			coords[2] = getCoordsWithScaledDisp(focusPoint.getPart3d().getVertex(indices[2]), null);
 			Matrix diff0 = new Matrix(coords[1], 3).minus(new Matrix(coords[0], 3));
 			Matrix diff1 = new Matrix(coords[2], 3).minus(new Matrix(coords[0], 3));
 			Matrix norm = diff0.crossProduct(diff1);
@@ -2999,15 +3010,24 @@ public class View extends GLCanvas {
 		for (int p = 0; p < SimLive.model.getParts3d().size(); p++) {
 			Part3d part3d = SimLive.model.getParts3d().get(p);
 			if (part3d.getNrVertices() > 0 && part3d.getVertex(0).getElementID() > -1) {
-				double[][] vertexCoords = new double[part3d.getNrVertices()][];
+				Matrix[] R = new Matrix[part3d.getNrVertices()];
+		    	double[][] vertexCoords = new double[part3d.getNrVertices()][];
 		    	Stream<Vertex3d> stream = Stream.of(part3d.getVertices()).parallel();
 				stream.forEach(vertex -> {
-					vertexCoords[vertex.getID()] = getCoordsWithScaledDisp(vertex);
+					R[vertex.getID()] = getRotation(vertex);
+					vertexCoords[vertex.getID()] = getCoordsWithScaledDisp(vertex, R[vertex.getID()]);
 				});
-				if (part3d.positionChanged(vertexCoords)) {
-					part3d.setVertexCoords(vertexCoords);
-					part3d.initNormals();
-		    	}
+				part3d.setVertexCoords(vertexCoords);
+				double[][] normals = new double[part3d.getNrFacets()*3][];
+				double[][] normals0 = part3d.getNormals0();
+				Stream<Facet3d> stream1 = Stream.of(part3d.getFacets()).parallel();
+				stream1.forEach(facet -> {
+					int[] indices = facet.getIndices();
+					for (int i = 0; i < indices.length; i++) {
+						normals[facet.getID()*3+i] = R[indices[i]].times(new Matrix(normals0[facet.getID()*3+i], 3)).getColumnPackedCopy();
+					}
+				});
+				part3d.setNormals(normals);
 			}
 		}
     	
