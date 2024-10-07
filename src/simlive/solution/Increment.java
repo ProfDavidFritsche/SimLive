@@ -1678,7 +1678,7 @@ public class Increment {
 				Matrix Rr = new Matrix(View.Rr[elemID]);
 				if (lineElement.getType() == Element.Type.BEAM) {
 					double scaling = SimLive.post.getScaling();
-					double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(elemID);
+					double[][] angles = this.angles[elemID];
 					double f2d = (t-1.0)*(3.0*t-1.0);
 					double f5d = t*(3.0*t-2.0);
 					double[] rot = new double[3];
