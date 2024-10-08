@@ -1,6 +1,5 @@
 package simlive.model;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import Jama.Matrix;
@@ -39,14 +38,16 @@ public class Part3d implements DeepEqualsInterface {
 		}
 		part3d.subTree = subTree.clone();
 		part3d.id = id;
-		if (connect != null) {
+		part3d.render = render;
+		part3d.doubleSided = doubleSided;		
+		//do not copy following to reduce data in model history
+		/*if (connect != null) {
 			part3d.connect = connect.clone();
 		}
 		if (neighbourFacets != null) {
 			part3d.neighbourFacets = neighbourFacets.clone();
 		}
-		//do not copy following to reduce data in model history
-		/*if (normals != null) {
+		if (normals != null) {
 			part3d.normals = normals.clone();
 		}
 		if (facetNormals != null) {
@@ -68,12 +69,15 @@ public class Part3d implements DeepEqualsInterface {
 		}
 		if (!this.subTree.deepEquals(part3d.subTree)) return false;
 		if (this.id != part3d.id) return false;
-		for (int i = 0; i < connect.length; i++) {
+		if (this.render != part3d.render) return false;
+		if (this.doubleSided != part3d.doubleSided) return false;
+		//do not check following because it was not copied
+		/*for (int i = 0; i < connect.length; i++) {
 			if (!Arrays.equals(this.connect[i], part3d.connect[i])) return false;
 		}
 		for (int i = 0; i < neighbourFacets.length; i++) {
 			if (!Arrays.equals(this.neighbourFacets[i], part3d.neighbourFacets[i])) return false;
-		}
+		}*/
 		//do not check following because it might detect a wrong model change
 		/*for (int i = 0; i < normals.length; i++) {
 			if (!Arrays.equals(this.normals[i], part3d.normals[i])) return false;
