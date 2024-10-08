@@ -38,6 +38,7 @@ public class Part3d implements DeepEqualsInterface {
 		}
 		part3d.subTree = subTree.clone();
 		part3d.id = id;
+		//do copy to have it in model history
 		part3d.render = render;
 		part3d.doubleSided = doubleSided;		
 		//do not copy following to reduce data in model history
@@ -69,8 +70,9 @@ public class Part3d implements DeepEqualsInterface {
 		}
 		if (!this.subTree.deepEquals(part3d.subTree)) return false;
 		if (this.id != part3d.id) return false;
-		if (this.render != part3d.render) return false;
-		if (this.doubleSided != part3d.doubleSided) return false;
+		//do not check because it is only for rendering
+		//if (this.render != part3d.render) return false;
+		//if (this.doubleSided != part3d.doubleSided) return false;
 		//do not check following because it was not copied
 		/*for (int i = 0; i < connect.length; i++) {
 			if (!Arrays.equals(this.connect[i], part3d.connect[i])) return false;
