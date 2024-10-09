@@ -1,6 +1,7 @@
 package simlive.view;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -14,7 +15,6 @@ import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-
 import simlive.SimLive;
 import simlive.SimLive.Mode;
 import simlive.SimLive.Select;
@@ -41,32 +41,13 @@ public class DiagramArea extends Canvas {
 	
 	public DiagramArea(Composite parent, int style) {
 		super(parent, style);
+		SimLive.addFocusListener(this, (CTabFolder) parent);
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				/* empty keyListener required to get focus on canvas if clicked */
-				if (e.keyCode == SWT.ARROW_LEFT) {
-					origin[0] -= 10*SimLive.UNIT_SIZE;
-					redraw();
-				}
-				if (e.keyCode == SWT.ARROW_RIGHT) {
-					origin[0] += 10*SimLive.UNIT_SIZE;
-					redraw();
-				}
-				if (e.keyCode == SWT.ARROW_UP) {
-					origin[1] -= 10*SimLive.UNIT_SIZE;
-					redraw();
-				}
-				if (e.keyCode == SWT.ARROW_DOWN) {
-					origin[1] += 10*SimLive.UNIT_SIZE;
-					redraw();
-				}
-				if (e.keyCode == SWT.PAGE_UP) {
-					zoomIn(getSize().x/2.0, getSize().y/2.0);
-				}
-				if (e.keyCode == SWT.PAGE_DOWN) {
-					zoomOut(getSize().x/2.0, getSize().y/2.0);
-				}
+				SimLive.view.timeControlByKeys(e);
+				simlive.SimLive.view.redraw();
 			}
 		});
 		reset();

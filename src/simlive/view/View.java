@@ -16,6 +16,7 @@ import java.util.TimerTask;
 import java.util.stream.Stream;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
@@ -23,7 +24,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.opengl.GLData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
@@ -185,6 +185,7 @@ public class View extends GLCanvas {
 				initFOV();
 			}
 		});
+		SimLive.addFocusListener(this, (CTabFolder) parent);
 		addMouseTrackListener(new MouseTrackAdapter() {
 			@Override
 			public void mouseExit(MouseEvent e) {
@@ -219,26 +220,7 @@ public class View extends GLCanvas {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				/* empty keyListener required to get focus on canvas if clicked */
-				if (e.keyCode == SWT.ARROW_LEFT) {
-					move[0] -= 10*SimLive.UNIT_SIZE;
-				}
-				if (e.keyCode == SWT.ARROW_RIGHT) {
-					move[0] += 10*SimLive.UNIT_SIZE;
-				}
-				if (e.keyCode == SWT.ARROW_UP) {
-					move[1] -= 10*SimLive.UNIT_SIZE;
-				}
-				if (e.keyCode == SWT.ARROW_DOWN) {
-					move[1] += 10*SimLive.UNIT_SIZE;
-				}
-				if (e.keyCode == SWT.PAGE_UP) {
-					Event arg0 = new Event();
-					arg0.count = 1;
-					notifyListeners(SWT.MouseWheel, arg0);
-				}
-				if (e.keyCode == SWT.PAGE_DOWN) {
-					notifyListeners(SWT.MouseWheel, new Event());
-				}
+				timeControlByKeys(e);
 				if (e.keyCode == SWT.DEL) {
 					deleteSelectedLabel();
 					deleteSelectedMeasurement();
@@ -1192,6 +1174,41 @@ public class View extends GLCanvas {
 		        SimLive.diagramArea.update();
 			}
 		});
+	}
+	
+	public void timeControlByKeys(KeyEvent e) {
+		if (SimLive.mode == Mode.RESULTS) {
+			int old = SimLive.post.getPostIncrementID();
+			if (e.keyCode == SWT.ARROW_LEFT) {
+				SimLive.post.setPostIncrementID(Math.max(old-1, 0));
+			}
+			if (e.keyCode == SWT.ARROW_RIGHT) {
+				SimLive.post.setPostIncrementID(Math.min(old+1,
+						SimLive.post.getSolution().getNumberOfIncrements()));
+			}
+			if (e.keyCode == SWT.ARROW_UP) {
+				SimLive.post.setPostIncrementIDtoStartOfStep();
+				if (SimLive.post.getPostIncrementID() == old) {
+					SimLive.post.setPostIncrementID(Math.max(old-1, 0));
+					SimLive.post.setPostIncrementIDtoStartOfStep();
+				}
+			}
+			if (e.keyCode == SWT.ARROW_DOWN) {
+				SimLive.post.setPostIncrementIDtoEndOfStep();
+				if (SimLive.post.getPostIncrementID() == old) {
+					SimLive.post.setPostIncrementID(Math.min(old+1,
+							SimLive.post.getSolution().getNumberOfIncrements()));
+					SimLive.post.setPostIncrementIDtoEndOfStep();
+				}
+			}
+			if (e.keyCode == SWT.PAGE_UP) {
+				SimLive.post.setPostIncrementID(0);
+			}
+			if (e.keyCode == SWT.PAGE_DOWN) {
+				SimLive.post.setPostIncrementID(SimLive.post.getSolution().getNumberOfIncrements());
+			}
+			((ResultsDialog) SimLive.dialogArea).setSliderValue(SimLive.post.getPostIncrementID());
+		}
 	}
 	
 	private Matrix getViewMatrix() {

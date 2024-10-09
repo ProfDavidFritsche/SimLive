@@ -64,7 +64,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawableFactory;
@@ -111,8 +110,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
@@ -1802,8 +1805,14 @@ public class SimLive {
 		sashForm_1 = new SashForm(sashForm, SWT.NONE);
 		
 		CTabFolder tabFolderView = new CTabFolder(sashForm_1, SWT.BORDER | SWT.SINGLE);
+		tabFolderView.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent arg0) {
+				view.setFocus();
+			}
+		});
 		tabFolderView.setSimple(false);
-		tabFolderView.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+		tabFolderView.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		
 		CTabItem tbtmView = new CTabItem(tabFolderView, SWT.NONE);
 		
@@ -1821,8 +1830,14 @@ public class SimLive {
 		tbtmView.setControl(view);
 		
 		CTabFolder tabFolderDiagram = new CTabFolder(sashForm_1, SWT.BORDER | SWT.CLOSE | SWT.SINGLE);
+		tabFolderDiagram.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent arg0) {
+				diagramArea.setFocus();
+			}
+		});
 		tabFolderDiagram.setSimple(false);
-		tabFolderDiagram.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));		
+		tabFolderDiagram.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));		
 		diagramArea = new DiagramArea(tabFolderDiagram, SWT.NO_BACKGROUND);
 		tbtmDiagram = new CTabItem(tabFolderDiagram, SWT.NONE);
 		tbtmDiagram.addDisposeListener(new DisposeListener() {
@@ -1835,8 +1850,14 @@ public class SimLive {
 		tabFolderDiagram.setSelection(tbtmDiagram);
 		
 		CTabFolder tabFolderMatrixView = new CTabFolder(sashForm, SWT.BORDER | SWT.CLOSE | SWT.SINGLE);
+		tabFolderMatrixView.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent arg0) {
+				sashFormMatrixView.setFocus();
+			}
+		});
 		tabFolderMatrixView.setSimple(false);
-		tabFolderMatrixView.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));		
+		tabFolderMatrixView.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));		
 		
 		sashFormMatrixView = new SashForm(tabFolderMatrixView, SWT.NONE);
 		sashFormMatrixView.addControlListener(new ControlAdapter() {
@@ -1870,6 +1891,7 @@ public class SimLive {
 				updateMatrixView();
 			}
 		});
+		addFocusListener(tree, tabFolderMatrixView);
 		/*tree.addMouseTrackListener(new MouseTrackAdapter() {
 			@Override
 			public void mouseEnter(MouseEvent e) {
@@ -1884,6 +1906,7 @@ public class SimLive {
 		table = new Table(sashFormMatrixView, SWT.BORDER);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		table.setLinesVisible(true);
+		addFocusListener(table, tabFolderMatrixView);
 		/*table.addMouseTrackListener(new MouseTrackAdapter() {
 			@Override
 			public void mouseEnter(MouseEvent e) {
@@ -1982,6 +2005,21 @@ public class SimLive {
 		resultIcon = new Label(compositeStatusBar, SWT.NONE);
 		
 		result = new Label(compositeStatusBar, SWT.NONE);
+	}
+	
+	public static void addFocusListener(Composite composite, CTabFolder tabFolder) {
+		composite.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+				tabFolder.setFont(SimLive.FONT_BOLD);
+			}
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+				tabFolder.setFont(SimLive.shell.getDisplay().getSystemFont());
+			}
+		});
 	}
 	
 	private int getModelTreeSelectionIndex() {
