@@ -221,18 +221,20 @@ public abstract class Search {
 					double[] pointOut = new double[3];
 					if (p[0][2] < 1 && p[1][2] < 1 && p[2][2] < 1 &&
 						GeomUtility.isPointInTriangle(p[0], p[1], p[2], screenCoords, pointOut)) {
-						if (pointOut[2] < Search.zCoord) {
-							Search.zCoord = pointOut[2];
-							Search.part3d = part3d;
-							Search.facet3d = facet;
-							Search.element = null;
-							Snap.element = null;
-							Snap.contactPair = null;
-							double[][] coords = new double[3][3];
-							for (int i = 0; i < 3; i++) {
-								coords[i] = part3d.getVertexCoords()[facet.getIndices()[i]];
+						synchronized(Search.class) {
+							if (pointOut[2] < Search.zCoord) {
+								Search.zCoord = pointOut[2];
+								Search.part3d = part3d;
+								Search.facet3d = facet;
+								Search.element = null;
+								Snap.element = null;
+								Snap.contactPair = null;
+								double[][] coords = new double[3][3];
+								for (int i = 0; i < 3; i++) {
+									coords[i] = part3d.getVertexCoords()[facet.getIndices()[i]];
+								}
+								Snap.coords3d = GeomUtility.getIntersectionLinePlane(linePoint, lineDir, coords[0], coords[1], coords[2]);
 							}
-							Snap.coords3d = GeomUtility.getIntersectionLinePlane(linePoint, lineDir, coords[0], coords[1], coords[2]);
 						}
 					}
 				});
