@@ -220,7 +220,9 @@ public class SimLive {
 						MATERIALS, SECTIONS, STEPS, GRID, SOLUTION, RESULTS}
 	public static Mode mode = Mode.NONE;
 	
-	public enum Select {NODES, PARTS, PARTS_3D, DISTANCE, ANGLE, LABEL}
+	public enum BoxSelect {NODES, PARTS, PARTS_3D}
+	public static BoxSelect boxSelect;
+	public enum Select {DEFAULT, DISTANCE, ANGLE, LABEL}
 	public static Select select;
 	
 	public static Label xCoord;
@@ -760,8 +762,9 @@ public class SimLive {
 		tltmMeasureDistance.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				select = select == Select.DISTANCE ? Select.PARTS : Select.DISTANCE;
-				SimLive.view.deselectAllAndDisposeDialogs();
+				select = select == Select.DISTANCE ? Select.DEFAULT : Select.DISTANCE;
+				//SimLive.view.deselectAllAndDisposeDialogs();
+				SimLive.view.removeUnfinalizedMeasurement();
 				setSelectionLabel();
 			}
 		});
@@ -771,8 +774,9 @@ public class SimLive {
 		tltmMeasureAngle.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				select = select == Select.ANGLE ? Select.PARTS : Select.ANGLE;
-				SimLive.view.deselectAllAndDisposeDialogs();
+				select = select == Select.ANGLE ? Select.DEFAULT : Select.ANGLE;
+				//SimLive.view.deselectAllAndDisposeDialogs();
+				SimLive.view.removeUnfinalizedMeasurement();
 				setSelectionLabel();
 			}
 		});
@@ -782,8 +786,9 @@ public class SimLive {
 		tltmCreateLabels.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				select = select == Select.LABEL ? Select.PARTS : Select.LABEL;
-				SimLive.view.deselectAllAndDisposeDialogs();
+				select = select == Select.LABEL ? Select.DEFAULT : Select.LABEL;
+				//SimLive.view.deselectAllAndDisposeDialogs();
+				SimLive.view.removeUnfinalizedMeasurement();
 				setSelectionLabel();
 			}
 		});
@@ -2683,7 +2688,8 @@ public class SimLive {
 			shell.setText(XML.getFilePath()+" - "+APPLICATION_NAME+" "+VERSION_NAME);
 		}
 		
-		select = Select.NODES;
+		boxSelect = BoxSelect.NODES;
+		select = Select.DEFAULT;
 		resetState();
 		resetToPartsMode();
 		setResultLabel(null, false, false, false);

@@ -40,6 +40,7 @@ import org.eclipse.swt.opengl.GLCanvas;
 import Jama.Matrix;
 import simlive.SimLive;
 import simlive.SimLive.Mode;
+import simlive.SimLive.BoxSelect;
 import simlive.SimLive.Select;
 import simlive.dialog.CircularAreaDialog;
 import simlive.dialog.ConnectorDialog;
@@ -355,9 +356,7 @@ public class View extends GLCanvas {
 					}
 				}
 				
-				if (mouseButton == 1 && (SimLive.select == SimLive.Select.NODES || SimLive.select == SimLive.Select.PARTS ||
-						SimLive.select == SimLive.Select.PARTS_3D) &&
-						selectedMeasurement == null && selectedLabel == null) {
+				if (mouseButton == 1 && selectedMeasurement == null && selectedLabel == null) {
 					
 					if (selectedNodes.size() == 1 && selectedNodes.get(0) == moveNode &&
 							SimLive.mode == Mode.PARTS && selectionBox == null &&
@@ -458,13 +457,13 @@ public class View extends GLCanvas {
 								mouseDown[0]-mousePos[0], mouseDown[1]-mousePos[1]);
 						
 						if (animation == null) {
-							if (SimLive.select == SimLive.Select.NODES) {
+							if (SimLive.boxSelect == SimLive.BoxSelect.NODES) {
 								selectNodesInBox();
 							}
-							if (SimLive.select == SimLive.Select.PARTS) {
+							if (SimLive.boxSelect == SimLive.BoxSelect.PARTS) {
 								selectSetsInBox();
 							}
-							if (SimLive.select == SimLive.Select.PARTS_3D) {
+							if (SimLive.boxSelect == SimLive.BoxSelect.PARTS_3D) {
 								selectParts3dInBox();
 							}
 						}
@@ -775,6 +774,8 @@ public class View extends GLCanvas {
 							popupMenu(popup);
 						}
 						
+						boolean labelAdded = false;
+						
 						if (e.button == 1) {
 							/* orientation */
 							if (side != Side.NONE) {
@@ -789,18 +790,9 @@ public class View extends GLCanvas {
 								
 								else if (selectedMeasurement == null && SimLive.select == SimLive.Select.LABEL) {
 									/* add label */
-									if (Snap.node != null) {
-										if (labelAtMousePos != null) {
-											labels.add(Label.getNewLabelForElement(labelAtMousePos.getElement()));
-										}
-										else {
-											labels.add(Label.getNewLabelForNode(Snap.node));
-										}
-									}
-									else {
-										if (Snap.element != null) {
-											labels.add(Label.getNewLabelForElement(Snap.element));
-										}
+									if (labelAtMousePos != null && labelAtMousePos.getElement() != null) {
+										labels.add(labelAtMousePos);
+										labelAdded = true;
 									}
 								}
 								
@@ -818,8 +810,8 @@ public class View extends GLCanvas {
 							}
 						}
 						
-						if (e.button == 1 && SimLive.select != Select.DISTANCE && SimLive.select != Select.ANGLE &&
-								SimLive.select != Select.LABEL && selectedLabel == null && selectedMeasurement == null &&
+						if (e.button == 1 && !labelAdded && SimLive.select != Select.DISTANCE && SimLive.select != Select.ANGLE &&
+								selectedLabel == null && selectedMeasurement == null &&
 								side == Side.NONE) {
 							
 							{
@@ -1143,18 +1135,14 @@ public class View extends GLCanvas {
 				mouseDown[0] = mousePos[0];
 				mouseDown[1] = mousePos[1];
 				
-				if (SimLive.select != Select.DISTANCE &&
-						SimLive.select != Select.ANGLE &&
-						SimLive.select != Select.LABEL) {
-					if (!selectedNodes.isEmpty()) {
-						SimLive.select = Select.NODES;
-					}
-					else if (!selectedParts3d.isEmpty()) {
-						SimLive.select = Select.PARTS_3D;
-					}
-					else {
-						SimLive.select = Select.PARTS;
-					}
+				if (!selectedNodes.isEmpty()) {
+					SimLive.boxSelect = BoxSelect.NODES;
+				}
+				else if (!selectedParts3d.isEmpty()) {
+					SimLive.boxSelect = BoxSelect.PARTS_3D;
+				}
+				else {
+					SimLive.boxSelect = BoxSelect.PARTS;
 				}
 			}
 		});
@@ -1345,7 +1333,7 @@ public class View extends GLCanvas {
             visibility.setMenu(menu1);
 		}
         ArrayList<Object> objects = SimLive.getModelTreeSelection();
-		if (objects.size() == 1 && selectedLabel == null && selectedMeasurement == null) {			
+        if (objects.size() == 1 && selectedLabel == null && selectedMeasurement == null) {
 			if (objects.get(0) instanceof Support && !selectedNodes.isEmpty()) {
 				Support support = (Support) objects.get(0);
 				getStoreMenuItem(popup).addSelectionListener(new SelectionAdapter() {
@@ -1931,6 +1919,15 @@ public class View extends GLCanvas {
 		}
 	}
 	
+	public void removeUnfinalizedMeasurement() {
+		if (!measurements.isEmpty()) {
+			if (!measurements.get(measurements.size()-1).isFinalized()) {
+				measurements.remove(measurements.size()-1);
+			}
+			redraw();
+		}
+	}
+	
 	public boolean doSetsOnlyContain(ArrayList<Set> sets, Set.View view) {
 		for (int s = 0; s < sets.size(); s++) {
 			if (sets.get(s).view != view) {
@@ -2280,11 +2277,7 @@ public class View extends GLCanvas {
 		selectedLabel = null;
 		//Sim2d.model.updateModel();
 		selectionBox = null;
-		for (int m = measurements.size()-1; m > -1; m--) {
-			if (!measurements.get(m).isFinalized()) {
-				measurements.remove(m);
-			}
-		}
+		removeUnfinalizedMeasurement();
 		SimLive.synchronizeModelTreeWithViewSelection();
 	}
 	
