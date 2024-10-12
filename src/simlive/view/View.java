@@ -1271,7 +1271,7 @@ public class View extends GLCanvas {
 				deselectAllAndDisposeDialogs();
 			}
 		});
-		if (!selectedSets.isEmpty() || !selectedParts3d.isEmpty()) {
+		if ((!selectedSets.isEmpty() || !selectedParts3d.isEmpty()) && selectedLabel == null && selectedMeasurement == null) {
 			new MenuItem(popup, SWT.SEPARATOR);
 			MenuItem visibility = new MenuItem(popup, SWT.CASCADE);
 			visibility.setText("Visibility");
@@ -1345,7 +1345,7 @@ public class View extends GLCanvas {
             visibility.setMenu(menu1);
 		}
         ArrayList<Object> objects = SimLive.getModelTreeSelection();
-		if (objects.size() == 1) {			
+		if (objects.size() == 1 && selectedLabel == null && selectedMeasurement == null) {			
 			if (objects.get(0) instanceof Support && !selectedNodes.isEmpty()) {
 				Support support = (Support) objects.get(0);
 				getStoreMenuItem(popup).addSelectionListener(new SelectionAdapter() {
@@ -1490,68 +1490,69 @@ public class View extends GLCanvas {
 			});
     		lockPart3dSelection.setSelection(lockSelectParts3d);
     		lockPart3dSelection.setEnabled(!SimLive.model.getParts3d().isEmpty());
-    		if (!selectedSets.isEmpty()) {
-    			ArrayList<Element> elementSet = new ArrayList<Element>();
-    			for (int s = 0; s < selectedSets.size(); s++) {
-    				elementSet.addAll(selectedSets.get(s).getElements());
-    			}
-    			if (!SimLive.model.doElementsContainType(elementSet, Element.Type.SPRING) &&
-    				!SimLive.model.doElementsContainType(elementSet, Element.Type.POINT_MASS)) {
-	    			new MenuItem(popup, SWT.SEPARATOR);
-	        		MenuItem material = new MenuItem(popup, SWT.CASCADE);
-	        		material.setText("Material");
-	                final Menu menu2 = new Menu(material);
-	                for (int i = 0; i < SimLive.model.getMaterials().size(); i++) {
-	                	final int j = i;
-	                	MenuItem newItem1 = new MenuItem(menu2, SWT.CHECK);
-	                	newItem1.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								for (int e1 = 0; e1 < elementSet.size(); e1++) {
-									elementSet.get(e1).setMaterialID(j);
-								}
-								((PartDialog) SimLive.dialogArea).updateDialog(new double[3]);
-							}
-						});
-	                	for (int e1 = 0; e1 < elementSet.size(); e1++) {
-	                		if (elementSet.get(e1).getMaterialID() == j) {
-								newItem1.setSelection(true);
-							}
-	                	}
-			            newItem1.setText(SimLive.model.getMaterials().get(j).name);
-	                }
-	                material.setMenu(menu2);
-	                
-    				if (!SimLive.model.doElementsContainType(elementSet, Element.Type.QUAD) &&
-    					!SimLive.model.doElementsContainType(elementSet, Element.Type.TRI)) {
-		        		MenuItem section = new MenuItem(popup, SWT.CASCADE);
-		        		section.setText("Section");
-		                final Menu menu3 = new Menu(section);
-		                for (int i = 0; i < SimLive.model.getSections().size(); i++) {
-		                	final int j = i;
-		                	MenuItem newItem1 = new MenuItem(menu3, SWT.CHECK);
-		                	newItem1.addSelectionListener(new SelectionAdapter() {
-								@Override
-								public void widgetSelected(SelectionEvent e) {
-									for (int e1 = 0; e1 < elementSet.size(); e1++) {
-										((LineElement) elementSet.get(e1)).setSectionID(j);
-									}
-									((PartDialog) SimLive.dialogArea).updateDialog(new double[3]);
-								}
-							});
-		                	for (int e1 = 0; e1 < elementSet.size(); e1++) {
-		                		if (((LineElement) elementSet.get(e1)).getSectionID() == j) {
-									newItem1.setSelection(true);
-								}
-		                	}
-				            newItem1.setText(SimLive.model.getSections().get(j).getName());
-		                }
-		                section.setMenu(menu3);
-	    			}
-    			}
-    		}
-    		if (!selectedSets.isEmpty() || !selectedParts3d.isEmpty()) {
-        		new MenuItem(popup, SWT.SEPARATOR);
+    		
+    		if ((!selectedSets.isEmpty() || !selectedParts3d.isEmpty()) && selectedLabel == null && selectedMeasurement == null) {
+    			if (!selectedSets.isEmpty()) {
+        			ArrayList<Element> elementSet = new ArrayList<Element>();
+        			for (int s = 0; s < selectedSets.size(); s++) {
+        				elementSet.addAll(selectedSets.get(s).getElements());
+        			}
+        			if (!SimLive.model.doElementsContainType(elementSet, Element.Type.SPRING) &&
+        				!SimLive.model.doElementsContainType(elementSet, Element.Type.POINT_MASS)) {
+    	    			new MenuItem(popup, SWT.SEPARATOR);
+    	        		MenuItem material = new MenuItem(popup, SWT.CASCADE);
+    	        		material.setText("Material");
+    	                final Menu menu2 = new Menu(material);
+    	                for (int i = 0; i < SimLive.model.getMaterials().size(); i++) {
+    	                	final int j = i;
+    	                	MenuItem newItem1 = new MenuItem(menu2, SWT.CHECK);
+    	                	newItem1.addSelectionListener(new SelectionAdapter() {
+    							@Override
+    							public void widgetSelected(SelectionEvent e) {
+    								for (int e1 = 0; e1 < elementSet.size(); e1++) {
+    									elementSet.get(e1).setMaterialID(j);
+    								}
+    								((PartDialog) SimLive.dialogArea).updateDialog(new double[3]);
+    							}
+    						});
+    	                	for (int e1 = 0; e1 < elementSet.size(); e1++) {
+    	                		if (elementSet.get(e1).getMaterialID() == j) {
+    								newItem1.setSelection(true);
+    							}
+    	                	}
+    			            newItem1.setText(SimLive.model.getMaterials().get(j).name);
+    	                }
+    	                material.setMenu(menu2);
+    	                
+        				if (!SimLive.model.doElementsContainType(elementSet, Element.Type.QUAD) &&
+        					!SimLive.model.doElementsContainType(elementSet, Element.Type.TRI)) {
+    		        		MenuItem section = new MenuItem(popup, SWT.CASCADE);
+    		        		section.setText("Section");
+    		                final Menu menu3 = new Menu(section);
+    		                for (int i = 0; i < SimLive.model.getSections().size(); i++) {
+    		                	final int j = i;
+    		                	MenuItem newItem1 = new MenuItem(menu3, SWT.CHECK);
+    		                	newItem1.addSelectionListener(new SelectionAdapter() {
+    								@Override
+    								public void widgetSelected(SelectionEvent e) {
+    									for (int e1 = 0; e1 < elementSet.size(); e1++) {
+    										((LineElement) elementSet.get(e1)).setSectionID(j);
+    									}
+    									((PartDialog) SimLive.dialogArea).updateDialog(new double[3]);
+    								}
+    							});
+    		                	for (int e1 = 0; e1 < elementSet.size(); e1++) {
+    		                		if (((LineElement) elementSet.get(e1)).getSectionID() == j) {
+    									newItem1.setSelection(true);
+    								}
+    		                	}
+    				            newItem1.setText(SimLive.model.getSections().get(j).getName());
+    		                }
+    		                section.setMenu(menu3);
+    	    			}
+        			}
+        		}
+    			new MenuItem(popup, SWT.SEPARATOR);
         		MenuItem copy = new MenuItem(popup, SWT.NONE);
         		copy.setText("Copy");
         		copy.addSelectionListener(new SelectionAdapter() {
@@ -1647,7 +1648,8 @@ public class View extends GLCanvas {
 				(selectedLabel != SimLive.post.getMinLabel() && selectedLabel != SimLive.post.getMaxLabel())))) {
 			new MenuItem(popup, SWT.SEPARATOR);
     		MenuItem delete = new MenuItem(popup, SWT.NONE);
-    		delete.setText("Delete");
+    		if (selectedMeasurement != null) delete.setText("Delete Measurement");
+    		if (selectedLabel != null) delete.setText("Delete Label");
     		delete.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
