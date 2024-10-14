@@ -2238,6 +2238,7 @@ public class SimLive {
 		setDisplayPartsLabel();
 		setSelectionLabel();
 		view.setCursor(null);
+		View.Rr = null;
 		SimLive.model.updateModel();
 		((CTabFolder) view.getParent()).getItem(0).setText("Model View");
 		SimLive.view.lockSelectParts3d = false;
