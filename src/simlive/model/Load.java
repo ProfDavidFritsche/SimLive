@@ -72,7 +72,7 @@ public class Load extends AbstractLoad implements DeepEqualsInterface {
 		if (!Arrays.equals(this.isRotation, load.isRotation)) return false;
 		if (!Arrays.equals(this.disp, load.disp)) return false;
 		if (!Arrays.equals(this.rotation, load.rotation)) return false;
-		if (this.referenceNode != null &&
+		if (this.referenceNode != null && load.referenceNode != null &&
 				!this.referenceNode.deepEquals(load.referenceNode)) return false;
 		if (!this.timeTable.deepEquals(load.timeTable)) return false;
 		if (this.name != load.name) return false;
