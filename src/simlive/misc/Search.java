@@ -200,13 +200,17 @@ public abstract class Search {
 		Search.part3d = null;
 		Search.facet3d = null;
 		//Search.zCoord = Double.MAX_VALUE;
-		ArrayList<Part3d> parts3d = SimLive.model.getParts3d();
+		ArrayList<Part3d> parts3d = new ArrayList<Part3d>();
+		parts3d.addAll(SimLive.model.getParts3d());
+		parts3d.removeAll(SimLive.view.getSelectedParts3d());
+		parts3d.addAll(0, SimLive.view.getSelectedParts3d());
 		double[] screenCoords = new double[2];
 	    screenCoords[0] = point[0];
 	    screenCoords[1] = point[1];
 	    double[] linePoint = View.screenToModelCoordinates(screenCoords[0], screenCoords[1]);
 		double[] lineDir = View.getViewDirection(linePoint);
 		for (int s = 0; s < parts3d.size(); s++) {
+			if (s == SimLive.view.getSelectedParts3d().size() && Search.part3d != null) break;
 			Part3d part3d = parts3d.get(s);
 			if (isPointInPart3dBoundingBox(part3d, screenCoords)) {
 				Stream<Facet3d> stream = Arrays.stream(part3d.getFacets()).parallel();

@@ -2652,6 +2652,7 @@ public class View extends GLCanvas {
 				for (int s1 = 0; s1 < subTree.subTrees.size(); s1++) {
 					Part3d newPart3d = new Part3d(subTree.subTrees.get(s1).nrVertices,
 							subTree.subTrees.get(s1).nrFacets);
+					newPart3d.render = part3d.render;
 					newPart3d.setSubTree(subTree.subTrees.get(s1));
 					for (int v = 0; v < newPart3d.getNrVertices(); v++) {
 						newPart3d.setVertex(part3d.getVertex(vertexCount++), v);
@@ -2689,6 +2690,7 @@ public class View extends GLCanvas {
 			subTree.subTrees.add(parts3d.get(s).getSubTree());
 		}
 		Part3d newPart3d = new Part3d(nrVertices, nrFacets);
+		newPart3d.render = parts3d.get(0).render;
 		subTree.nrVertices = nrVertices;
 		subTree.nrFacets = nrFacets;
 		nrVertices = 0;
