@@ -8,7 +8,7 @@ public abstract class Element implements DeepEqualsInterface {
 
 	public enum Type {ROD, SPRING, BEAM, TRI, QUAD, RECTANGULAR, CIRCULAR, TRIANGULAR, SPUR_GEAR, POINT_MASS}
 	protected int[] elementNodes;
-	protected int material_id;
+	protected Material material;
 	protected Matrix I;
 	protected int id;
 	protected double stiffnessDamping;
@@ -16,7 +16,6 @@ public abstract class Element implements DeepEqualsInterface {
 	public Matrix M_elem; //solution speed-up
 	
 	public Element() {
-		material_id = -1;
 		id = SimLive.model.getElements().size();
 	}
 	
@@ -28,7 +27,7 @@ public abstract class Element implements DeepEqualsInterface {
 		this.elementNodes = elementNodes;
 	}
 
-	public abstract Element clone();
+	public abstract Element clone(Model model);
 	
 	public abstract boolean deepEquals(Object obj);
 	
@@ -38,34 +37,29 @@ public abstract class Element implements DeepEqualsInterface {
 	
 	public abstract void adaptNodeIDs(int deleteNodeID);
 	
-	public void setMaterialID(int mat_id) {
-		material_id = mat_id;
+	public void setMaterial(Material material) {
+		this.material = material;
 	}
 	
-	public int getMaterialID() {
-		return material_id;
+	public Material getMaterial() {
+		return material;
 	}
 
-	public boolean isMaterialIDValid(ArrayList<Material> materials) {
-		if (material_id < 0 || material_id > materials.size() - 1) return false;
-		return true;
+	public boolean isMaterialValid(ArrayList<Material> materials) {
+		return materials.contains(material);
 	}
 	
 	public abstract Element.Type getType();
 	
 	public abstract String getTypeString();
 	
-	public abstract Matrix getElementStiffness(ArrayList<Material> materials, ArrayList<Section> sections,
-			   						           ArrayList<Node> nodes);
+	public abstract Matrix getElementStiffness(ArrayList<Node> nodes);
 	
-	public abstract Matrix getElementStiffnessNL(ArrayList<Material> materials, ArrayList<Section> sections,
-	           									 ArrayList<Node> nodes, Matrix u_global);
+	public abstract Matrix getElementStiffnessNL(ArrayList<Node> nodes, Matrix u_global);
 	
-	public abstract Matrix getElementForce(ArrayList<Material> materials, ArrayList<Section> sections,
-		     					   ArrayList<Node> nodes, Matrix u_global, boolean localSys);
+	public abstract Matrix getElementForce(ArrayList<Node> nodes, Matrix u_global, boolean localSys);
 
-	public abstract Matrix getElementForceNL(ArrayList<Material> materials, ArrayList<Section> sections,
-            					     ArrayList<Node> nodes, Matrix u_global, boolean localSys);
+	public abstract Matrix getElementForceNL(ArrayList<Node> nodes, Matrix u_global, boolean localSys);
 	
 	public abstract void setIndexIncidence(Solution solution, ArrayList<Node> nodes);
 	
@@ -117,10 +111,10 @@ public abstract class Element implements DeepEqualsInterface {
 		this.massDamping = massDamping;
 	}
 	
-	protected abstract Matrix getMelem(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes);
+	protected abstract Matrix getMelem(ArrayList<Node> nodes);
 	
-	public void initMelem(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes) {
-		M_elem = getMelem(materials, sections, nodes);
+	public void initMelem(ArrayList<Node> nodes) {
+		M_elem = getMelem(nodes);
 	}
 
 	public abstract void update();
@@ -130,9 +124,9 @@ public abstract class Element implements DeepEqualsInterface {
 		id = SimLive.model.getElements().indexOf(this);
 		
 		/* assign material */
-		if (!isMaterialIDValid(SimLive.model.getMaterials())) {
-			if (SimLive.model.getMaterials().size() > 0) {							
-				material_id = 0;
+		if (!isMaterialValid(SimLive.model.getMaterials())) {
+			if (!SimLive.model.getMaterials().isEmpty()) {							
+				material = SimLive.model.getMaterials().get(0);
 			}
 		}
 		

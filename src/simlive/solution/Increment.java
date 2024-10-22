@@ -22,11 +22,9 @@ import simlive.model.DistributedLoad;
 import simlive.model.Element;
 import simlive.model.LineElement;
 import simlive.model.Load;
-import simlive.model.Material;
 import simlive.model.Model;
 import simlive.model.Node;
 import simlive.model.PlaneElement;
-import simlive.model.Section;
 import simlive.model.Set;
 import simlive.model.Step;
 import simlive.model.Support;
@@ -67,8 +65,6 @@ public class Increment {
 	public Matrix assembleStiffnessParallel(int nDofs, Matrix u_global) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
-		ArrayList<Section> sections = solution.getRefModel().getSections();
 		
 		temp = new Matrix(nDofs, nDofs);
 		
@@ -76,10 +72,10 @@ public class Increment {
 		stream.forEach(element -> {
 			Matrix K_elem = null;
 			if (solution.getRefSettings().isLargeDisplacement) {
-				K_elem = element.getElementStiffnessNL(materials, sections, nodes, u_global);
+				K_elem = element.getElementStiffnessNL(nodes, u_global);
 			}
 			else {
-				K_elem = element.getElementStiffness(materials, sections, nodes);
+				K_elem = element.getElementStiffness(nodes);
 			}
 			synchronized (this) {
 				temp = element.addLocalToGlobalMatrix(K_elem, temp);
@@ -104,17 +100,15 @@ public class Increment {
 	public Matrix[] getElementStiffnessArray(Matrix u_global) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
-		ArrayList<Section> sections = solution.getRefModel().getSections();
 		
 		Matrix[] K_elem = new Matrix[elements.size()];
 		
 		for (int elem = 0; elem < elements.size(); elem++) {
 			if (solution.getRefSettings().isLargeDisplacement) {
-				K_elem[elem] = elements.get(elem).getElementStiffnessNL(materials, sections, nodes, u_global);
+				K_elem[elem] = elements.get(elem).getElementStiffnessNL(nodes, u_global);
 			}
 			else {
-				K_elem[elem] = elements.get(elem).getElementStiffness(materials, sections, nodes);
+				K_elem[elem] = elements.get(elem).getElementStiffness(nodes);
 			}
 		}
 		
@@ -124,8 +118,6 @@ public class Increment {
 	public Matrix assembleForceParallel(int nDofs, Matrix u_global) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
-		ArrayList<Section> sections = solution.getRefModel().getSections();
 		
 		temp = new Matrix(nDofs, 1);
 		
@@ -133,12 +125,10 @@ public class Increment {
 		stream.forEach(element -> {
 			Matrix f_elem = null;
 			if (solution.getRefSettings().isLargeDisplacement) {				
-				f_elem = element.getElementForceNL(materials,
-						sections, nodes, u_global, false);
+				f_elem = element.getElementForceNL(nodes, u_global, false);
 			}
 			else {
-				f_elem = element.getElementForce(materials,
-						sections, nodes, u_global, false);
+				f_elem = element.getElementForce(nodes, u_global, false);
 			}
 			synchronized (this) {
 				temp = element.addLocalToGlobalMatrix(f_elem, temp);
@@ -163,8 +153,6 @@ public class Increment {
 	
 	public Matrix getDStiffMatrix(int nDofs, Matrix u_global, ArrayList<Element> dStiffElems) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
-		ArrayList<Section> sections = solution.getRefModel().getSections();
 		
 		temp = new Matrix(nDofs, nDofs);
 		
@@ -172,10 +160,10 @@ public class Increment {
 		stream.forEach(element -> {
 			Matrix K_elem = null;
 			if (solution.getRefSettings().isLargeDisplacement) {
-				K_elem = element.getElementStiffnessNL(materials, sections, nodes, u_global);
+				K_elem = element.getElementStiffnessNL(nodes, u_global);
 			}
 			else {
-				K_elem = element.getElementStiffness(materials, sections, nodes);
+				K_elem = element.getElementStiffness(nodes);
 			}
 			temp = element.addLocalToGlobalMatrix(K_elem.times(element.getStiffnessDamping()), temp);
 		});
@@ -1291,8 +1279,6 @@ public class Increment {
 	public int getNumberOfDynamicTimeSteps(int nDofs, Matrix u_global, Step step) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
-		ArrayList<Section> sections = solution.getRefModel().getSections();
 		
 		double minCritTimeStep = Double.MAX_VALUE;
 		for (int elem = 0; elem < elements.size(); elem++) {
@@ -1300,12 +1286,10 @@ public class Increment {
 				Matrix M_elem = elements.get(elem).M_elem;
 				Matrix K_elem = null;
 				if (solution.getRefSettings().isLargeDisplacement) {
-					K_elem = elements.get(elem).getElementStiffnessNL(materials,
-							sections, nodes, u_global);
+					K_elem = elements.get(elem).getElementStiffnessNL(nodes, u_global);
 				}
 				else {
-					K_elem = elements.get(elem).getElementStiffness(materials,
-							sections, nodes);
+					K_elem = elements.get(elem).getElementStiffness(nodes);
 				}
 			
 				try {

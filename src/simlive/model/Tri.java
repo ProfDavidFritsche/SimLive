@@ -176,13 +176,12 @@ public class Tri extends PlaneElement {
 	}
 	
 	@Override
-	protected Matrix getKelem(ArrayList<Material> materials, ArrayList<Section> sections,
-			  ArrayList<Node> nodes) {
+	protected Matrix getKelem(ArrayList<Node> nodes) {
 		Matrix K_elem_plate = new Matrix(9, 9);
 		Matrix K_elem_membrane = new Matrix(6, 6);
 		
 		double t = getThickness();		
-		Matrix C = getMaterialMatrix(materials);
+		Matrix C = getMaterialMatrix();
 		Matrix Cp = C.times(t*t/12.0);
 		
 		double[][] x = new double[2][3];
@@ -245,8 +244,7 @@ public class Tri extends PlaneElement {
 	}
 	
 	@Override
-	public Matrix getElementStiffness(ArrayList<Material> materials, ArrayList<Section> sections,
-									  ArrayList<Node> nodes) {
+	public Matrix getElementStiffness(ArrayList<Node> nodes) {
 		
 		Matrix T = getTransformation();
 		
@@ -318,8 +316,7 @@ public class Tri extends PlaneElement {
 	}
 	
 	@Override
-	public Matrix getElementStiffnessNL(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes, Matrix u_global) {
+	public Matrix getElementStiffnessNL(ArrayList<Node> nodes, Matrix u_global) {
 		
 		Matrix u_elem = globalToLocalVector(u_global);
 		Matrix Rr = getRr(nodes, u_elem);
@@ -345,10 +342,9 @@ public class Tri extends PlaneElement {
 	}
 
 	@Override
-	public Matrix getElementForce(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForce(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 		
-		Matrix K_elem = getElementStiffness(materials, sections, nodes);
+		Matrix K_elem = getElementStiffness(nodes);
 		
 		Matrix u_elem = globalToLocalVector(u_global);
 		
@@ -358,8 +354,7 @@ public class Tri extends PlaneElement {
 	}
 
 	@Override
-	public Matrix getElementForceNL(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForceNL(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 		
 		Matrix u_elem = globalToLocalVector(u_global);
 		Matrix Rr = getRr(nodes, u_elem);
@@ -374,11 +369,10 @@ public class Tri extends PlaneElement {
 	}
 
 	@Override
-	protected Matrix getMelem(ArrayList<Material> materials, ArrayList<Section> sections,
-			  ArrayList<Node> nodes) {
+	protected Matrix getMelem(ArrayList<Node> nodes) {
 
 		double rho, t;
-		rho = materials.get(material_id).getDensity();
+		rho = material.getDensity();
 		t = getThickness();
 		
 		double[] x = new double[3];
@@ -465,7 +459,7 @@ public class Tri extends PlaneElement {
 			newElementNodes[(i+1)%3] = edgeNodes[i];
 			newElementNodes[(i+2)%3] = edgeNodes[(i+2)%3];
 			Tri newElement = new Tri(newElementNodes);
-			newElement.setMaterialID(this.getMaterialID());
+			newElement.setMaterial(this.getMaterial());
 			//newElement.setState(this.getState());
 			newElement.setThickness(this.getThickness());
 			newElement.setStiffnessDamping(this.getStiffnessDamping());
@@ -500,10 +494,11 @@ public class Tri extends PlaneElement {
 		return dofNames;
 	}
 	
-	public Element clone() {
+	public Element clone(Model model) {
 		Tri tri = new Tri();
 		tri.elementNodes = this.elementNodes.clone();
-		tri.material_id = this.material_id;
+		if (isMaterialValid(SimLive.model.getMaterials()))
+			tri.material = model.getMaterials().get(SimLive.model.getMaterials().indexOf(this.material));
 		tri.thickness = this.thickness;
 		//tri.state = this.state;
 		tri.R0 = this.R0.copy();
@@ -519,7 +514,8 @@ public class Tri extends PlaneElement {
 		Tri element = (Tri) obj;
 		if (this.getType() != element.getType()) return false;
 		if (!Arrays.equals(this.elementNodes, element.elementNodes)) return false;
-		if (this.material_id != element.material_id) return false;
+		if (this.material != null && element.material != null)
+			if (!this.material.deepEquals(element.material)) return false;
 		if (this.thickness != element.thickness) return false;
 		//if (this.state != element.state) return false;
 		if (!Arrays.equals(this.R0.getRowPackedCopy(), element.R0.getRowPackedCopy())) return false;

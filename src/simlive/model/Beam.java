@@ -21,9 +21,8 @@ public class Beam extends LineElement {
 	}
 	
 	@Override
-	public boolean isSectionIDValid(ArrayList<Section> sections) {
-		if (section_id < 0 || section_id > sections.size() - 1) return false;
-		return true;
+	public boolean isSectionValid(ArrayList<Section> sections) {
+		return sections.contains(section);
 	}
 
 	@Override
@@ -191,18 +190,17 @@ public class Beam extends LineElement {
 	}
 	
 	@Override
-	public Matrix getElementStiffness(ArrayList<Material> materials, ArrayList<Section> sections,
-									  ArrayList<Node> nodes) {
+	public Matrix getElementStiffness(ArrayList<Node> nodes) {
 		
 		Matrix K_elem = new Matrix(12, 12);
 		
 		double E, A, Iz, Iy, G, It, l;
-		E = materials.get(material_id).getYoungsModulus();
-		A = sections.get(section_id).getArea();
-		Iy = sections.get(section_id).getIy();
-		Iz = sections.get(section_id).getIz();
-		It = sections.get(section_id).getIt();
-		G = E/(2.0*(1.0+materials.get(material_id).getPoissonsRatio()));
+		E = material.getYoungsModulus();
+		A = section.getArea();
+		Iy = section.getIy();
+		Iz = section.getIz();
+		It = section.getIt();
+		G = E/(2.0*(1.0+material.getPoissonsRatio()));
 		l = getLength();
 		
 		K_elem.set(0, 0, E*A/l);
@@ -252,8 +250,7 @@ public class Beam extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementStiffnessNL(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes, Matrix u_global) {
+	public Matrix getElementStiffnessNL(ArrayList<Node> nodes, Matrix u_global) {
 		
 		//Large displacement, small strain formulation
 		//Co-rotational formulation, euler-bernoulli beam
@@ -271,24 +268,24 @@ public class Beam extends LineElement {
 		R_local = Rr.transpose().times(rotationMatrixFromAngles(u_elem.getMatrix(9, 11, 0, 0))).times(R0);
 		double[] angles1 = anglesFromRotationMatrix(R_local);
 		
-		Matrix K_elem = getKelem(materials, sections, length-length0, angles0, angles1, length0);
+		Matrix K_elem = getKelem(length-length0, angles0, angles1, length0);
 		
-		Matrix f_local = getFLocal(materials, sections, length-length0, angles0, angles1, length0);
+		Matrix f_local = getFLocal(length-length0, angles0, angles1, length0);
 		
 		Matrix K_geo = getKgeo(u_elem, f_local, Rr, r1, length);
 		
 		return B.transpose().times(K_elem).times(B).plus(K_geo);
 	}
 	
-	private Matrix getKelem(ArrayList<Material> materials, ArrayList<Section> sections, double u, double[] a0, double[] a1, double L0) {
+	private Matrix getKelem(double u, double[] a0, double[] a1, double L0) {
 		double E, A, Iy, Iz, Io, G, It;
-		E = materials.get(material_id).getYoungsModulus();
-		A = sections.get(section_id).getArea();
-		Iy = sections.get(section_id).getIy();
-		Iz = sections.get(section_id).getIz();
+		E = material.getYoungsModulus();
+		A = section.getArea();
+		Iy = section.getIy();
+		Iz = section.getIz();
 		Io = Iy+Iz;
-		It = sections.get(section_id).getIt();
-		G = E/(2.0*(1.0+materials.get(material_id).getPoissonsRatio()));
+		It = section.getIt();
+		G = E/(2.0*(1.0+material.getPoissonsRatio()));
 		//Rechteck: Irr = 1/80*h^5*w + 1/72*h^3*w^3 + 1/80*h*w^5
 		//Kreis: Irr = d^6*pi/192
 		
@@ -384,10 +381,9 @@ public class Beam extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementForce(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForce(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 				
-		Matrix K_elem = getElementStiffness(materials, sections, nodes);
+		Matrix K_elem = getElementStiffness(nodes);
 		
 		Matrix u_elem = globalToLocalVector(u_global);
 		
@@ -486,8 +482,7 @@ public class Beam extends LineElement {
 	}
 	
 	@Override
-	public Matrix getElementForceNL(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForceNL(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 		
 		//Large displacement, small strain formulation
 		//Co-rotational formulation, euler-bernoulli beam
@@ -503,7 +498,7 @@ public class Beam extends LineElement {
 		R_local = Rr.transpose().times(rotationMatrixFromAngles(u_elem.getMatrix(9, 11, 0, 0))).times(R0);
 		double[] angles1 = anglesFromRotationMatrix(R_local);
 				
-		Matrix f_local = getFLocal(materials, sections, length-length0, angles0, angles1, length0);
+		Matrix f_local = getFLocal(length-length0, angles0, angles1, length0);
 		
 		Matrix B = getBMatrix(u_elem, Rr, r1, length);
 		
@@ -527,15 +522,15 @@ public class Beam extends LineElement {
 		return B.transpose().times(f_local);
 	}
 	
-	private Matrix getFLocal(ArrayList<Material> materials, ArrayList<Section> sections, double u, double[] a0, double[] a1, double L0) {
+	private Matrix getFLocal(double u, double[] a0, double[] a1, double L0) {
 		double E, A, Iy, Iz, Io, G, It;
-		E = materials.get(material_id).getYoungsModulus();
-		A = sections.get(section_id).getArea();
-		Iy = sections.get(section_id).getIy();
-		Iz = sections.get(section_id).getIz();
+		E = material.getYoungsModulus();
+		A = section.getArea();
+		Iy = section.getIy();
+		Iz = section.getIz();
 		Io = Iy+Iz;
-		It = sections.get(section_id).getIt();
-		G = E/(2.0*(1.0+materials.get(material_id).getPoissonsRatio()));
+		It = section.getIt();
+		G = E/(2.0*(1.0+material.getPoissonsRatio()));
 		//Rechteck: Irr = 1/80*h^5*w + 1/72*h^3*w^3 + 1/80*h*w^5
 		//Kreis: Irr = d^6*pi/192
 		
@@ -555,12 +550,11 @@ public class Beam extends LineElement {
 	}
 
 	@Override
-	protected Matrix getMelem(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes) {
+	protected Matrix getMelem(ArrayList<Node> nodes) {
 
 		double rho, A, l;
-		rho = materials.get(material_id).getDensity();
-		A = sections.get(section_id).getArea();
+		rho = material.getDensity();
+		A = section.getArea();
 		l = getLength();
 		
 		Matrix M_elem = null;
@@ -725,8 +719,8 @@ public class Beam extends LineElement {
 		int[][] element_node = {{elementNodes[0], nodes.size()-1}, {nodes.size()-1, elementNodes[1]}};
 		this.setElementNodes(element_node[0]);
 		Beam newElement = new Beam(element_node[1]);
-		newElement.setMaterialID(this.getMaterialID());
-		newElement.setSectionID(this.getSectionID());
+		newElement.setMaterial(this.getMaterial());
+		newElement.setSection(this.getSection());
 		newElement.setQ0(q0.clone());
 		newElement.setStiffnessDamping(this.getStiffnessDamping());
 		newElement.setMassDamping(this.getMassDamping());
@@ -755,11 +749,13 @@ public class Beam extends LineElement {
 		return dofNames;
 	}
 	
-	public Element clone() {
+	public Element clone(Model model) {
 		Beam beam = new Beam();
 		beam.elementNodes = this.elementNodes.clone();
-		beam.material_id = this.material_id;
-		beam.section_id = this.section_id;
+		if (isMaterialValid(SimLive.model.getMaterials()))
+			beam.material = model.getMaterials().get(SimLive.model.getMaterials().indexOf(this.material));
+		if (isSectionValid(SimLive.model.getSections()))
+			beam.section = model.getSections().get(SimLive.model.getSections().indexOf(this.section));
 		beam.R0 = this.R0.copy();
 		beam.q0 = this.q0.clone();
 		beam.id = this.id;
@@ -774,8 +770,10 @@ public class Beam extends LineElement {
 		Beam element = (Beam) obj;
 		if (this.getType() != element.getType()) return false;
 		if (!Arrays.equals(this.elementNodes, element.elementNodes)) return false;
-		if (this.material_id != element.material_id) return false;
-		if (this.section_id != element.section_id) return false;
+		if (this.material != null && element.material != null)
+			if (!this.material.deepEquals(element.material)) return false;
+		if (this.section != null && element.section != null)
+			if (!this.section.deepEquals(element.section)) return false;
 		if (!Arrays.equals(this.R0.getRowPackedCopy(), element.R0.getRowPackedCopy())) return false;
 		if (!Arrays.equals(this.q0, element.q0)) return false;
 		if (this.id != element.id) return false;

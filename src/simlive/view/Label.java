@@ -105,8 +105,8 @@ public class Label {
 					String firstRow = "No material";
 					String secondRow = "No section";
 					String thirdRow = null;
-					if (element.isMaterialIDValid(SimLive.model.getMaterials())) {
-						Material material = SimLive.model.getMaterials().get(element.getMaterialID());
+					if (element.isMaterialValid(SimLive.model.getMaterials())) {
+						Material material = element.getMaterial();
 						firstRow = material.name;
 					}
 					if (element.isPlaneElement()) {
@@ -120,8 +120,8 @@ public class Label {
 						secondRow = "Thickness="+SimLive.double2String(thickness)+" "+Units.getLengthUnit();
 					}
 					if (element.isLineElement() &&
-						((LineElement) element).isSectionIDValid(SimLive.model.getSections())) {
-						Section section = SimLive.model.getSections().get(((LineElement) element).getSectionID());
+						((LineElement) element).isSectionValid(SimLive.model.getSections())) {
+						Section section = ((LineElement) element).getSection();
 						secondRow = section.getName();
 					}
 						

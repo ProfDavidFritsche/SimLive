@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import Jama.Matrix;
+import simlive.SimLive;
 import simlive.solution.Increment;
 import simlive.solution.Solution;
 
@@ -17,9 +18,8 @@ public class Rod extends LineElement {
 	}
 	
 	@Override
-	public boolean isSectionIDValid(ArrayList<Section> sections) {
-		if (section_id < 0 || section_id > sections.size() - 1) return false;
-		return true;
+	public boolean isSectionValid(ArrayList<Section> sections) {
+		return sections.contains(section);
 	}
 
 	@Override
@@ -33,14 +33,13 @@ public class Rod extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementStiffness(ArrayList<Material> materials, ArrayList<Section> sections,
-			   			              ArrayList<Node> nodes) {
+	public Matrix getElementStiffness(ArrayList<Node> nodes) {
 		
 		Matrix K_elem = new Matrix(2, 2);
 		
 		double E, A, l;
-		E = materials.get(material_id).getYoungsModulus();
-		A = sections.get(section_id).getArea();
+		E = material.getYoungsModulus();
+		A = section.getArea();
 		l = getLength();
 		
 		K_elem.set(0, 0, 1.0);
@@ -56,14 +55,13 @@ public class Rod extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementStiffnessNL(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes, Matrix u_global) {
+	public Matrix getElementStiffnessNL(ArrayList<Node> nodes, Matrix u_global) {
 		
 		//Large displacement, large strain formulation
 		//Co-rotational formulation
 		double E, A, l0;
-		E = materials.get(material_id).getYoungsModulus();
-		A = sections.get(section_id).getArea();
+		E = material.getYoungsModulus();
+		A = section.getArea();
 		l0 = getLength();
 		Matrix u_elem = globalToLocalVector(u_global);
 		
@@ -94,10 +92,9 @@ public class Rod extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementForce(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForce(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 		
-		Matrix K_elem = getElementStiffness(materials, sections, nodes);
+		Matrix K_elem = getElementStiffness(nodes);
 		
 		Matrix u_elem = globalToLocalVector(u_global);
 		
@@ -112,14 +109,13 @@ public class Rod extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementForceNL(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForceNL(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 		
 		//Large displacement, large strain formulation
 		//Co-rotational formulation
 		double E, A, l0;
-		E = materials.get(material_id).getYoungsModulus();
-		A = sections.get(section_id).getArea();
+		E = material.getYoungsModulus();
+		A = section.getArea();
 		l0 = getLength();
 		Matrix u_elem = globalToLocalVector(u_global);
 		
@@ -138,12 +134,11 @@ public class Rod extends LineElement {
 	}
 
 	@Override
-	protected Matrix getMelem(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes) {
+	protected Matrix getMelem(ArrayList<Node> nodes) {
 		
 		double rho, A, l;
-		rho = materials.get(material_id).getDensity();
-		A = sections.get(section_id).getArea();
+		rho = material.getDensity();
+		A = section.getArea();
 		l = getLength();
 		
 		Matrix M_elem = null;
@@ -247,8 +242,8 @@ public class Rod extends LineElement {
 		int[][] element_node = {{elementNodes[0], nodes.size()-1}, {nodes.size()-1, elementNodes[1]}};
 		this.setElementNodes(element_node[0]);
 		Rod newElement = new Rod(element_node[1]);
-		newElement.setMaterialID(this.getMaterialID());
-		newElement.setSectionID(this.getSectionID());
+		newElement.setMaterial(this.getMaterial());
+		newElement.setSection(this.getSection());
 		newElement.setQ0(q0.clone());
 		newElement.setStiffnessDamping(this.getStiffnessDamping());
 		newElement.setMassDamping(this.getMassDamping());
@@ -272,11 +267,13 @@ public class Rod extends LineElement {
 	}
 
 	@Override
-	public Element clone() {
+	public Element clone(Model model) {
 		Rod rod = new Rod();
 		rod.elementNodes = this.elementNodes.clone();
-		rod.material_id = this.material_id;
-		rod.section_id = this.section_id;
+		if (isMaterialValid(SimLive.model.getMaterials()))
+			rod.material = model.getMaterials().get(SimLive.model.getMaterials().indexOf(this.material));
+		if (isSectionValid(SimLive.model.getSections()))
+			rod.section = model.getSections().get(SimLive.model.getSections().indexOf(this.section));
 		rod.R0 = this.R0.copy();
 		rod.q0 = this.q0.clone();
 		rod.id = this.id;
@@ -291,8 +288,10 @@ public class Rod extends LineElement {
 		Rod element = (Rod) obj;
 		if (this.getType() != element.getType()) return false;
 		if (!Arrays.equals(this.elementNodes, element.elementNodes)) return false;
-		if (this.material_id != element.material_id) return false;
-		if (this.section_id != element.section_id) return false;
+		if (this.material != null && element.material != null)
+			if (!this.material.deepEquals(element.material)) return false;
+		if (this.section != null && element.section != null)
+			if (!this.section.deepEquals(element.section)) return false;
 		if (!Arrays.equals(this.R0.getRowPackedCopy(), element.R0.getRowPackedCopy())) return false;
 		if (!Arrays.equals(this.q0, element.q0)) return false;
 		if (this.id != element.id) return false;

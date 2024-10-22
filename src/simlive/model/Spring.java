@@ -33,7 +33,7 @@ public class Spring extends LineElement {
 	}
 	
 	@Override
-	public boolean isSectionIDValid(ArrayList<Section> sections) {
+	public boolean isSectionValid(ArrayList<Section> sections) {
 		return true;
 	}
 
@@ -48,8 +48,7 @@ public class Spring extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementStiffness(ArrayList<Material> materials, ArrayList<Section> sections,
-			   			              ArrayList<Node> nodes) {
+	public Matrix getElementStiffness(ArrayList<Node> nodes) {
 		
 		Matrix K_elem = new Matrix(2, 2);
 		
@@ -66,8 +65,7 @@ public class Spring extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementStiffnessNL(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes, Matrix u_global) {
+	public Matrix getElementStiffnessNL(ArrayList<Node> nodes, Matrix u_global) {
 		
 		//Large displacement, large strain formulation
 		//Co-rotational formulation
@@ -101,10 +99,9 @@ public class Spring extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementForce(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForce(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 
-		Matrix K_elem = getElementStiffness(materials, sections, nodes);
+		Matrix K_elem = getElementStiffness(nodes);
 		
 		Matrix u_elem = globalToLocalVector(u_global);
 		
@@ -119,8 +116,7 @@ public class Spring extends LineElement {
 	}
 
 	@Override
-	public Matrix getElementForceNL(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForceNL(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 		
 		//Large displacement, large strain formulation
 		//Co-rotational formulation
@@ -142,8 +138,7 @@ public class Spring extends LineElement {
 	}
 
 	@Override
-	protected Matrix getMelem(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes) {
+	protected Matrix getMelem(ArrayList<Node> nodes) {
 		return new Matrix(6, 6);
 	}
 
@@ -241,7 +236,7 @@ public class Spring extends LineElement {
 	}
 
 	@Override
-	public Element clone() {
+	public Element clone(Model model) {
 		Spring spring = new Spring();
 		spring.elementNodes = this.elementNodes.clone();
 		spring.stiffness = this.stiffness;

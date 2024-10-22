@@ -10,13 +10,12 @@ import simlive.view.View;
 
 public abstract class LineElement extends Element {
 	
-	protected int section_id;
+	protected Section section;
 	protected Matrix R0 = Matrix.identity(3, 3);
 	protected double[] q0 = new double[]{0, 1, 0};
 	
 	protected LineElement() {
 		super();
-		section_id = -1;
 	}
 	
 	public LineElement(int[] elementNodes) {
@@ -40,15 +39,15 @@ public abstract class LineElement extends Element {
 		if (elementNodes[1] >= deleteNodeID) elementNodes[1]--;
 	}
 
-	public void setSectionID(int sec_id) {
-		section_id = sec_id;
+	public void setSection(Section section) {
+		this.section = section;
 	}
 	
-	public int getSectionID() {
-		return section_id;
+	public Section getSection() {
+		return section;
 	}
 	
-	public abstract boolean isSectionIDValid(ArrayList<Section> sections);
+	public abstract boolean isSectionValid(ArrayList<Section> sections);
 	
 	public double[] getQ0() {
 		return q0;
@@ -229,9 +228,8 @@ public abstract class LineElement extends Element {
 	}
 	
 	public double[] getCoordsInElement(double[] modelCoords2d) {
-		if (SimLive.settings.isShowSections && isSectionIDValid(SimLive.model.getSections()) &&
-				SimLive.model.getSections().get(section_id).getSectionShape().getType() !=
-				SectionShape.Type.DIRECT_INPUT) {
+		if (SimLive.settings.isShowSections && isSectionValid(SimLive.model.getSections()) &&
+				section.getSectionShape().getType() != SectionShape.Type.DIRECT_INPUT) {
 			double[] coords0 = View.getCoordsWithScaledDisp(elementNodes[0]);
 			double[] coords1 = View.getCoordsWithScaledDisp(elementNodes[1]);
 			double[] diff = new double[3];
@@ -247,7 +245,7 @@ public abstract class LineElement extends Element {
 				return new double[3];
 			}
 	    	
-			double[][] P = SimLive.model.getSections().get(section_id).getSectionPoints();
+			double[][] P = section.getSectionPoints();
 				
 			double t = 0.0, y = 0.0, z = 0.0;
 			int lineDivisions = SimLive.view.getLineDivisions(this);
@@ -313,9 +311,9 @@ public abstract class LineElement extends Element {
 		updateIDAndMaterial();
 		
 		/* assign section */
-		if (!isSectionIDValid(SimLive.model.getSections())) {
+		if (!isSectionValid(SimLive.model.getSections())) {
 			if (!SimLive.model.getSections().isEmpty()) {
-				section_id = 0;
+				section = SimLive.model.getSections().get(0);
 			}
 		}
 		

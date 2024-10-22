@@ -167,7 +167,7 @@ public class ContactPair implements DeepEqualsInterface {
 			contactPair.slaveNodes.add(model.getNodes().get(id));
 		}
 		for (int i = 0; i < this.rigidElements.size(); i++) {
-			contactPair.rigidElements.add(this.rigidElements.get(i).clone());
+			contactPair.rigidElements.add(this.rigidElements.get(i).clone(SimLive.model));
 		}
 		for (int i = 0; i < this.rigidNodes.size(); i++) {
 			contactPair.rigidNodes.add(this.rigidNodes.get(i).clone());

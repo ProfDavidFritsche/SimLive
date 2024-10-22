@@ -439,9 +439,45 @@ public class XML {
 			org.jdom.Element XMLmodel = XMLroot.getChild("model");
 			Model.twoDimensional = getBooleanAttribute(XMLmodel, "twoDimensional");
 			
+			/* materials */
+			org.jdom.Element XMLmaterials = XMLmodel.getChild("materials");
+			Object[] list = XMLmaterials.getChildren().toArray();
+
+			for (int i = 0; i < list.length; i++) {
+
+				org.jdom.Element XMLmaterial = (org.jdom.Element) list[i];
+				Material material = new Material(true);
+				material.name = getStringAttribute(XMLmaterial, "name");
+				material.setDensity(getDoubleAttribute(XMLmaterial, "density"));
+				material.setYoungsModulus(getDoubleAttribute(XMLmaterial, "youngsModulus"));
+				material.setPoissonsRatio(getDoubleAttribute(XMLmaterial, "poissonsRatio"));
+				SimLive.model.getMaterials().add(material);
+			}
+			
+			/* sections */
+			org.jdom.Element XMLsections = XMLmodel.getChild("sections");
+			list = XMLsections.getChildren().toArray();
+
+			for (int i = 0; i < list.length; i++) {
+
+				org.jdom.Element XMLsection = (org.jdom.Element) list[i];
+				org.jdom.Element XMLshape = XMLsection.getChild("shape");
+				SectionShape sectionShape = new SectionShape(SectionShape.Type.valueOf(getStringAttribute(XMLshape, "type")));
+				sectionShape.setWidth(getDoubleAttribute(XMLshape, "width"));
+				sectionShape.setHeight(getDoubleAttribute(XMLshape, "height"));
+				sectionShape.setDiameter(getDoubleAttribute(XMLshape, "diameter"));
+				sectionShape.setThickness(getDoubleAttribute(XMLshape, "thickness"));
+				Section section = new Section(sectionShape);
+				section.setArea(getDoubleAttribute(XMLsection, "area"));
+				section.setIy(getDoubleAttribute(XMLsection, "Iy"));
+				section.setIz(getDoubleAttribute(XMLsection, "Iz"));
+				section.setIt(getDoubleAttribute(XMLsection, "It"));
+				SimLive.model.getSections().add(section);
+			}
+			
 			/* nodes */
 			org.jdom.Element XMLnodes = XMLmodel.getChild("nodes");
-			Object[] list = XMLnodes.getChildren().toArray();
+			list = XMLnodes.getChildren().toArray();
 
 			for (int i = 0; i < list.length; i++) {
 
@@ -470,8 +506,8 @@ public class XML {
 					nodes[0] = getIntegerAttribute(XMLelement, "node0");
 					nodes[1] = getIntegerAttribute(XMLelement, "node1");
 					element = new Rod(nodes);
-					element.setMaterialID(getIntegerAttribute(XMLelement, "materialID"));
-					((LineElement) element).setSectionID(getIntegerAttribute(XMLelement, "sectionID"));
+					element.setMaterial(SimLive.model.getMaterials().get(getIntegerAttribute(XMLelement, "materialID")));
+					((LineElement) element).setSection(SimLive.model.getSections().get(getIntegerAttribute(XMLelement, "sectionID")));
 					org.jdom.Element XMLsecondAxis = XMLelement.getChild("secondAxis");
 					((LineElement) element).setQ0(new double[]{getDoubleAttribute(XMLsecondAxis, "x"),
 							getDoubleAttribute(XMLsecondAxis, "y"), getDoubleAttribute(XMLsecondAxis, "z")});
@@ -491,8 +527,8 @@ public class XML {
 					nodes[0] = getIntegerAttribute(XMLelement, "node0");
 					nodes[1] = getIntegerAttribute(XMLelement, "node1");
 					element = new Beam(nodes);
-					element.setMaterialID(getIntegerAttribute(XMLelement, "materialID"));
-					((LineElement) element).setSectionID(getIntegerAttribute(XMLelement, "sectionID"));
+					element.setMaterial(SimLive.model.getMaterials().get(getIntegerAttribute(XMLelement, "materialID")));
+					((LineElement) element).setSection(SimLive.model.getSections().get(getIntegerAttribute(XMLelement, "sectionID")));
 					org.jdom.Element XMLsecondAxis = XMLelement.getChild("secondAxis");
 					((LineElement) element).setQ0(new double[]{getDoubleAttribute(XMLsecondAxis, "x"),
 							getDoubleAttribute(XMLsecondAxis, "y"), getDoubleAttribute(XMLsecondAxis, "z")});
@@ -513,7 +549,7 @@ public class XML {
 					element = new Quad(nodes);
 				}
 				if (element.getType() == Element.Type.TRI || element.getType() == Element.Type.QUAD) {
-					element.setMaterialID(getIntegerAttribute(XMLelement, "materialID"));
+					element.setMaterial(SimLive.model.getMaterials().get(getIntegerAttribute(XMLelement, "materialID")));
 					/*if (getStringAttribute(XMLelement, "state").equals(PlaneElement.State.PLANE_STRESS.toString())) {
 						((PlaneElement) element).setState(PlaneElement.State.PLANE_STRESS);
 					}
@@ -832,42 +868,6 @@ public class XML {
 				SimLive.model.getContactPairs().add(contactPair);
 			}
 
-			/* materials */
-			org.jdom.Element XMLmaterials = XMLmodel.getChild("materials");
-			list = XMLmaterials.getChildren().toArray();
-
-			for (int i = 0; i < list.length; i++) {
-
-				org.jdom.Element XMLmaterial = (org.jdom.Element) list[i];
-				Material material = new Material(true);
-				material.name = getStringAttribute(XMLmaterial, "name");
-				material.setDensity(getDoubleAttribute(XMLmaterial, "density"));
-				material.setYoungsModulus(getDoubleAttribute(XMLmaterial, "youngsModulus"));
-				material.setPoissonsRatio(getDoubleAttribute(XMLmaterial, "poissonsRatio"));
-				SimLive.model.getMaterials().add(material);
-			}
-			
-			/* sections */
-			org.jdom.Element XMLsections = XMLmodel.getChild("sections");
-			list = XMLsections.getChildren().toArray();
-
-			for (int i = 0; i < list.length; i++) {
-
-				org.jdom.Element XMLsection = (org.jdom.Element) list[i];
-				org.jdom.Element XMLshape = XMLsection.getChild("shape");
-				SectionShape sectionShape = new SectionShape(SectionShape.Type.valueOf(getStringAttribute(XMLshape, "type")));
-				sectionShape.setWidth(getDoubleAttribute(XMLshape, "width"));
-				sectionShape.setHeight(getDoubleAttribute(XMLshape, "height"));
-				sectionShape.setDiameter(getDoubleAttribute(XMLshape, "diameter"));
-				sectionShape.setThickness(getDoubleAttribute(XMLshape, "thickness"));
-				Section section = new Section(sectionShape);
-				section.setArea(getDoubleAttribute(XMLsection, "area"));
-				section.setIy(getDoubleAttribute(XMLsection, "Iy"));
-				section.setIz(getDoubleAttribute(XMLsection, "Iz"));
-				section.setIt(getDoubleAttribute(XMLsection, "It"));
-				SimLive.model.getSections().add(section);
-			}
-			
 			/* steps */
 			org.jdom.Element XMLsteps = XMLmodel.getChild("steps");
 			list = XMLsteps.getChildren().toArray();
@@ -1092,8 +1092,8 @@ public class XML {
 						setDoubleAttribute(XMLelement, "stiffness", ((Spring) element).getStiffness());
 					}
 					else {
-						setIntegerAttribute(XMLelement, "materialID", element.getMaterialID());
-						setIntegerAttribute(XMLelement, "sectionID", ((LineElement) element).getSectionID());
+						setIntegerAttribute(XMLelement, "materialID", materials.indexOf(element.getMaterial()));
+						setIntegerAttribute(XMLelement, "sectionID", sections.indexOf(((LineElement) element).getSection()));
 					}
 					org.jdom.Element XMLsecondAxis = new org.jdom.Element("secondAxis");
 					setDoubleAttribute(XMLsecondAxis, "x", ((LineElement) element).getQ0()[0]);
@@ -1105,7 +1105,7 @@ public class XML {
 					setIntegerAttribute(XMLelement, "node0", elemNodes[0]);
 					setIntegerAttribute(XMLelement, "node1", elemNodes[1]);
 					setIntegerAttribute(XMLelement, "node2", elemNodes[2]);
-					setIntegerAttribute(XMLelement, "materialID", element.getMaterialID());
+					setIntegerAttribute(XMLelement, "materialID", materials.indexOf(element.getMaterial()));
 					//setStringAttribute(XMLelement, "state", ((Tri) element).getState().toString());
 					setDoubleAttribute(XMLelement, "thickness", ((Tri) element).getThickness());
 				}
@@ -1114,7 +1114,7 @@ public class XML {
 					setIntegerAttribute(XMLelement, "node1", elemNodes[1]);
 					setIntegerAttribute(XMLelement, "node2", elemNodes[2]);
 					setIntegerAttribute(XMLelement, "node3", elemNodes[3]);
-					setIntegerAttribute(XMLelement, "materialID", element.getMaterialID());
+					setIntegerAttribute(XMLelement, "materialID", materials.indexOf(element.getMaterial()));
 					//setStringAttribute(XMLelement, "state", ((Quad) element).getState().toString());
 					setDoubleAttribute(XMLelement, "thickness", ((Quad) element).getThickness());
 				}

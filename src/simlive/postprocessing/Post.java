@@ -8,11 +8,9 @@ import simlive.model.Beam;
 import simlive.model.DistributedLoad;
 import simlive.model.Element;
 import simlive.model.LineElement;
-import simlive.model.Material;
 import simlive.model.Node;
 import simlive.model.PlaneElement;
 import simlive.model.PointMass;
-import simlive.model.Section;
 import simlive.model.Set;
 import simlive.model.Spring;
 import simlive.solution.Increment;
@@ -626,7 +624,6 @@ public class Post {
 	public double[][] calculateEquivalentStrain(Matrix[][][] strain) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
 		double[][] equivalentStrain = new double[solution.getNumberOfIncrements()+1][];
 		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
 			equivalentStrain[i] = new double[nodes.size()];
@@ -641,10 +638,10 @@ public class Post {
 						double[] localCoords = planeElement.getLocalCoords(n);
 						Matrix elemStrain = strain[i][elem][n];
 						double thicknessStrain = planeElement.getThickening(
-								materials, nodes, u_global, localCoords[0], localCoords[1])/
+								nodes, u_global, localCoords[0], localCoords[1])/
 								planeElement.getThickness();
 						
-						equivalentStrain[i][elemNodes[n]] += 1.0/(Math.sqrt(2)*(1+materials.get(planeElement.getMaterialID()).getPoissonsRatio()))*
+						equivalentStrain[i][elemNodes[n]] += 1.0/(Math.sqrt(2)*(1+planeElement.getMaterial().getPoissonsRatio()))*
 								Math.sqrt((elemStrain.get(0, 0)-elemStrain.get(1, 0))*(elemStrain.get(0, 0)-elemStrain.get(1, 0))+
 										(elemStrain.get(1, 0)-thicknessStrain)*(elemStrain.get(1, 0)-thicknessStrain)+
 										(thicknessStrain-elemStrain.get(0, 0))*(thicknessStrain-elemStrain.get(0, 0))+
@@ -667,7 +664,6 @@ public class Post {
 	public Matrix[][][] calculateStress() {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
 		Matrix[][][] stress = new Matrix[solution.getNumberOfIncrements()+1][elements.size()][];
 		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
 			Matrix u_global = solution.getIncrement(i).get_u_global();
@@ -680,7 +676,7 @@ public class Post {
 					for (int n = 0; n < elemNodes.length; n++) {
 						double[] localCoords = planeElement.getLocalCoords(n);
 						stress[i][elem][n] = planeElement.getStress(
-									materials, nodes, u_global, localCoords[0], localCoords[1]);
+									nodes, u_global, localCoords[0], localCoords[1]);
 					}
 				}
 			}
@@ -835,7 +831,6 @@ public class Post {
 	public double[][] calculateThickening() {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
 		double[][] thickening = new double[solution.getNumberOfIncrements()+1][];
 		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
 			thickening[i] = new double[nodes.size()];
@@ -850,7 +845,7 @@ public class Post {
 					for (int n = 0; n < elemNodes.length; n++) {
 						double[] localCoords = planeElement.getLocalCoords(n);
 						thickening[i][elemNodes[n]] += planeElement.getThickening(
-									materials, nodes, u_global, localCoords[0], localCoords[1]);
+									nodes, u_global, localCoords[0], localCoords[1]);
 						count[elemNodes[n]]++;
 					}
 				}
@@ -866,8 +861,6 @@ public class Post {
 	public double[][] calculateElementForce(int component /* 0: normal, 1: shear y, 2: shear z, 3: torsion, 4: bending y, 5: bending z */) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
-		ArrayList<Material> materials = solution.getRefModel().getMaterials();
-		ArrayList<Section> sections = solution.getRefModel().getSections();
 		ArrayList<DistributedLoad> distributedLoads = solution.getRefModel().getDistributedLoads();
 		double[][] forces = new double[solution.getNumberOfIncrements()+1][];
 		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
@@ -878,10 +871,10 @@ public class Post {
 				if (elements.get(elem).isLineElement()) {
 					Matrix elementForces = null;
 					if (solution.getRefSettings().isLargeDisplacement) {
-						elementForces = elements.get(elem).getElementForceNL(materials, sections, nodes, u_global, true);
+						elementForces = elements.get(elem).getElementForceNL(nodes, u_global, true);
 					}
 					else {
-						elementForces = elements.get(elem).getElementForce(materials, sections, nodes, u_global, true);
+						elementForces = elements.get(elem).getElementForce(nodes, u_global, true);
 					}
 					if (elements.get(elem).getType() == Element.Type.ROD ||
 						elements.get(elem).getType() == Element.Type.SPRING) {

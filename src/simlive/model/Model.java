@@ -188,10 +188,10 @@ public class Model implements DeepEqualsInterface {
 	
 	public Model clone() {
 		Model model = new Model();
-		for (int i = 0; i < nodes.size(); i++) 		 	  model.nodes.add(nodes.get(i).clone());
-		for (int i = 0; i < elements.size(); i++) 	 	  model.elements.add(elements.get(i).clone());
 		for (int i = 0; i < materials.size(); i++) 	 	  model.materials.add(materials.get(i).clone());
 		for (int i = 0; i < sections.size(); i++) 	 	  model.sections.add(sections.get(i).clone());
+		for (int i = 0; i < nodes.size(); i++) 		 	  model.nodes.add(nodes.get(i).clone());
+		for (int i = 0; i < elements.size(); i++) 	 	  model.elements.add(elements.get(i).clone(model));
 		for (int i = 0; i < steps.size(); i++) 	 	  	  model.steps.add(steps.get(i).clone());
 		for (int i = 0; i < sets.size(); i++)       	  model.sets.add(sets.get(i).clone(model));
 		for (int i = 0; i < parts3d.size(); i++)          model.parts3d.add(parts3d.get(i).clone());
@@ -424,7 +424,7 @@ public class Model implements DeepEqualsInterface {
 	public boolean haveElementsSameMaterial(ArrayList<Element> elementSet) {
 		if (materials.isEmpty()) return false;
 		for (int elem = 1; elem < elementSet.size(); elem++) {
-			if (elementSet.get(elem).getMaterialID() != elementSet.get(0).getMaterialID()) {
+			if (elementSet.get(elem).getMaterial() != elementSet.get(0).getMaterial()) {
 				return false;
 			}
 		}
@@ -452,8 +452,8 @@ public class Model implements DeepEqualsInterface {
 	public boolean haveLineElementsSameSection(ArrayList<Element> elementSet) {
 		if (sections.isEmpty()) return false;
 		for (int elem = 1; elem < elementSet.size(); elem++) {
-			if (((LineElement) elementSet.get(elem)).getSectionID() !=
-					((LineElement) elementSet.get(0)).getSectionID()) {
+			if (((LineElement) elementSet.get(elem)).getSection() !=
+					((LineElement) elementSet.get(0)).getSection()) {
 				return false;
 			}
 		}
@@ -1013,7 +1013,7 @@ public class Model implements DeepEqualsInterface {
 		Matrix[] r1 = new Matrix[nodes.size()];
 		Matrix[][] edgeNorm = new Matrix[nodes.size()][nodes.size()];
 		boolean[] angled = new boolean[nodes.size()];
-		int[] section = new int[nodes.size()];
+		Section[] section = new Section[nodes.size()];
 		Element.Type[] type = new Element.Type[nodes.size()];
 		for (int e = 0; e < elements.size(); e++) {
 			int[] element_nodes = elements.get(e).getElementNodes();
@@ -1028,14 +1028,14 @@ public class Model implements DeepEqualsInterface {
 					angled[n1] = r1[n1].dotProduct(r1Loc) < 1.0-SimLive.ZERO_TOL;
 				}
 				if (SimLive.contains(SimLive.view.outlineEdge[n1], n1) && !angled[n1] && elements.get(e).getType() == type[n1] &&
-						((LineElement) elements.get(e)).getSectionID() == section[n1]) {
+						((LineElement) elements.get(e)).getSection() == section[n1]) {
 					SimLive.view.outlineEdge[n1] = SimLive.remove(SimLive.view.outlineEdge[n1], n1);
 				}
 				else {
 					SimLive.view.outlineEdge[n1] = SimLive.add(SimLive.view.outlineEdge[n1], n1);
 				}
 				if (SimLive.contains(SimLive.view.outlineEdge[n0], n0) && !angled[n0] && elements.get(e).getType() == type[n0] &&
-						((LineElement) elements.get(e)).getSectionID() == section[n0]) {
+						((LineElement) elements.get(e)).getSection() == section[n0]) {
 					SimLive.view.outlineEdge[n0] = SimLive.remove(SimLive.view.outlineEdge[n0], n0);
 				}
 				else {
@@ -1043,7 +1043,7 @@ public class Model implements DeepEqualsInterface {
 				}
 				r1[n0] = r1[n1] = r1Loc;
 				type[n0] = type[n1] = elements.get(e).getType();
-				section[n0] = section[n1] = ((LineElement) elements.get(e)).getSectionID();
+				section[n0] = section[n1] = ((LineElement) elements.get(e)).getSection();
 			}
 			if (elements.get(e).isPlaneElement()) {
 				double thickness = ((PlaneElement) elements.get(e)).getThickness();

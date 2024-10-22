@@ -135,7 +135,7 @@ public class Solution {
 				if (elements.get(elem).isLineElement()) {
 					LineElement element = (LineElement) elements.get(elem);
 					if (element.getType() == type) {
-						if (!element.isSectionIDValid(sections)) {
+						if (!element.isSectionValid(sections)) {
 							errors.add("No section for elements of type \""+element.getTypeString()+"\" defined.");
 						}
 						break;
@@ -300,11 +300,9 @@ public class Solution {
 		contacts = new Contact[refModel.getNodes().size()];
 		
 		for (int e = 0; e < refModel.getElements().size(); e++) {
-			refModel.getElements().get(e).initMelem(refModel.getMaterials(),
-						refModel.getSections(), refModel.getNodes());
+			refModel.getElements().get(e).initMelem(refModel.getNodes());
 			if (refModel.getElements().get(e).isPlaneElement()) {
-				((PlaneElement) refModel.getElements().get(e)).initKelem(refModel.getMaterials(),
-						refModel.getSections(), refModel.getNodes());
+				((PlaneElement) refModel.getElements().get(e)).initKelem(refModel.getNodes());
 			}
 			int[] elemNodes = refModel.getElements().get(e).getElementNodes();
 			for (int i = 1; i < elemNodes.length; i++) {

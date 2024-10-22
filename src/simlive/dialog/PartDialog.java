@@ -857,12 +857,12 @@ public class PartDialog extends Composite {
 			}
 			else {
 				if (combo != null && combo.getSelectionIndex() != -1) {
-					elementSet.get(elem).setMaterialID(combo.getSelectionIndex());
+					elementSet.get(elem).setMaterial(SimLive.model.getMaterials().get(combo.getSelectionIndex()));
 				}
 				if (elementSet.get(elem).getType() == Element.Type.ROD ||
 					elementSet.get(elem).getType() == Element.Type.BEAM) {
 					if (combo_2 != null && combo_2.getSelectionIndex() != -1) {
-						((LineElement) elementSet.get(elem)).setSectionID(combo_2.getSelectionIndex());
+						((LineElement) elementSet.get(elem)).setSection(SimLive.model.getSections().get(combo_2.getSelectionIndex()));
 					}
 				}
 				if (elementSet.get(elem).isPlaneElement()) {
@@ -979,20 +979,20 @@ public class PartDialog extends Composite {
 				volumeAndMass[0] += volume;
 				double density = 0.0;
 				if (!SimLive.model.getMaterials().isEmpty()) {
-					density = SimLive.model.getMaterials().get(elementSet.get(e).getMaterialID()).getDensity();
+					density = elementSet.get(e).getMaterial().getDensity();
 				}
 				volumeAndMass[1] += density*volume;
 			}
 			if (elementSet.get(e).isLineElement() && elementSet.get(e).getType() != Element.Type.SPRING) {
 				double area = 0.0;
 				if (!SimLive.model.getSections().isEmpty()) {
-					area = SimLive.model.getSections().get(((LineElement) elementSet.get(e)).getSectionID()).getArea();
+					area = ((LineElement) elementSet.get(e)).getSection().getArea();
 				}
 				double volume = area*((LineElement) elementSet.get(e)).getLength();
 				volumeAndMass[0] += volume;
 				double density = 0.0;
 				if (!SimLive.model.getMaterials().isEmpty()) {
-					density = SimLive.model.getMaterials().get(elementSet.get(e).getMaterialID()).getDensity();
+					density = elementSet.get(e).getMaterial().getDensity();
 				}
 				volumeAndMass[1] += density*volume;
 			}

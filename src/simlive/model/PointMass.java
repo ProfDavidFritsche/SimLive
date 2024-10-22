@@ -34,7 +34,7 @@ public class PointMass extends Element {
 	}
 
 	@Override
-	public Element clone() {
+	public Element clone(Model model) {
 		PointMass pointMass = new PointMass();
 		pointMass.elementNodes = this.elementNodes.clone();
 		pointMass.mass = this.mass;
@@ -83,31 +83,27 @@ public class PointMass extends Element {
 	}
 
 	@Override
-	public Matrix getElementStiffness(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes) {
+	public Matrix getElementStiffness(ArrayList<Node> nodes) {
 		return new Matrix(3, 3);
 	}
 
 	@Override
-	public Matrix getElementStiffnessNL(ArrayList<Material> materials, ArrayList<Section> sections,
-			ArrayList<Node> nodes, Matrix u_global) {
+	public Matrix getElementStiffnessNL(ArrayList<Node> nodes, Matrix u_global) {
 		return new Matrix(3, 3);
 	}
 
 	@Override
-	public Matrix getElementForce(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForce(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 		return new Matrix(3, 1);
 	}
 
 	@Override
-	public Matrix getElementForceNL(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes,
-			Matrix u_global, boolean localSys) {
+	public Matrix getElementForceNL(ArrayList<Node> nodes, Matrix u_global, boolean localSys) {
 		return new Matrix(3, 1);
 	}
 
 	@Override
-	protected Matrix getMelem(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes) {
+	protected Matrix getMelem(ArrayList<Node> nodes) {
 		Matrix M_elem = new Matrix(3, 3);
 		M_elem.set(0, 0, mass);
 		M_elem.set(1, 1, mass);

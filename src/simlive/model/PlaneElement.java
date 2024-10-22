@@ -93,10 +93,10 @@ public abstract class PlaneElement extends Element {
 		R0.setMatrix(0, 2, 2, 2, vz.times(1.0/vz.normF()));
 	}
 	
-	protected abstract Matrix getKelem(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes);
+	protected abstract Matrix getKelem(ArrayList<Node> nodes);
 	
-	public void initKelem(ArrayList<Material> materials, ArrayList<Section> sections, ArrayList<Node> nodes) {
-		K_elem = getKelem(materials, sections, nodes);
+	public void initKelem(ArrayList<Node> nodes) {
+		K_elem = getKelem(nodes);
 	}
 
 	@Override
@@ -132,12 +132,12 @@ public abstract class PlaneElement extends Element {
 	
 	protected abstract Matrix getBMatrixMembrane(Matrix Jinv, double r, double s);
 	
-	protected Matrix getMaterialMatrix(ArrayList<Material> materials) {
+	protected Matrix getMaterialMatrix() {
 		Matrix C = new Matrix(3, 3);
 		
 		/*if (state == PlaneElement.State.PLANE_STRESS)*/ {
-			double E = materials.get(material_id).getYoungsModulus();
-			double mu = materials.get(material_id).getPoissonsRatio();
+			double E = material.getYoungsModulus();
+			double mu = material.getPoissonsRatio();
 			
 			C.set(0, 0, 1.0);
 			C.set(0, 1, mu);
@@ -202,21 +202,19 @@ public abstract class PlaneElement extends Element {
 		return Bm.times(u_membrane).plus(Bp.times(u_plate).times(sign*thickness/2.0));
 	}
 	
-	public Matrix getStress(ArrayList<Material> materials,
-			ArrayList<Node> nodes, Matrix u_global, double r, double s) {
-		Matrix C = getMaterialMatrix(materials);		
+	public Matrix getStress(ArrayList<Node> nodes, Matrix u_global, double r, double s) {
+		Matrix C = getMaterialMatrix();		
 		return C.times(getStrain(nodes, u_global, r, s));
 	}
 	
-	public double getThickening(ArrayList<Material> materials, ArrayList<Node> nodes,
-			Matrix u_global, double r, double s) {
+	public double getThickening(ArrayList<Node> nodes, Matrix u_global, double r, double s) {
 		/*if (state == PlaneElement.State.PLANE_STRESS)*/ {
 			double t = getThickness();
 			double E, mu;
-			E = materials.get(material_id).getYoungsModulus();
-			mu = materials.get(material_id).getPoissonsRatio();
+			E = material.getYoungsModulus();
+			mu = material.getPoissonsRatio();
 			
-			Matrix stress = getStress(materials, nodes, u_global, r, s);
+			Matrix stress = getStress(nodes, u_global, r, s);
 			return -t*mu/E*(stress.get(0, 0)+stress.get(1, 0));
 		}
 		/*else {

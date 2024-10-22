@@ -68,6 +68,7 @@ import simlive.model.Element;
 import simlive.model.Facet3d;
 import simlive.model.LineElement;
 import simlive.model.Load;
+import simlive.model.Material;
 import simlive.model.Model;
 import simlive.model.Node;
 import simlive.model.Part3d;
@@ -1492,23 +1493,23 @@ public class View extends GLCanvas {
     	        		material.setText("Material");
     	                final Menu menu2 = new Menu(material);
     	                for (int i = 0; i < SimLive.model.getMaterials().size(); i++) {
-    	                	final int j = i;
+    	                	final Material mat = SimLive.model.getMaterials().get(i);
     	                	MenuItem newItem1 = new MenuItem(menu2, SWT.CHECK);
     	                	newItem1.addSelectionListener(new SelectionAdapter() {
     							@Override
     							public void widgetSelected(SelectionEvent e) {
     								for (int e1 = 0; e1 < elementSet.size(); e1++) {
-    									elementSet.get(e1).setMaterialID(j);
+    									elementSet.get(e1).setMaterial(mat);
     								}
     								((PartDialog) SimLive.dialogArea).updateDialog(new double[3]);
     							}
     						});
     	                	for (int e1 = 0; e1 < elementSet.size(); e1++) {
-    	                		if (elementSet.get(e1).getMaterialID() == j) {
+    	                		if (elementSet.get(e1).getMaterial() == mat) {
     								newItem1.setSelection(true);
     							}
     	                	}
-    			            newItem1.setText(SimLive.model.getMaterials().get(j).name);
+    			            newItem1.setText(mat.name);
     	                }
     	                material.setMenu(menu2);
     	                
@@ -1518,23 +1519,23 @@ public class View extends GLCanvas {
     		        		section.setText("Section");
     		                final Menu menu3 = new Menu(section);
     		                for (int i = 0; i < SimLive.model.getSections().size(); i++) {
-    		                	final int j = i;
+    		                	final Section sec = SimLive.model.getSections().get(i);
     		                	MenuItem newItem1 = new MenuItem(menu3, SWT.CHECK);
     		                	newItem1.addSelectionListener(new SelectionAdapter() {
     								@Override
     								public void widgetSelected(SelectionEvent e) {
     									for (int e1 = 0; e1 < elementSet.size(); e1++) {
-    										((LineElement) elementSet.get(e1)).setSectionID(j);
+    										((LineElement) elementSet.get(e1)).setSection(sec);
     									}
     									((PartDialog) SimLive.dialogArea).updateDialog(new double[3]);
     								}
     							});
     		                	for (int e1 = 0; e1 < elementSet.size(); e1++) {
-    		                		if (((LineElement) elementSet.get(e1)).getSectionID() == j) {
+    		                		if (((LineElement) elementSet.get(e1)).getSection() == sec) {
     									newItem1.setSelection(true);
     								}
     		                	}
-    				            newItem1.setText(SimLive.model.getSections().get(j).getName());
+    				            newItem1.setText(sec.getName());
     		                }
     		                section.setMenu(menu3);
     	    			}
@@ -2408,7 +2409,7 @@ public class View extends GLCanvas {
 			if (set.getType() == Set.Type.BASIC && set.getElements().size() > 1) {
 				/* set used by distributed load - copy as single beam */
 				Element element = set.getElements().get(0);
-				Element newElement = element.clone();
+				Element newElement = element.clone(SimLive.model);
 				int[] elementNodes = new int[element.getElementNodes().length];
 				elementNodes[0] = indices[element.getElementNodes()[0]];
 				elementNodes[1] = indices[set.getElements().get(set.getElements().size()-1).getElementNodes()[1]];
@@ -2418,7 +2419,7 @@ public class View extends GLCanvas {
 			else {
 				for (int e = 0; e < set.getElements().size(); e++) {
 					Element element = set.getElements().get(e);
-					Element newElement = element.clone();
+					Element newElement = element.clone(SimLive.model);
 					int[] elementNodes = new int[element.getElementNodes().length];
 					for (int i = 0; i < element.getElementNodes().length; i++) {
 						elementNodes[i] = indices[element.getElementNodes()[i]];
@@ -3644,6 +3645,9 @@ public class View extends GLCanvas {
 			}
 			
 			if (element != null) {
+				if (element.isLineElement() && !SimLive.model.getSections().isEmpty()) {
+					((LineElement) element).setSection(SimLive.model.getSections().get(0));
+				}
 				gl2.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 				gl2.glEnable(GL2.GL_BLEND);
 				renderLineElementAndPointMass(gl2, element, connectSets0, connectSets1, width, glu, outside, inside,
@@ -5004,8 +5008,8 @@ public class View extends GLCanvas {
 		diff[2] = coords1[2]-coords0[2];
 		double length = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
 		if (length < SimLive.ZERO_TOL) return;
-		Section section = element.isSectionIDValid(SimLive.model.getSections()) ?
-				SimLive.model.getSections().get(element.getSectionID()) :
+		Section section = element.isSectionValid(SimLive.model.getSections()) ?
+				element.getSection() :
 				new Section(new SectionShape(SectionShape.Type.DIRECT_INPUT));
 		double[][] P = section.getSectionPoints();
 		if (!isLineElementVisibleOnScreen(element, coords0, coords1,

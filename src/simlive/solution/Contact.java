@@ -251,7 +251,7 @@ public class Contact {
 								planeNormal[2] += normal[2];
 							}
 							if ((element.getType() == Element.Type.BEAM || element.getType() == Element.Type.ROD) &&
-									solution.getRefModel().getSections().get(((LineElement) element).getSectionID()).getSectionShape().getType() !=
+									((LineElement) element).getSection().getSectionShape().getType() !=
 									SectionShape.Type.DIRECT_INPUT) {
 								double length = ((LineElement) element).getCurrentLength(nodes, u_elem0);
 								Matrix r1 = ((LineElement) element).getr1(nodes, u_elem0, length);
@@ -263,7 +263,7 @@ public class Contact {
 									Rr = ((Rod) element).getVectorTransformation(r1.getColumnPackedCopy());
 								}
 								if (Rr != null) {
-									SectionShape sectionShape = solution.getRefModel().getSections().get(((LineElement) element).getSectionID()).getSectionShape();
+									SectionShape sectionShape = ((LineElement) element).getSection().getSectionShape();
 									double w, h;
 									if (sectionShape.getType() == SectionShape.Type.CIRCLE || sectionShape.getType() == SectionShape.Type.HOLLOW_CIRCLE) {
 										w = h = sectionShape.getDiameter();
