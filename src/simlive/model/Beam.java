@@ -38,8 +38,9 @@ public class Beam extends LineElement {
 	public Matrix getRr(Matrix u_elem, Matrix r1) {
 		Matrix R1g = rotationMatrixFromAngles(u_elem.getMatrix(3, 5, 0, 0));
 		Matrix R2g = rotationMatrixFromAngles(u_elem.getMatrix(9, 11, 0, 0));
-		Matrix q1 = R1g.times(R0).times(new Matrix(new double[]{0, 1, 0}, 3));
-		Matrix q2 = R2g.times(R0).times(new Matrix(new double[]{0, 1, 0}, 3));
+		Matrix r0col = R0.getMatrix(0, 2, 1, 1);
+		Matrix q1 = R1g.times(r0col);
+		Matrix q2 = R2g.times(r0col);
 		Matrix q = (q1.plus(q2)).times(0.5);
 		Matrix r3 = r1.crossProduct(q);
 		r3 = r3.times(1.0/r3.normF());
@@ -55,8 +56,9 @@ public class Beam extends LineElement {
 	private Matrix getG(Matrix u_elem, Matrix Rr, double length) {
 		Matrix R1g = rotationMatrixFromAngles(u_elem.getMatrix(3, 5, 0, 0));
 		Matrix R2g = rotationMatrixFromAngles(u_elem.getMatrix(9, 11, 0, 0));
-		Matrix q1 = R1g.times(R0).times(new Matrix(new double[]{0, 1, 0}, 3));
-		Matrix q2 = R2g.times(R0).times(new Matrix(new double[]{0, 1, 0}, 3));
+		Matrix r0col = R0.getMatrix(0, 2, 1, 1);
+		Matrix q1 = R1g.times(r0col);
+		Matrix q2 = R2g.times(r0col);
 		Matrix q = (q1.plus(q2)).times(0.5);
 		Matrix RrTq = Rr.transpose().times(q);
 		//Matrix RrTq1 = Rr.transpose().times(q1);
