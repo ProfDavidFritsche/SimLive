@@ -1122,7 +1122,7 @@ public class Increment {
 		return f_gravity;
 	}
 	
-	public Matrix getExternalForce(int nDofs, Step step, Matrix f_gravity) {
+	public Matrix getExternalForce(int nDofs, Step step, Matrix f_gravity, Matrix u_global) {
 		Matrix f_ext = f_gravity.copy();
 		ArrayList<Load> loads = solution.getRefModel().getLoads();
 		ArrayList<DistributedLoad> distributedLoads = solution.getRefModel().getDistributedLoads();
@@ -1133,11 +1133,11 @@ public class Increment {
 				load.getTimeTable().isFactorDefinedAtTime(time)) {
 				Matrix rot = GeomUtility.getRotationMatrix(load.getAngle()*Math.PI/180.0, load.getAxis().clone());
 				
-				/*if (load.getReferenceNode() != null && load.getReferenceNode().isRotationalDOF()) {
+				if (load.getReferenceNode() != null && load.getReferenceNode().isRotationalDOF()) {
 					int dof = solution.getDofOfNodeID(load.getReferenceNode().getID());
 					Matrix R1g = Beam.rotationMatrixFromAngles(u_global.getMatrix(dof+3, dof+5, 0, 0));
 					rot = rot.times(R1g);
-				}*/
+				}
 				
 				for (int n = 0; n < load.getNodes().size(); n++) {
 					Matrix force = new Matrix(load.getForce(time), 3);
@@ -1168,7 +1168,12 @@ public class Increment {
 				double yDirEndValue = load.getEndValue(1, time);		
 				double zDirStartValue = load.getStartValue(2, time);
 				double zDirEndValue = load.getEndValue(2, time);		
-				//double phi = getRotationOfReference(load.getReferenceNodes(), u_global, 1.0);
+				
+				Matrix rot = null;
+				if (load.getReferenceNode() != null && load.getReferenceNode().isRotationalDOF()) {
+					int dof = solution.getDofOfNodeID(load.getReferenceNode().getID());
+					rot = Beam.rotationMatrixFromAngles(u_global.getMatrix(dof+3, dof+5, 0, 0));
+				}
 				
 				for (int s = 0; s < load.getElementSets().size(); s++) {
 					Set set = load.getElementSets().get(s);
@@ -1178,6 +1183,9 @@ public class Increment {
 					Matrix R = GeomUtility.getRotationMatrix(load.getAngle()*Math.PI/180.0, load.getAxis().clone());					
 					if (load.isLocalSysAligned()) {
 						R = beam.getR0();
+					}
+					if (rot != null) {
+						R = R.times(rot);
 					}
 					
 					for (int i = 0; i < set.getElements().size(); i++) {

@@ -18,7 +18,6 @@ public class Load extends AbstractLoad implements DeepEqualsInterface {
 	private boolean[] isRotation;
 	private double[] disp;
 	private double[] rotation;
-	private Node referenceNode;
 	private TimeTable timeTable;
 	
 	public Load () {
@@ -85,14 +84,6 @@ public class Load extends AbstractLoad implements DeepEqualsInterface {
 
 	public void setNodes(ArrayList<Node> nodes) {
 		this.nodes = nodes;
-	}
-
-	public Node getReferenceNode() {
-		return referenceNode;
-	}
-	
-	public void setReferenceNode(Node referenceNode) {
-		this.referenceNode = referenceNode;
 	}
 
 	public double[] getAxis() {
