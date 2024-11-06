@@ -1136,7 +1136,7 @@ public class Increment {
 				if (load.getReferenceNode() != null && load.getReferenceNode().isRotationalDOF()) {
 					int dof = solution.getDofOfNodeID(load.getReferenceNode().getID());
 					Matrix R1g = Beam.rotationMatrixFromAngles(u_global.getMatrix(dof+3, dof+5, 0, 0));
-					rot = rot.times(R1g);
+					rot = R1g.times(rot);
 				}
 				
 				for (int n = 0; n < load.getNodes().size(); n++) {
@@ -1185,7 +1185,7 @@ public class Increment {
 						R = beam.getR0();
 					}
 					if (rot != null) {
-						R = R.times(rot);
+						R = rot.times(R);
 					}
 					
 					for (int i = 0; i < set.getElements().size(); i++) {
