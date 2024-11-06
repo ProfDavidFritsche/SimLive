@@ -25,14 +25,13 @@ public class PenaltyMethod extends ConstraintMethod {
 	
 	@Override
 	public Matrix getConstrainedMatrix(Matrix matrix, Matrix G) {
-		double penalty = getPenaltyValue(matrix);
-		return matrix.plus(G.transposeTimesItself().timesEquals(penalty));
+		return matrix.plus(G.transposeTimesItself().times(getPenaltyValue(matrix)));
 	}
 
 	@Override
 	public Matrix getConstrainedRHS(Matrix rhs, Matrix C_global, Matrix matrix, Matrix G, Matrix g) {
 		double penalty = getPenaltyValue(matrix);
-		return rhs.plus(G.transpose().times(g.timesEquals(penalty)));
+		return rhs.plus(G.transpose().times(g.times(penalty)));
 	}
 
 	@Override
@@ -55,8 +54,8 @@ public class PenaltyMethod extends ConstraintMethod {
 	@Override
 	public Matrix getConstraintForce(Matrix C_global, Matrix solutionConstr, Matrix G, Matrix g, Matrix matrix) {
 		double penalty = getPenaltyValue(matrix);
-		return G.transpose().times(g.timesEquals(penalty)).minus(
-				G.transposeTimesItself().timesEquals(penalty).times(solutionConstr));
+		return G.transpose().times(g.times(penalty)).minus(
+				G.transposeTimesItself().times(penalty).times(solutionConstr));
 	}
 
 	@Override
