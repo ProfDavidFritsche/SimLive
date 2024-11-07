@@ -775,9 +775,9 @@ public class XML {
 				load.setStartValue(2, zDirStartValue);
 				load.setEndValue(2, zDirEndValue);
 				
-				if (XMLdistributedLoad.getAttribute("referenceNode") != null) {
-					load.setReferenceNode(SimLive.model.getNodes().get(getIntegerAttribute(XMLdistributedLoad, "referenceNode")));
-				}
+				/*if (XMLdistributedLoad.getAttribute("referenceNode") != null) {
+					load.setReferenceNode(Sim2d.model.getNodes().get(getIntegerAttribute(XMLdistributedLoad, "referenceNode")));
+				}*/
 				
 				load.setTimeTable(getTimeTable(XMLdistributedLoad.getChild("timeTable")));
 				
@@ -1304,9 +1304,9 @@ public class XML {
 				setDoubleAttribute(XMLdistributedLoad, "zDirEndValue",
 						distributedLoad.getEndValue(2));
 				
-				if (distributedLoad.getReferenceNode() != null) {
+				/*if (distributedLoad.getReferenceNode() != null) {
 					setIntegerAttribute(XMLdistributedLoad, "referenceNode", distributedLoad.getReferenceNode().getID());
-				}
+				}*/
 								
 				org.jdom.Element XMLdistributedLoadSets = new org.jdom.Element("sets");
 				for (int s = 0; s < distributedLoad.getElementSets().size(); s++) {

@@ -87,6 +87,7 @@ import simlive.model.Section;
 import simlive.model.SectionShape;
 import simlive.model.Vertex3d;
 import simlive.model.AbstractConnector.ConnectorType;
+import simlive.model.AbstractLoad.LoadType;
 import simlive.model.ContactPair.Type;
 import simlive.model.Step.GRAVITY;
 import simlive.postprocessing.ScalarPlot;
@@ -1344,22 +1345,20 @@ public class View extends GLCanvas {
 					}
 				});
 			}
-			if (objects.get(0) instanceof AbstractLoad) {
-				AbstractLoad abstractLoad = (AbstractLoad) objects.get(0);
-				if (selectedNodes.size() == 1) {
+			if (objects.get(0) instanceof Load && !selectedNodes.isEmpty()) {
+				Load load = (Load) objects.get(0);
+				if (load.getType() == Load.Type.DISPLACEMENT && selectedNodes.size() == 1) {
 					new MenuItem(popup, SWT.SEPARATOR);
 					MenuItem setReference = new MenuItem(popup, SWT.NONE);
 					setReference.setText("Reference Node");
 					setReference.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
-							abstractLoad.setReferenceNode(selectedNodes.get(0));
+							load.setReferenceNode(selectedNodes.get(0));
+							storeMenuItemSelected(0, !load.getNodes().isEmpty());
 						}
 					});
 				}
-			}
-			if (objects.get(0) instanceof Load && !selectedNodes.isEmpty()) {
-				Load load = (Load) objects.get(0);
 				getStoreMenuItem(popup).addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -3511,7 +3510,9 @@ public class View extends GLCanvas {
 				Node referenceNode = null;
 				AbstractLoad abstractLoad = (AbstractLoad) objects.get(i);
 				if (abstractLoad != null) {
-					referenceNode = abstractLoad.getReferenceNode();
+					if (abstractLoad.getLoadType() == LoadType.LOAD) {
+						referenceNode = ((Load) abstractLoad).getReferenceNode();
+					}
 				}
 				if (referenceNode != null) {
 					double[] t = getModelViewMatrix();
@@ -6293,13 +6294,11 @@ public class View extends GLCanvas {
 		    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_RED, 0);
 		    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, SimLive.COLOR_BLACK, 0);	        	
 		    	}
-		    	Matrix rot = null;
-				if (SimLive.mode == Mode.RESULTS && distributedLoad.getReferenceNode() != null &&
-						distributedLoad.getReferenceNode().isRotationalDOF()) {
-					int dof = SimLive.post.getSolution().getDofOfNodeID(distributedLoad.getReferenceNode().getID());
-					Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
-					rot = Beam.rotationMatrixFromAngles(u_global.getMatrix(dof+3, dof+5, 0, 0)).transpose();
-				}
+		    	/*double phi = 0.0;
+		    	if (Sim2d.mode == Mode.RESULTS && distributedLoad.getReferenceNodes() != null) {
+		    		Matrix u_global = Sim2d.post.getPostIncrement().get_u_global();
+		    		phi = Sim2d.post.getPostIncrement().getRotationOfReference(distributedLoad.getReferenceNodes(), u_global, scaling);
+		    	}*/
 		    	double xDirStartValue = distributedLoad.getStartValue(0, time);
 				double xDirEndValue = distributedLoad.getEndValue(0, time);
 				double yDirStartValue = distributedLoad.getStartValue(1, time);
@@ -6320,9 +6319,6 @@ public class View extends GLCanvas {
 							Beam beam = (Beam) set.getElements().get(0);
 							R = beam.getR0().transpose();
 						}
-				    	if (rot != null) {
-				    		R = R.times(rot);
-				    	}
 						double[] RR = getArrayFromRotationMatrix(R, false);
 				    	//gl2.glMultMatrixd(RR.getRowPackedCopy(), 0);
 				    	
