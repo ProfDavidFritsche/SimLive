@@ -3510,7 +3510,8 @@ public class View extends GLCanvas {
 				Node referenceNode = null;
 				AbstractLoad abstractLoad = (AbstractLoad) objects.get(i);
 				if (abstractLoad != null) {
-					if (abstractLoad.getLoadType() == LoadType.LOAD) {
+					if (abstractLoad.getLoadType() == LoadType.LOAD &&
+							((Load) abstractLoad).getType() == Load.Type.DISPLACEMENT) {
 						referenceNode = ((Load) abstractLoad).getReferenceNode();
 					}
 				}
@@ -6108,7 +6109,8 @@ public class View extends GLCanvas {
 		    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, SimLive.COLOR_BLACK, 0);	        	
 		    	}
 		    	Matrix R = GeomUtility.getRotationMatrix(-load.getAngle()*Math.PI/180.0, load.getAxis().clone());
-		    	if (SimLive.mode == Mode.RESULTS && load.getReferenceNode() != null && load.getReferenceNode().isRotationalDOF()) {
+		    	if (SimLive.mode == Mode.RESULTS && load.getType() == Load.Type.DISPLACEMENT &&
+		    			load.getReferenceNode() != null && load.getReferenceNode().isRotationalDOF()) {
 		    		Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
 		    		int id = SimLive.post.getSolution().getDofOfNodeID(load.getReferenceNode().getID());
 		    		Matrix rot = u_global.getMatrix(id+3, id+5, 0, 0);
