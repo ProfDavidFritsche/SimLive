@@ -6298,18 +6298,7 @@ public class View extends GLCanvas {
 						distributedLoad.getReferenceNode().isRotationalDOF()) {
 					int dof = SimLive.post.getSolution().getDofOfNodeID(distributedLoad.getReferenceNode().getID());
 					Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
-					rot = u_global.getMatrix(dof+3, dof+5, 0, 0);
-					double factor = 0;
-		    		if (SimLive.settings.isLargeDisplacement) {
-		    			factor = scaling;
-		    		}
-		    		else {
-		    			factor = rot.normF();
-		    			if (factor > 0) {
-			    			factor = Math.atan(scaling*factor)/factor;
-			    		}
-		    		}
-		    		rot = Beam.rotationMatrixFromAngles(rot.times(factor)).transpose();
+					rot = Beam.rotationMatrixFromAngles(u_global.getMatrix(dof+3, dof+5, 0, 0)).transpose();
 				}
 		    	double xDirStartValue = distributedLoad.getStartValue(0, time);
 				double xDirEndValue = distributedLoad.getEndValue(0, time);
