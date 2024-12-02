@@ -220,6 +220,7 @@ public abstract class GeomUtility {
 	
 	public static boolean isPointInConvexPolygon(float[][] p, float[] pointIn)
 	{
+		if (p == null || pointIn == null) return false;
 		for (int i = 0; i < p.length; i++) {
 			float[] p0 = p[i];
 			float[] p1 = p[(i+1)%p.length];

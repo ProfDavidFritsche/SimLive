@@ -295,7 +295,7 @@ public abstract class PlaneElement extends Element {
 		    Matrix rhs = new Matrix(2,1);
 		    rhs.set(0,0, p[0]-x);
 		    rhs.set(1,0, p[1]-y);
-		    if (rhs.normF() == 0.0) break;
+		    if (rhs.normF() < SimLive.ZERO_TOL) break;
 		    Matrix delta = J.transpose().inverse().times(rhs);
 			r += delta.get(0,0);
 			s += delta.get(1,0);
