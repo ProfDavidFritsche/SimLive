@@ -185,8 +185,8 @@ public class Increment {
 				double[] norm = contacts[c].getNorm();
 				
 				double scal = C_global.get(dof_n, 0)*norm[0]+C_global.get(dof_n+1, 0)*norm[1]+C_global.get(dof_n+2, 0)*norm[2];
-				double contactForce = Math.abs(scal);
-				double fricForce = contacts[c].getFrictionCoefficient()*contactForce;
+				double normalForce = Math.abs(scal);
+				double fricForce = contacts[c].getFrictionCoefficient()*normalForce;
 				
 				double[] fricDir = new double[3];
 				
@@ -198,7 +198,7 @@ public class Increment {
 				
 				if (calledFromStatic) {
 					
-					if (contactForce > SimLive.ZERO_TOL && tangentialForce > fricForce-SimLive.ZERO_TOL) {
+					if (normalForce > SimLive.ZERO_TOL && tangentialForce > fricForce-SimLive.ZERO_TOL) {
 						contacts[c].setSticking(false);
 						
 						if (tangentialForce > SimLive.ZERO_TOL) {
