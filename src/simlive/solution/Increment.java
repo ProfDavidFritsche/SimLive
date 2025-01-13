@@ -165,7 +165,9 @@ public class Increment {
 			else {
 				K_elem = element.getElementStiffness(nodes);
 			}
-			temp = element.addLocalToGlobalMatrix(K_elem.times(element.getStiffnessDamping()), temp);
+			synchronized (this) {
+				temp = element.addLocalToGlobalMatrix(K_elem.times(element.getStiffnessDamping()), temp);
+			}
 		});
 		
 		return temp;
