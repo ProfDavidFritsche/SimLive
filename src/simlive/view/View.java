@@ -851,15 +851,17 @@ public class View extends GLCanvas {
 							if (SimLive.mode == Mode.PARTS) {
 								
 								if (SimLive.model.getNodes().contains(Snap.node) || !selectedSets.isEmpty() || !selectedParts3d.isEmpty()) {
-									SimLive.disposeDialogAreas();							
 									if (selectedNodes.size() == 1 && selectedNodes.get(0).getID() <= Model.maxUsedNodeID) {
+										SimLive.disposeDialogAreas();							
 										SimLive.dialogArea = new NodeDialog(SimLive.compositeLeft, SWT.NONE, selectedNodes.get(0));
 									}
 									if (!selectedSets.isEmpty()) {
+										SimLive.disposeDialogAreas();							
 										SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
 											SWT.NONE, selectedSets, SimLive.settings);
 									}
 									if (!selectedParts3d.isEmpty()) {
+										SimLive.disposeDialogAreas();							
 										SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
 											SWT.NONE, selectedParts3d, SimLive.settings);
 									}
@@ -1999,7 +2001,8 @@ public class View extends GLCanvas {
 					 SimLive.settings.newPartType == Element.Type.SPRING ||
 					 SimLive.settings.newPartType == Element.Type.BEAM ||
 					 SimLive.settings.newPartType == Element.Type.TRI ||
-					 SimLive.settings.newPartType == Element.Type.QUAD))) {
+					 SimLive.settings.newPartType == Element.Type.QUAD ||
+					 SimLive.dialogArea instanceof GeometricAreaDialog))) {
 				if (selectedNodes.contains(Snap.node)) {
 					selectedNodes.remove(Snap.node);
 				}
