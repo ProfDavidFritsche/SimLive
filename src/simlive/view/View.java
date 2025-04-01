@@ -3666,7 +3666,7 @@ public class View extends GLCanvas {
 		if (SimLive.mode == Mode.PARTS && selectionBox == null) {
 			if (selectedNodes.size() == 1 && selectedNodes.get(0).getID() > Model.maxUsedNodeID) {
 				double[] coords = selectedNodes.get(0).getCoords();
-				double[] p = screenToModelCoordinates(mousePos[0], mousePos[1]);
+				double[] p = Snap.node != null ? Snap.node.getCoords() : screenToModelCoordinates(mousePos[0], mousePos[1]);
 				
 				gl2.glDisable(GL2.GL_CULL_FACE);
 				gl2.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
