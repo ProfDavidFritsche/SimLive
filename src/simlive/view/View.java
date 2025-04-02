@@ -816,21 +816,21 @@ public class View extends GLCanvas {
 								side == Side.NONE) {
 							
 							{
-								if (selectedSets.isEmpty() && selectedParts3d.isEmpty() &&
+								if ((selectedSets.isEmpty() && selectedParts3d.isEmpty() || !isControlKeyPressed) &&
 									Snap.node != null) {
 									if (!selectNodes()) {
 										//deselectAllAndDisposeDialogs();
 										//return;
 									}
 								}
-								else if (selectedParts3d.isEmpty() && selectedNodes.isEmpty() &&
+								else if ((selectedParts3d.isEmpty() && selectedNodes.isEmpty() || !isControlKeyPressed) &&
 										Snap.element != null) {
 									if (!selectSets()) {
 										deselectAllAndDisposeDialogs();
 										return;
 									}
 								}
-								else if (selectedSets.isEmpty() && selectedNodes.isEmpty() &&
+								else if ((selectedSets.isEmpty() && selectedNodes.isEmpty() || !isControlKeyPressed) &&
 										Snap.part3d != null) {
 									if (!selectParts3d()) {
 										deselectAllAndDisposeDialogs();
