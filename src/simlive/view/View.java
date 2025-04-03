@@ -819,7 +819,7 @@ public class View extends GLCanvas {
 								if ((selectedSets.isEmpty() && selectedParts3d.isEmpty() || !isControlKeyPressed) &&
 									Snap.node != null) {
 									if (!selectNodes()) {
-										//deselectAllAndDisposeDialogs();
+										deselectAllAndDisposeDialogs();
 										//return;
 									}
 								}
