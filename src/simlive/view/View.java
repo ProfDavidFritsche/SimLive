@@ -933,7 +933,7 @@ public class View extends GLCanvas {
 										double[] mpos = selectedNodes.get(1).getCoords();
 										double base = mpos[0]-edge[0];
 										double height = mpos[1]-edge[1];
-										double offset = ((TriangularAreaDialog) SimLive.dialogArea).getOffset();
+										double offset = SimLive.dialogArea instanceof TriangularAreaDialog ? ((TriangularAreaDialog) SimLive.dialogArea).getOffset() : 0;
 										SimLive.model.addTriangleFromQuads(edge, base, height, offset);
 										deselectAllAndDisposeDialogs();
 									}
@@ -3704,7 +3704,7 @@ public class View extends GLCanvas {
 					gl2.glEnd();
 				}
 				if (SimLive.settings.newPartType == Element.Type.TRIANGULAR) {
-					double offset = ((TriangularAreaDialog) SimLive.dialogArea).getOffset();
+					double offset = SimLive.dialogArea instanceof TriangularAreaDialog ? ((TriangularAreaDialog) SimLive.dialogArea).getOffset() : 0;
 					gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
 					gl2.glBegin(GL2.GL_LINE_STRIP);
 			    	gl2.glVertex2d(coords[0], coords[1]);
