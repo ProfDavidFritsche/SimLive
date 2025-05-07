@@ -226,7 +226,8 @@ public abstract class LineElement extends Element {
 	}
 	
 	public double[] getCoordsInElement(double[] modelCoords2d) {
-		if (SimLive.settings.isShowSections && isSectionValid(SimLive.model.getSections()) &&
+		if (this.getType() != Element.Type.SPRING &&
+				SimLive.settings.isShowSections && isSectionValid(SimLive.model.getSections()) &&
 				section.getSectionShape().getType() != SectionShape.Type.DIRECT_INPUT) {
 			double[] coords0 = View.getCoordsWithScaledDisp(elementNodes[0]);
 			double[] coords1 = View.getCoordsWithScaledDisp(elementNodes[1]);
