@@ -214,12 +214,10 @@ public class Increment {
 						C_global.set(dof_n+2, 0, C_global.get(dof_n+2, 0)-tForce[2]);
 						if (contacts[c].isDeformableDeformable()) {
 							for (int i = 0; i < element_nodes.length; i++) {
-								if (shapeFunctionValues[i] > 0.0) {
-									int dof = solution.getDofOfNodeID(element_nodes[i]);
-									C_global.set(dof, 0, C_global.get(dof, 0)+shapeFunctionValues[i]*tForce[0]);
-									C_global.set(dof+1, 0, C_global.get(dof+1, 0)+shapeFunctionValues[i]*tForce[1]);
-									C_global.set(dof+2, 0, C_global.get(dof+2, 0)+shapeFunctionValues[i]*tForce[2]);
-								}
+								int dof = solution.getDofOfNodeID(element_nodes[i]);
+								C_global.set(dof, 0, C_global.get(dof, 0)+shapeFunctionValues[i]*tForce[0]);
+								C_global.set(dof+1, 0, C_global.get(dof+1, 0)+shapeFunctionValues[i]*tForce[1]);
+								C_global.set(dof+2, 0, C_global.get(dof+2, 0)+shapeFunctionValues[i]*tForce[2]);
 							}
 						}
 					}
@@ -228,18 +226,18 @@ public class Increment {
 				if (calledFromDynamic) {
 					
 					double[] v_tang = new double[3];
-					v_tang[0] = v_global.get(dof_n, 0)-v_global.get(dof_n, 0)*norm[0];
-					v_tang[1] = v_global.get(dof_n+1, 0)-v_global.get(dof_n+1, 0)*norm[1];
-					v_tang[2] = v_global.get(dof_n+2, 0)-v_global.get(dof_n+2, 0)*norm[2];
+					scal = v_global.get(dof_n, 0)*norm[0]+v_global.get(dof_n+1, 0)*norm[1]+v_global.get(dof_n+2, 0)*norm[2];
+					v_tang[0] = v_global.get(dof_n, 0)-scal*norm[0];
+					v_tang[1] = v_global.get(dof_n+1, 0)-scal*norm[1];
+					v_tang[2] = v_global.get(dof_n+2, 0)-scal*norm[2];
 					double[] v_tang_master = new double[3];
 					if (contacts[c].isDeformableDeformable()) {
 						for (int i = 0; i < element_nodes.length; i++) {
-							if (shapeFunctionValues[i] > 0.0) {
-								int dof = solution.getDofOfNodeID(element_nodes[i]);
-								v_tang_master[0] += shapeFunctionValues[i]*(v_global.get(dof, 0)-v_global.get(dof, 0)*norm[0]);
-								v_tang_master[1] += shapeFunctionValues[i]*(v_global.get(dof+1, 0)-v_global.get(dof+1, 0)*norm[1]);
-								v_tang_master[2] += shapeFunctionValues[i]*(v_global.get(dof+2, 0)-v_global.get(dof+2, 0)*norm[2]);
-							}
+							int dof = solution.getDofOfNodeID(element_nodes[i]);
+							scal = v_global.get(dof_n, 0)*norm[0]+v_global.get(dof_n+1, 0)*norm[1]+v_global.get(dof_n+2, 0)*norm[2];
+							v_tang_master[0] += shapeFunctionValues[i]*(v_global.get(dof, 0)-scal*norm[0]);
+							v_tang_master[1] += shapeFunctionValues[i]*(v_global.get(dof+1, 0)-scal*norm[1]);
+							v_tang_master[2] += shapeFunctionValues[i]*(v_global.get(dof+2, 0)-scal*norm[2]);
 						}
 					}
 					v_tang[0] -= v_tang_master[0];
