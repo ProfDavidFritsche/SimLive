@@ -281,7 +281,7 @@ public class View extends GLCanvas {
 					int xMove = arg0.x-mouseDown[0];
 					int yMove = -(arg0.y-mouseDown[1]);
 					R = rotateAroundAxis(xMove, yMove);
-					redraw();
+					if (animation == null) redraw();
 					return;
 				}
 				
