@@ -248,13 +248,14 @@ public class Increment {
 					// from slip
 					if (v_tangential > SimLive.ZERO_TOL) {
 						double stickingForce = M_global.get(dof_n, dof_n)*v_tangential/timeStep;
-						if (stickingForce > fricForce) {
-							contacts[c].setSticking(false);
-							
-							fricDir[0] = -v_tang[0]/v_tangential;
-							fricDir[1] = -v_tang[1]/v_tangential;
-							fricDir[2] = -v_tang[2]/v_tangential;
+						if (fricForce > stickingForce) {
+							fricForce = stickingForce;
 						}
+						contacts[c].setSticking(false);
+						
+						fricDir[0] = -v_tang[0]/v_tangential;
+						fricDir[1] = -v_tang[1]/v_tangential;
+						fricDir[2] = -v_tang[2]/v_tangential;
 					}
 					
 					// from stick
