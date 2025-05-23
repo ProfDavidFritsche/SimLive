@@ -226,25 +226,27 @@ public class Increment {
 				if (calledFromDynamic) {
 					
 					double[] v_tang = new double[3];
-					scal = v_global.get(dof_n, 0)*norm[0]+v_global.get(dof_n+1, 0)*norm[1]+v_global.get(dof_n+2, 0)*norm[2];
-					v_tang[0] = v_global.get(dof_n, 0)-scal*norm[0];
-					v_tang[1] = v_global.get(dof_n+1, 0)-scal*norm[1];
-					v_tang[2] = v_global.get(dof_n+2, 0)-scal*norm[2];
-					double[] v_tang_master = new double[3];
-					if (contacts[c].isDeformableDeformable()) {
-						for (int i = 0; i < element_nodes.length; i++) {
-							int dof = solution.getDofOfNodeID(element_nodes[i]);
-							scal = v_global.get(dof_n, 0)*norm[0]+v_global.get(dof_n+1, 0)*norm[1]+v_global.get(dof_n+2, 0)*norm[2];
-							v_tang_master[0] += shapeFunctionValues[i]*(v_global.get(dof, 0)-scal*norm[0]);
-							v_tang_master[1] += shapeFunctionValues[i]*(v_global.get(dof+1, 0)-scal*norm[1]);
-							v_tang_master[2] += shapeFunctionValues[i]*(v_global.get(dof+2, 0)-scal*norm[2]);
+					if (tangentialForce < SimLive.ZERO_TOL) {
+						scal = v_global.get(dof_n, 0)*norm[0]+v_global.get(dof_n+1, 0)*norm[1]+v_global.get(dof_n+2, 0)*norm[2];
+						v_tang[0] = v_global.get(dof_n, 0)-scal*norm[0];
+						v_tang[1] = v_global.get(dof_n+1, 0)-scal*norm[1];
+						v_tang[2] = v_global.get(dof_n+2, 0)-scal*norm[2];
+						double[] v_tang_master = new double[3];
+						if (contacts[c].isDeformableDeformable()) {
+							for (int i = 0; i < element_nodes.length; i++) {
+								int dof = solution.getDofOfNodeID(element_nodes[i]);
+								scal = v_global.get(dof_n, 0)*norm[0]+v_global.get(dof_n+1, 0)*norm[1]+v_global.get(dof_n+2, 0)*norm[2];
+								v_tang_master[0] += shapeFunctionValues[i]*(v_global.get(dof, 0)-scal*norm[0]);
+								v_tang_master[1] += shapeFunctionValues[i]*(v_global.get(dof+1, 0)-scal*norm[1]);
+								v_tang_master[2] += shapeFunctionValues[i]*(v_global.get(dof+2, 0)-scal*norm[2]);
+							}
 						}
+						v_tang[0] -= v_tang_master[0];
+						v_tang[1] -= v_tang_master[1];
+						v_tang[2] -= v_tang_master[2];
 					}
-					v_tang[0] -= v_tang_master[0];
-					v_tang[1] -= v_tang_master[1];
-					v_tang[2] -= v_tang_master[2];
 					double v_tangential = Math.sqrt(v_tang[0]*v_tang[0]+v_tang[1]*v_tang[1]+v_tang[2]*v_tang[2]);
-					
+										
 					// from slip
 					if (v_tangential > SimLive.ZERO_TOL) {
 						double stickingForce = M_global.get(dof_n, dof_n)*v_tangential/timeStep;
