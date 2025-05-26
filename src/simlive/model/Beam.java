@@ -752,10 +752,8 @@ public class Beam extends LineElement {
 	public Element clone(Model model) {
 		Beam beam = new Beam();
 		beam.elementNodes = this.elementNodes.clone();
-		if (isMaterialValid(SimLive.model.getMaterials()))
-			beam.material = model.getMaterials().get(SimLive.model.getMaterials().indexOf(this.material));
-		if (isSectionValid(SimLive.model.getSections()))
-			beam.section = model.getSections().get(SimLive.model.getSections().indexOf(this.section));
+		beam.material = findMaterial(model.getMaterials(), material);
+		beam.section = findSection(model.getSections(), section);
 		beam.R0 = this.R0.copy();
 		beam.q0 = this.q0.clone();
 		beam.id = this.id;

@@ -599,8 +599,7 @@ public class Quad extends PlaneElement {
 	public Element clone(Model model) {
 		Quad quad = new Quad();
 		quad.elementNodes = this.elementNodes.clone();
-		if (isMaterialValid(SimLive.model.getMaterials()))
-			quad.material = model.getMaterials().get(SimLive.model.getMaterials().indexOf(this.material));
+		quad.material = findMaterial(model.getMaterials(), material);
 		quad.thickness = this.thickness;
 		//quad.state = this.state;
 		quad.R0 = this.R0.copy();

@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import Jama.Matrix;
-import simlive.SimLive;
 import simlive.solution.Increment;
 import simlive.solution.Solution;
 
@@ -270,10 +269,8 @@ public class Rod extends LineElement {
 	public Element clone(Model model) {
 		Rod rod = new Rod();
 		rod.elementNodes = this.elementNodes.clone();
-		if (isMaterialValid(SimLive.model.getMaterials()))
-			rod.material = model.getMaterials().get(SimLive.model.getMaterials().indexOf(this.material));
-		if (isSectionValid(SimLive.model.getSections()))
-			rod.section = model.getSections().get(SimLive.model.getSections().indexOf(this.section));
+		rod.material = findMaterial(model.getMaterials(), material);
+		rod.section = findSection(model.getSections(), section);
 		rod.R0 = this.R0.copy();
 		rod.q0 = this.q0.clone();
 		rod.id = this.id;

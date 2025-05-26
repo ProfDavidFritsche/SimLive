@@ -497,8 +497,7 @@ public class Tri extends PlaneElement {
 	public Element clone(Model model) {
 		Tri tri = new Tri();
 		tri.elementNodes = this.elementNodes.clone();
-		if (isMaterialValid(SimLive.model.getMaterials()))
-			tri.material = model.getMaterials().get(SimLive.model.getMaterials().indexOf(this.material));
+		tri.material = findMaterial(model.getMaterials(), material);
 		tri.thickness = this.thickness;
 		//tri.state = this.state;
 		tri.R0 = this.R0.copy();

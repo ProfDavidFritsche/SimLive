@@ -49,6 +49,13 @@ public abstract class Element implements DeepEqualsInterface {
 		return materials.contains(material);
 	}
 	
+	public Material findMaterial(ArrayList<Material> materials, Material material) {
+		for (int i = 0; i < materials.size(); i++) {
+			if (materials.get(i).deepEquals(material)) return materials.get(i);
+		}
+		return null;
+	}
+	
 	public abstract Element.Type getType();
 	
 	public abstract String getTypeString();

@@ -49,6 +49,13 @@ public abstract class LineElement extends Element {
 	
 	public abstract boolean isSectionValid(ArrayList<Section> sections);
 	
+	public Section findSection(ArrayList<Section> sections, Section section) {
+		for (int i = 0; i < sections.size(); i++) {
+			if (sections.get(i).deepEquals(section)) return sections.get(i);
+		}
+		return null;
+	}
+	
 	public double[] getQ0() {
 		return q0;
 	}
