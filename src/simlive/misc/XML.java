@@ -1530,6 +1530,7 @@ public class XML {
 			Mode mode = SimLive.mode;
 			SimLive.mode = Mode.NONE;
 			model.updateModel();
+			model.deleteUnusedNodes();
 			SimLive.mode = mode;
 			
 		}

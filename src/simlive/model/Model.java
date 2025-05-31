@@ -528,7 +528,7 @@ public class Model implements DeepEqualsInterface {
 		}
 	}
 	
-	private void deleteUnusedNodes() {
+	public void deleteUnusedNodes() {
 		boolean[] usedNodes = new boolean[nodes.size()];
 		for (int elem = 0; elem < elements.size(); elem++) {
 			int[] elemNodes = elements.get(elem).getElementNodes();
