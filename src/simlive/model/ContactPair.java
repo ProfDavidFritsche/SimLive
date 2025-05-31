@@ -46,10 +46,8 @@ public class ContactPair implements DeepEqualsInterface {
 				rigidElements.add(element);
 			}
 			SimLive.model.getSets().remove(set);
+			SimLive.model.getElements().removeAll(set.getElements());
 		}
-		SimLive.model.getElements().removeAll(rigidElements);
-		SimLive.model.getNodes().removeAll(rigidNodes);
-		SimLive.model.updateAllElements();
 	}
 	
 	private void setDeformableDeformable() {
