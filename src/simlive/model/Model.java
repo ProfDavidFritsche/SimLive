@@ -557,7 +557,6 @@ public class Model implements DeepEqualsInterface {
 	
 	public void updateModel() {
 		if (SimLive.mode != Mode.RESULTS) {
-			deleteUnusedNodes();
 			updateAllContacts();
 			deleteUnusedNodes();
 			updateAllNodes();
