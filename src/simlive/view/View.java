@@ -1347,27 +1347,31 @@ public class View extends GLCanvas {
 					}
 				});
 			}
-			if (objects.get(0) instanceof Load && !selectedNodes.isEmpty()) {
-				Load load = (Load) objects.get(0);
-				if (load.getType() == Load.Type.DISPLACEMENT && selectedNodes.size() == 1) {
+			if (objects.get(0) instanceof AbstractLoad && !selectedNodes.isEmpty()) {
+				AbstractLoad load = (AbstractLoad) objects.get(0);
+				if (selectedNodes.size() == 1) {
 					new MenuItem(popup, SWT.SEPARATOR);
 					MenuItem setReference = new MenuItem(popup, SWT.NONE);
 					setReference.setText("Reference Node");
 					setReference.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
-							load.setReferenceNode(selectedNodes.get(0));
-							storeMenuItemSelected(0, !load.getNodes().isEmpty());
+							load.referenceNode = selectedNodes.get(0);
+							if (load.getLoadType() == LoadType.LOAD) {
+								storeMenuItemSelected(0, !((Load) load).getNodes().isEmpty());
+							}
 						}
 					});
 				}
-				getStoreMenuItem(popup).addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						load.setNodes(getSelectedNodes());
-						storeMenuItemSelected(0, !load.getNodes().isEmpty());
-					}
-				});
+				if (objects.get(0) instanceof Load && !selectedNodes.isEmpty()) {
+					getStoreMenuItem(popup).addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							((Load) load).setNodes(getSelectedNodes());
+							storeMenuItemSelected(0, !((Load) load).getNodes().isEmpty());
+						}
+					});
+				}
 			}
 			if (objects.get(0) instanceof DistributedLoad && !selectedSets.isEmpty() &&
 					SimLive.model.doSetsContainOnlyType(selectedSets, Element.Type.BEAM)) {
@@ -3513,10 +3517,7 @@ public class View extends GLCanvas {
 				Node referenceNode = null;
 				AbstractLoad abstractLoad = (AbstractLoad) objects.get(i);
 				if (abstractLoad != null) {
-					if (abstractLoad.getLoadType() == LoadType.LOAD &&
-							((Load) abstractLoad).getType() == Load.Type.DISPLACEMENT) {
-						referenceNode = ((Load) abstractLoad).getReferenceNode();
-					}
+					referenceNode = abstractLoad.referenceNode;
 				}
 				if (referenceNode != null) {
 					double[] t = getModelViewMatrix();
@@ -6112,10 +6113,10 @@ public class View extends GLCanvas {
 		    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, SimLive.COLOR_BLACK, 0);	        	
 		    	}
 		    	Matrix R = GeomUtility.getRotationMatrix(-load.getAngle()*Math.PI/180.0, load.getAxis().clone());
-		    	if (SimLive.mode == Mode.RESULTS && load.getType() == Load.Type.DISPLACEMENT &&
-		    			load.getReferenceNode() != null && load.getReferenceNode().isRotationalDOF()) {
+		    	if (SimLive.mode == Mode.RESULTS &&
+		    			load.referenceNode != null && load.referenceNode.isRotationalDOF()) {
 		    		Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
-		    		int id = SimLive.post.getSolution().getDofOfNodeID(load.getReferenceNode().getID());
+		    		int id = SimLive.post.getSolution().getDofOfNodeID(load.referenceNode.getID());
 		    		Matrix rot = u_global.getMatrix(id+3, id+5, 0, 0);
 		    		double factor = 0;
 		    		if (SimLive.settings.isLargeDisplacement) {
@@ -6324,6 +6325,23 @@ public class View extends GLCanvas {
 							Beam beam = (Beam) set.getElements().get(0);
 							R = beam.getR0().transpose();
 						}
+				    	if (SimLive.mode == Mode.RESULTS &&
+				    			distributedLoad.referenceNode != null && distributedLoad.referenceNode.isRotationalDOF()) {
+				    		Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
+				    		int id = SimLive.post.getSolution().getDofOfNodeID(distributedLoad.referenceNode.getID());
+				    		Matrix rot = u_global.getMatrix(id+3, id+5, 0, 0);
+				    		double factor = 0;
+				    		if (SimLive.settings.isLargeDisplacement) {
+				    			factor = scaling;
+				    		}
+				    		else {
+				    			factor = rot.normF();
+				    			if (factor > 0) {
+					    			factor = Math.atan(scaling*factor)/factor;
+					    		}
+				    		}
+				    		R = R.times(Beam.rotationMatrixFromAngles(rot.times(factor)).transpose());
+				    	}
 						double[] RR = getArrayFromRotationMatrix(R, false);
 				    	//gl2.glMultMatrixd(RR.getRowPackedCopy(), 0);
 				    	

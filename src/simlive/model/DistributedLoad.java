@@ -13,7 +13,6 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 	private double angle;
 	private boolean isLocalSysAligned;
 	private ArrayList<Set> elementSets;
-	//private Node referenceNode;
 	private TimeTable timeTable;
 	
 	public DistributedLoad() {
@@ -38,9 +37,9 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 		distributedLoad.axis = Arrays.copyOf(this.axis, 3);
 		distributedLoad.angle = this.angle;
 		distributedLoad.isLocalSysAligned = this.isLocalSysAligned;
-		/*if (this.referenceNode != null) {
+		if (this.referenceNode != null) {
 			distributedLoad.referenceNode = model.getNodes().get(this.referenceNode.getID());
-		}*/
+		}
 		distributedLoad.timeTable = this.timeTable.clone();
 		distributedLoad.name = this.name;
 		distributedLoad.isShifted = this.isShifted;
@@ -55,7 +54,8 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 		if (!Arrays.equals(this.axis, distributedLoad.axis)) return false;
 		if (this.angle != distributedLoad.angle) return false;
 		if (this.isLocalSysAligned != distributedLoad.isLocalSysAligned) return false;
-		//if (!this.referenceNode.deepEquals(distributedLoad.referenceNode)) return false;
+		if (this.referenceNode != null && distributedLoad.referenceNode != null &&
+			!this.referenceNode.deepEquals(distributedLoad.referenceNode)) return false;
 		if (!this.timeTable.deepEquals(distributedLoad.timeTable)) return false;
 		if (this.name != distributedLoad.name) return false;
 		return true;
@@ -84,14 +84,6 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 	public void setEndValue(int comp, double value) {
 		this.endValues[comp] = value;
 	}
-
-	/*public Node getReferenceNode() {
-		return referenceNode;
-	}
-	
-	public void setReferenceNode(Node referenceNode) {
-		this.referenceNode = referenceNode;
-	}*/
 
 	public double[] getAxis() {
 		return axis;

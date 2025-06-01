@@ -719,7 +719,7 @@ public class XML {
 				load.setRotation(getDoubleAttribute(XMLrotation, "z"), 2);
 				
 				if (XMLload.getAttribute("referenceNode") != null) {
-					load.setReferenceNode(SimLive.model.getNodes().get(getIntegerAttribute(XMLload, "referenceNode")));
+					load.referenceNode = SimLive.model.getNodes().get(getIntegerAttribute(XMLload, "referenceNode"));
 				}
 				
 				load.setTimeTable(getTimeTable(XMLload.getChild("timeTable")));
@@ -775,9 +775,9 @@ public class XML {
 				load.setStartValue(2, zDirStartValue);
 				load.setEndValue(2, zDirEndValue);
 				
-				/*if (XMLdistributedLoad.getAttribute("referenceNode") != null) {
-					load.setReferenceNode(Sim2d.model.getNodes().get(getIntegerAttribute(XMLdistributedLoad, "referenceNode")));
-				}*/
+				if (XMLdistributedLoad.getAttribute("referenceNode") != null) {
+					load.referenceNode = SimLive.model.getNodes().get(getIntegerAttribute(XMLdistributedLoad, "referenceNode"));
+				}
 				
 				load.setTimeTable(getTimeTable(XMLdistributedLoad.getChild("timeTable")));
 				
@@ -1264,8 +1264,8 @@ public class XML {
 				XMLload.addContent(XMLrotation);
 				setTimeTable(XMLload, load.getTimeTable());				
 				
-				if (load.getReferenceNode() != null) {
-					setIntegerAttribute(XMLload, "referenceNode", load.getReferenceNode().getID());
+				if (load.referenceNode != null) {
+					setIntegerAttribute(XMLload, "referenceNode", load.referenceNode.getID());
 				}
 				
 				org.jdom.Element XMLloadNodes = new org.jdom.Element("nodes");
@@ -1304,9 +1304,9 @@ public class XML {
 				setDoubleAttribute(XMLdistributedLoad, "zDirEndValue",
 						distributedLoad.getEndValue(2));
 				
-				/*if (distributedLoad.getReferenceNode() != null) {
-					setIntegerAttribute(XMLdistributedLoad, "referenceNode", distributedLoad.getReferenceNode().getID());
-				}*/
+				if (distributedLoad.referenceNode != null) {
+					setIntegerAttribute(XMLdistributedLoad, "referenceNode", distributedLoad.referenceNode.getID());
+				}
 								
 				org.jdom.Element XMLdistributedLoadSets = new org.jdom.Element("sets");
 				for (int s = 0; s < distributedLoad.getElementSets().size(); s++) {

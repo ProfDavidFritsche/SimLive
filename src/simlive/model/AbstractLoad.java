@@ -5,4 +5,5 @@ public abstract class AbstractLoad {
 	public abstract LoadType getLoadType();
 	public boolean isShifted; /* only for display */
 	public String name;
+	public Node referenceNode;
 }

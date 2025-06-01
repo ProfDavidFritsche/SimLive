@@ -750,8 +750,8 @@ public class Increment {
 				Matrix TTRgT = TT.copy();
 				int refDof = -1;
 				Node refNode = null;
-				if (load.getReferenceNode() != null) {
-					refNode = load.getReferenceNode();
+				if (load.referenceNode != null) {
+					refNode = load.referenceNode;
 					refDof = solution.getDofOfNodeID(refNode.getID());
 					if (refNode.isRotationalDOF()) {
 						Matrix Rg = Beam.rotationMatrixFromAngles(u_global.getMatrix(refDof+3, refDof+5, 0, 0));
@@ -918,8 +918,8 @@ public class Increment {
 				Node refNode = null;
 				int refDof = -1;
 				Matrix Rg = null;
-				if (load.getReferenceNode() != null) {
-					refNode = load.getReferenceNode();
+				if (load.referenceNode != null) {
+					refNode = load.referenceNode;
 					refDof = solution.getDofOfNodeID(refNode.getID());
 					if (refNode.isRotationalDOF()) {
 						Rg = Beam.rotationMatrixFromAngles(u_global.getMatrix(refDof+3, refDof+5, 0, 0));
@@ -1125,7 +1125,7 @@ public class Increment {
 		return f_gravity;
 	}
 	
-	public Matrix getExternalForce(int nDofs, Step step, Matrix f_gravity) {
+	public Matrix getExternalForce(int nDofs, Step step, Matrix f_gravity, Matrix u_global) {
 		Matrix f_ext = f_gravity.copy();
 		ArrayList<Load> loads = solution.getRefModel().getLoads();
 		ArrayList<DistributedLoad> distributedLoads = solution.getRefModel().getDistributedLoads();
@@ -1136,11 +1136,11 @@ public class Increment {
 				load.getTimeTable().isFactorDefinedAtTime(time)) {
 				Matrix rot = GeomUtility.getRotationMatrix(load.getAngle()*Math.PI/180.0, load.getAxis().clone());
 				
-				/*if (load.getReferenceNode() != null && load.getReferenceNode().isRotationalDOF()) {
-					int dof = solution.getDofOfNodeID(load.getReferenceNode().getID());
+				if (load.referenceNode != null && load.referenceNode.isRotationalDOF()) {
+					int dof = solution.getDofOfNodeID(load.referenceNode.getID());
 					Matrix R1g = Beam.rotationMatrixFromAngles(u_global.getMatrix(dof+3, dof+5, 0, 0));
 					rot = rot.times(R1g);
-				}*/
+				}
 				
 				for (int n = 0; n < load.getNodes().size(); n++) {
 					Matrix force = new Matrix(load.getForce(time), 3);
@@ -1181,6 +1181,11 @@ public class Increment {
 					Matrix R = GeomUtility.getRotationMatrix(load.getAngle()*Math.PI/180.0, load.getAxis().clone());					
 					if (load.isLocalSysAligned()) {
 						R = beam.getR0();
+					}
+					if (load.referenceNode != null && load.referenceNode.isRotationalDOF()) {
+						int dof = solution.getDofOfNodeID(load.referenceNode.getID());
+						Matrix R1g = Beam.rotationMatrixFromAngles(u_global.getMatrix(dof+3, dof+5, 0, 0));
+						R = R.times(R1g);
 					}
 					
 					for (int i = 0; i < set.getElements().size(); i++) {

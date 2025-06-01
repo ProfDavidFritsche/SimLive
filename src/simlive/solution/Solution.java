@@ -405,7 +405,7 @@ public class Solution {
 				Contact.search(contacts, refModel.getContactPairs(), this, u_global, u_global0, C_coupling_global);
 				
 				Matrix f_fric = increments[i].getFrictionForce(nDofs, contacts, C_coupling_global, null, null, 0.0);
-				f_ext = increments[i].getExternalForce(nDofs, step, f_gravity).plus(f_fric);
+				f_ext = increments[i].getExternalForce(nDofs, step, f_gravity, u_global).plus(f_fric);
 				
 				K_global = increments[i].assembleStiffnessParallel(nDofs, u_global);
 				Matrix G_connect = increments[i].getConnectorPartOfGMatrix(nDofs, u_global);
@@ -546,7 +546,7 @@ public class Solution {
 			Contact.search(contacts, refModel.getContactPairs(), this, u_global_with_delta, u_global_with_delta, C_coupling_global);
 			
 			Matrix f_fric = increment.getFrictionForce(nDofs, contacts, C_coupling_global, v_global, M_global, timeStep);
-			Matrix f_ext = increment.getExternalForce(nDofs, step, f_gravity).plus(f_fric);
+			Matrix f_ext = increment.getExternalForce(nDofs, step, f_gravity, u_global).plus(f_fric);
 			Matrix G_connect = increment.getConnectorPartOfGMatrix(nDofs, u_global);
 			Matrix G_contact = increment.getContactPartOfGMatrix(nDofs, contacts, u_global);
 			Matrix G_load = increment.getLoadPartOfGMatrix(nDofs, u_global);
