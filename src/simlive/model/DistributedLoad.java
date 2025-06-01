@@ -220,8 +220,8 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 			}
 		}
 		
-		/*if (!Sim2d.model.getNodes().contains(referenceNode)) {
+		if (!SimLive.model.getNodes().contains(referenceNode)) {
 			referenceNode = null;
-		}*/
+		}
 	}
 }
