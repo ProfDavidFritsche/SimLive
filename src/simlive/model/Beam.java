@@ -685,6 +685,12 @@ public class Beam extends LineElement {
 			Matrix a0 = x_elem.getMatrix(3, 5, 0, 0);
 			Matrix a1 = x_elem.getMatrix(9, 11, 0, 0);
 			if (val == 0) {
+				if (!SimLive.settings.isLargeDisplacement) {
+					for (int i = 0; i < 3; i++) {
+						a0.set(i, 0, Math.atan(a0.get(i, 0)));
+						a1.set(i, 0, Math.atan(a1.get(i, 0)));
+					}
+				}
 				Matrix R_local = Rr.transpose().times(rotationMatrixFromAngles(a0)).times(R0);
 				angles[0] = anglesFromRotationMatrix(R_local);
 				R_local = Rr.transpose().times(rotationMatrixFromAngles(a1)).times(R0);
