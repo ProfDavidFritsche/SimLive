@@ -409,6 +409,7 @@ public class Post {
 			}
 		}
 		
+		double scaling = 1.0;
 		if (maxDisp > SimLive.ZERO_TOL) {	
 			double minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
 			for (int i = 0; i < nodes.size(); i++) {
@@ -419,11 +420,23 @@ public class Post {
 				if (nodes.get(i).getZCoord() < minZ) minZ = nodes.get(i).getZCoord();
 				if (nodes.get(i).getZCoord() > maxZ) maxZ = nodes.get(i).getZCoord();
 			}
-			return Math.sqrt((maxX-minX)*(maxX-minX)+(maxY-minY)*(maxY-minY)+(maxZ-minZ)*(maxZ-minZ))/(10.0*maxDisp);
+			scaling = Math.sqrt((maxX-minX)*(maxX-minX)+(maxY-minY)*(maxY-minY)+(maxZ-minZ)*(maxZ-minZ))/(10.0*maxDisp);
 		}
-		else {
-			return 1.0;
+		
+		for (int inc = 0; inc < solution.getNumberOfIncrements()+1; inc++) {
+			Matrix u_global = solution.getIncrement(inc).get_u_global();
+			for (int i = 0; i < nodes.size(); i++) {
+				if (nodes.get(i).isRotationalDOF()) {
+					int dof = solution.getDofOfNodeID(i);
+					double phi = Math.atan(u_global.getMatrix(dof+3, dof+5, 0, 0).normF());
+					if (phi*scaling > Math.PI/2.0) {
+						scaling = Math.PI/2.0/phi;
+					}
+				}
+			}
 		}
+		
+		return scaling;
 	}
 	
 	public double getCurvePlotScaleFactor() {
