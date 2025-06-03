@@ -1231,16 +1231,18 @@ public class Increment {
 	public Matrix updateSolution(Matrix u_global, Matrix delta_u_global) {
 		Matrix u_global_new = u_global.plus(delta_u_global);
 		//intrinsic update of rotations
-		ArrayList<Node> nodes = solution.getRefModel().getNodes();
-		for (int n = 0; n < nodes.size(); n++) {
-			if (nodes.get(n).isRotationalDOF()) {
-				int dof = solution.getDofOfNodeID(n);
-				Matrix rotVecOld = u_global.getMatrix(dof+3, dof+5, 0, 0);
-				Matrix delta_rotVec = delta_u_global.getMatrix(dof+3, dof+5, 0, 0);
-				Matrix ROld = Beam.rotationMatrixFromAngles(rotVecOld);
-				Matrix deltaR = Beam.rotationMatrixFromAngles(delta_rotVec);
-				Matrix rotVecNew = new Matrix(Beam.anglesFromRotationMatrix(deltaR.times(ROld)), 3);
-				u_global_new.setMatrix(dof+3, dof+5, 0, 0, rotVecNew);
+		if (solution.getRefSettings().isLargeDisplacement) {
+			ArrayList<Node> nodes = solution.getRefModel().getNodes();
+			for (int n = 0; n < nodes.size(); n++) {
+				if (nodes.get(n).isRotationalDOF()) {
+					int dof = solution.getDofOfNodeID(n);
+					Matrix rotVecOld = u_global.getMatrix(dof+3, dof+5, 0, 0);
+					Matrix delta_rotVec = delta_u_global.getMatrix(dof+3, dof+5, 0, 0);
+					Matrix ROld = Beam.rotationMatrixFromAngles(rotVecOld);
+					Matrix deltaR = Beam.rotationMatrixFromAngles(delta_rotVec);
+					Matrix rotVecNew = new Matrix(Beam.anglesFromRotationMatrix(deltaR.times(ROld)), 3);
+					u_global_new.setMatrix(dof+3, dof+5, 0, 0, rotVecNew);
+				}
 			}
 		}
 		return u_global_new;

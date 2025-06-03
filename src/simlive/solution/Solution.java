@@ -573,14 +573,16 @@ public class Solution {
 				}
 				
 				// modification of a_constr for finite rotations
-				for (int n = 0; n < refModel.getNodes().size(); n++) if (refModel.getNodes().get(n).isRotationalDOF()) {
-					int dof = dofOfNodeID[n];
-					Matrix PsiDotDot = a_constr.getMatrix(dof+3, dof+5, 0, 0);
-					Matrix PsiDot = v_global.getMatrix(dof+3, dof+5, 0, 0);
-					Matrix Psi = u_global.getMatrix(dof+3, dof+5, 0, 0);
-					Matrix TInv = Beam.getTInv(Psi);
-					Matrix TDot = Beam.getTDot(Psi, PsiDot);
-					a_constr.setMatrix(dof+3, dof+5, 0, 0, TInv.times(PsiDotDot.minus(TDot.times(PsiDot))));
+				if (refSettings.isLargeDisplacement) {
+					for (int n = 0; n < refModel.getNodes().size(); n++) if (refModel.getNodes().get(n).isRotationalDOF()) {
+						int dof = dofOfNodeID[n];
+						Matrix PsiDotDot = a_constr.getMatrix(dof+3, dof+5, 0, 0);
+						Matrix PsiDot = v_global.getMatrix(dof+3, dof+5, 0, 0);
+						Matrix Psi = u_global.getMatrix(dof+3, dof+5, 0, 0);
+						Matrix TInv = Beam.getTInv(Psi);
+						Matrix TDot = Beam.getTDot(Psi, PsiDot);
+						a_constr.setMatrix(dof+3, dof+5, 0, 0, TInv.times(PsiDotDot.minus(TDot.times(PsiDot))));
+					}
 				}
 			}
 			catch (RuntimeException e) {
