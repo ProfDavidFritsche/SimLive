@@ -429,8 +429,8 @@ public class Post {
 				if (nodes.get(i).isRotationalDOF()) {
 					int dof = solution.getDofOfNodeID(i);
 					double phi = Math.atan(u_global.getMatrix(dof+3, dof+5, 0, 0).normF());
-					if (phi*scaling > Math.PI/2.0) {
-						scaling = Math.PI/2.0/phi;
+					if (phi*scaling > Math.PI/4.0) {
+						scaling = Math.PI/4.0/phi;
 					}
 				}
 			}
