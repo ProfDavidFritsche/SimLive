@@ -13,6 +13,7 @@ import simlive.model.PlaneElement;
 import simlive.model.PointMass;
 import simlive.model.Set;
 import simlive.model.Spring;
+import simlive.model.Step;
 import simlive.solution.Increment;
 import simlive.solution.Solution;
 import simlive.view.Label;
@@ -41,6 +42,9 @@ public class Post {
 	private Layer layer;
 	
 	public Post(Solution solution) {
+		if (solution.getRefModel().getSteps().get(0).type == Step.Type.MODAL_ANALYSIS) {
+			solution.calculateIncrementsForEigenmode(0);
+		}
 		this.solution = solution;
 		this.eigenMode = 0;
 		this.isAutoMin = true;

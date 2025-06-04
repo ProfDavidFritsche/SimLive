@@ -808,8 +808,6 @@ public class Solution {
 		log.add(D.getRowDimension()+" Eigenmodes calculated.");
 		dialog.updateLog();
 		
-		calculateIncrementsForEigenmode(0);
-		
 		return true;
 	}
 	
