@@ -429,12 +429,15 @@ public class Post {
 		
 		for (int inc = 0; inc < solution.getNumberOfIncrements()+1; inc++) {
 			Matrix u_global = solution.getIncrement(inc).get_u_global();
-			for (int i = 0; i < nodes.size(); i++) {
-				if (nodes.get(i).isRotationalDOF()) {
-					int dof = solution.getDofOfNodeID(i);
-					double phi = Math.atan(u_global.getMatrix(dof+3, dof+5, 0, 0).normF());
-					if (phi*scaling > Math.PI/4.0) {
-						scaling = Math.PI/4.0/phi;
+			for (int elem = 0; elem < elements.size(); elem++) {
+				if (elements.get(elem).getType() == Element.Type.BEAM) {
+					Beam beam = (Beam) elements.get(elem);
+					for (int i = 0; i < beam.getElementNodes().length; i++) {
+						int dof = solution.getDofOfNodeID(beam.getElementNodes()[i]);
+						double phi = Math.atan(u_global.getMatrix(dof+3, dof+5, 0, 0).normF());
+						if (phi*scaling > Math.PI/4.0) {
+							scaling = Math.PI/4.0/phi;
+						}
 					}
 				}
 			}
