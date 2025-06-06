@@ -413,7 +413,7 @@ public class Post {
 			}
 		}
 		
-		double scaling = 1.0;
+		double scaling = 0.0;
 		if (maxDisp > SimLive.ZERO_TOL) {	
 			double minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
 			for (int i = 0; i < nodes.size(); i++) {
@@ -427,6 +427,7 @@ public class Post {
 			scaling = Math.sqrt((maxX-minX)*(maxX-minX)+(maxY-minY)*(maxY-minY)+(maxZ-minZ)*(maxZ-minZ))/(10.0*maxDisp);
 		}
 		
+		double maxRot = 0.0;
 		for (int inc = 0; inc < solution.getNumberOfIncrements()+1; inc++) {
 			Matrix u_global = solution.getIncrement(inc).get_u_global();
 			for (int elem = 0; elem < elements.size(); elem++) {
@@ -434,12 +435,17 @@ public class Post {
 					Beam beam = (Beam) elements.get(elem);
 					for (int i = 0; i < beam.getElementNodes().length; i++) {
 						int dof = solution.getDofOfNodeID(beam.getElementNodes()[i]);
-						double phi = Math.atan(u_global.getMatrix(dof+3, dof+5, 0, 0).normF());
-						if (phi*scaling > Math.PI/4.0) {
-							scaling = Math.PI/4.0/phi;
+						double rot = u_global.getMatrix(dof+3, dof+5, 0, 0).normF();
+						if (rot > maxRot) {
+							maxRot = rot;
 						}
 					}
 				}
+			}
+		}
+		if (maxRot > SimLive.ZERO_TOL) {
+			if (scaling == 0.0 || scaling > Math.PI/4.0/Math.atan(maxRot)) {
+				scaling = Math.PI/4.0/Math.atan(maxRot);
 			}
 		}
 		
