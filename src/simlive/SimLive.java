@@ -267,7 +267,7 @@ public class SimLive {
 	private CTabItem tbtmMatrixView;
 	private CTabItem tbtmDiagram;
 	
-	private boolean checkModel = false;
+	private Thread checkModel;
 	/**
 	 * Launch the application.
 	 * @param args
@@ -315,7 +315,7 @@ public class SimLive {
 			if (!display.readAndDispatch()) {				
 				display.sleep();
 			}
-			checkModelChange();
+			regularChecks();
 		}
 	}
 
@@ -1251,12 +1251,7 @@ public class SimLive {
 						break;
 					
 					case 2:
-						if (SimLive.post != null) {
-							if (!post.getSolution().getRefModel().deepEquals(model) ||
-								!post.getSolution().getRefSettings().deepEquals(settings)) {
-								resetPost();
-							}
-						}
+						checkModelChange();
 						if (SimLive.post != null) {
 							mode = Mode.RESULTS;
 							resetState();
@@ -2586,30 +2581,32 @@ public class SimLive {
 	}
 	
 	private void checkModelChange() {
-		if (mode != Mode.RESULTS && !shell.isDisposed() && shell.getChildren()[0].isEnabled()) {
-			if (post != null && !checkModel) {
-				new Thread(new Runnable() {
-					public void run() {
-						checkModel = true;
-						if (!post.getSolution().getRefModel().deepEquals(model) ||
-							!post.getSolution().getRefSettings().deepEquals(settings)) {
-							SimLive.shell.getDisplay().syncExec(new Runnable() {
-								public void run() {
-									resetPost();
-								}
-							});
+		if (mode != Mode.RESULTS) {
+			if (post != null) {
+				if (!post.getSolution().getRefModel().deepEquals(model) ||
+					!post.getSolution().getRefSettings().deepEquals(settings)) {
+					SimLive.shell.getDisplay().syncExec(new Runnable() {
+						public void run() {
+							resetPost();
 						}
-						checkModel = false;
-					}
-				}).start();
+					});
+				}
 			}
 		}
-		/*else if (lastSolution != null) {
-			if (!lastSolution.getRefModel().deepEquals(model) ||
-				!lastSolution.getRefSettings().deepEquals(settings)) {
-				resetPost();
+	}
+	
+	private void regularChecks() {
+		if (mode != Mode.RESULTS && !shell.isDisposed() && shell.getChildren()[0].isEnabled()) {
+			if (post != null && (checkModel == null || !checkModel.isAlive())) {
+				checkModel = new Thread(new Runnable() {
+					public void run() {
+						checkModelChange();
+					}
+				});
+				checkModel.start();
 			}
-		}*/
+		}
+		
 		if (!tltmUndo.isDisposed() && !tltmRedo.isDisposed()) {
 			tltmUndo.setEnabled(modelPos > 0 && mode != Mode.RESULTS);
 			tltmRedo.setEnabled(modelPos < modelHistory.size()-1 && mode != Mode.RESULTS);
