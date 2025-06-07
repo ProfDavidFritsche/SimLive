@@ -1251,7 +1251,12 @@ public class SimLive {
 						break;
 					
 					case 2:
-						checkModelChange();
+						if (SimLive.post != null) {
+							if (!post.getSolution().getRefModel().deepEquals(model) ||
+								!post.getSolution().getRefSettings().deepEquals(settings)) {
+								resetPost();
+							}
+						}
 						if (SimLive.post != null) {
 							mode = Mode.RESULTS;
 							resetState();
