@@ -338,6 +338,46 @@ public class SimLive {
 		shell.getDisplay().addFilter(SWT.KeyDown, new Listener() {
             @SuppressWarnings("deprecation")
 			public void handleEvent(Event arg0) {
+            	if(arg0.keyCode == SWT.DEL && modelTree.isFocusControl()) {
+            		ArrayList<Object> objects = getModelTreeSelection();
+            		switch (mode) {
+            			case PARTS:
+            				if (!view.getSelectedSets().isEmpty()) view.deleteSelectedSets();
+            				if (!view.getSelectedParts3d().isEmpty()) view.deleteSelectedParts3d();
+            				break;
+            			case SUPPORTS:
+            				model.getSupports().removeAll(objects);
+            				break;
+            			case LOADS:
+            				model.getLoads().removeAll(objects);
+            				model.getDistributedLoads().removeAll(objects);
+            				break;
+            			case CONNECTORS:
+            				model.getConnectors().removeAll(objects);
+            				model.getConnectors3d().removeAll(objects);
+            				break;
+            			case CONTACTS:
+            				model.getContactPairs().removeAll(objects);
+            				break;
+            			case MATERIALS:
+            				model.getMaterials().removeAll(objects);
+            				break;
+            			case SECTIONS:
+            				model.getSections().removeAll(objects);
+            				break;
+            			case STEPS:
+            				model.getSteps().removeAll(objects);
+            				break;
+            			default:
+            				break;
+            		}
+            		if (mode != Mode.PARTS && !objects.isEmpty()) {
+            			int index = getModelTreeSelectionIndex();
+                		doModelTreeNewSelection(getModelTreeSelectionIndexAfterDelete(index));
+            		}
+            		model.updateModel();
+            		view.redraw();
+            	}
             	if(arg0.keyCode == SWT.CONTROL) {
             		view.isControlKeyPressed = true;
 					view.measuring(false);
