@@ -307,27 +307,21 @@ public class LUDecomposition implements java.io.Serializable {
 
       // Solve L*Y = B(piv,:)
       for (int k = 0; k < n; k++) {
-         for (int i = k+1; i < n; i++) if (LU[i][k] != 0.0) {
-            for (int j = 0; j < nx; j++) {
-               X[i][j] -= X[k][j]*LU[i][k];
-            }
+    	 int j = nx == 1 ? 0 : k;
+    	 for (int i = k+1; i < n; i++) if (LU[i][k] != 0.0) {
+            X[i][j] -= X[k][j]*LU[i][k];
          }
       }
       // Solve U*X = Y;
       for (int k = n-1; k >= 0; k--) {
-         for (int j = 0; j < nx; j++) {
-            X[k][j] /= LU[k][k];
-         }
+    	 int j = nx == 1 ? 0 : k;
+    	 X[k][j] /= LU[k][k];
          for (int i = 0; i < k; i++) if (LU[i][k] != 0.0) {
-            for (int j = 0; j < nx; j++) {
-               X[i][j] -= X[k][j]*LU[i][k];
-            }
+            X[i][j] -= X[k][j]*LU[i][k];
          }
          // check result is finite
-         for (int j = 0; j < nx; j++) {
-            if (!Double.isFinite(X[k][j])) {
-               throw new RuntimeException("Solver failed.");
-            }
+         if (!Double.isFinite(X[k][j])) {
+            throw new RuntimeException("Solver failed.");
          }
       }
       return Xmat;
