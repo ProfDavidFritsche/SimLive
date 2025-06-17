@@ -719,6 +719,10 @@ public class View extends GLCanvas {
 					selectedLabel.finalizeMove();
 				}
 				
+				if (measurements.size() > 1 && !measurements.get(measurements.size()-2).isFinalized()) {
+					measurements.get(measurements.size()-2).toFront();
+				}
+				
 				if (setFocusPoint && e.button == 1 && !isMouseDragged) {
 					if (Snap.node != null) {
 						focusPoint = Label.getNewLabelForNode(Snap.node);
