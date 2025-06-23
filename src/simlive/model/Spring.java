@@ -50,18 +50,21 @@ public class Spring extends LineElement {
 	@Override
 	public Matrix getElementStiffness(ArrayList<Node> nodes) {
 		
-		Matrix K_elem = new Matrix(2, 2);
-		
-		K_elem.set(0, 0, 1.0);
-		K_elem.set(0, 1, -1.0);
-		K_elem.set(1, 0, -1.0);
-		K_elem.set(1, 1, 1.0);
-		
-		K_elem = K_elem.times(stiffness);
-		
-		Matrix T = getTransformation();
-		
-		return T.transpose().times(K_elem).times(T);
+		if (Tt_K_elem_T == null) {
+			Matrix K_elem = new Matrix(2, 2);
+			
+			K_elem.set(0, 0, 1.0);
+			K_elem.set(0, 1, -1.0);
+			K_elem.set(1, 0, -1.0);
+			K_elem.set(1, 1, 1.0);
+			
+			K_elem = K_elem.times(stiffness);
+			
+			Matrix T = getTransformation();
+			
+			Tt_K_elem_T = T.transpose().times(K_elem).times(T);
+		}
+		return Tt_K_elem_T;
 	}
 
 	@Override

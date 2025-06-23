@@ -246,9 +246,12 @@ public class Tri extends PlaneElement {
 	@Override
 	public Matrix getElementStiffness(ArrayList<Node> nodes) {
 		
-		Matrix T = getTransformation();
-		
-		return T.transpose().times(K_elem).times(T);
+		if (Tt_K_elem_T == null) {
+			Matrix T = getTransformation();
+			
+			Tt_K_elem_T = T.transpose().times(K_elem).times(T);
+		}
+		return Tt_K_elem_T;
 	}
 	
 	private Matrix getTransformation() {

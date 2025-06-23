@@ -192,61 +192,64 @@ public class Beam extends LineElement {
 	@Override
 	public Matrix getElementStiffness(ArrayList<Node> nodes) {
 		
-		Matrix K_elem = new Matrix(12, 12);
-		
-		double E, A, Iz, Iy, G, It, l;
-		E = material.getYoungsModulus();
-		A = section.getArea();
-		Iy = section.getIy();
-		Iz = section.getIz();
-		It = section.getIt();
-		G = E/(2.0*(1.0+material.getPoissonsRatio()));
-		l = getLength();
-		
-		K_elem.set(0, 0, E*A/l);
-		K_elem.set(0, 6, -E*A/l);
-		K_elem.set(1, 1, 12*E*Iz/(l*l*l));
-		K_elem.set(1, 5, 6*E*Iz/(l*l));
-		K_elem.set(1, 7, -12*E*Iz/(l*l*l));
-		K_elem.set(1, 11, 6*E*Iz/(l*l));		
-		K_elem.set(2, 2, 12*E*Iy/(l*l*l));
-		K_elem.set(2, 4, -6*E*Iy/(l*l));
-		K_elem.set(2, 8, -12*E*Iy/(l*l*l));
-		K_elem.set(2, 10, -6*E*Iy/(l*l));
-		K_elem.set(3, 3, G*It/l);
-		K_elem.set(3, 9, -G*It/l);
-		K_elem.set(4, 2, -6*E*Iy/(l*l));
-		K_elem.set(4, 4, 4*E*Iy/l);
-		K_elem.set(4, 8, 6*E*Iy/(l*l));
-		K_elem.set(4, 10, 2*E*Iy/l);
-		K_elem.set(5, 1, 6*E*Iz/(l*l));
-		K_elem.set(5, 5, 4*E*Iz/l);
-		K_elem.set(5, 7, -6*E*Iz/(l*l));
-		K_elem.set(5, 11, 2*E*Iz/l);
-		K_elem.set(6, 0, -E*A/l);
-		K_elem.set(6, 6, E*A/l);
-		K_elem.set(7, 1, -12*E*Iz/(l*l*l));
-		K_elem.set(7, 5, -6*E*Iz/(l*l));
-		K_elem.set(7, 7, 12*E*Iz/(l*l*l));
-		K_elem.set(7, 11, -6*E*Iz/(l*l));
-		K_elem.set(8, 2, -12*E*Iy/(l*l*l));
-		K_elem.set(8, 4, 6*E*Iy/(l*l));
-		K_elem.set(8, 8, 12*E*Iy/(l*l*l));
-		K_elem.set(8, 10, 6*E*Iy/(l*l));
-		K_elem.set(9, 3, -G*It/l);
-		K_elem.set(9, 9, G*It/l);		
-		K_elem.set(10, 2, -6*E*Iy/(l*l));
-		K_elem.set(10, 4, 2*E*Iy/l);
-		K_elem.set(10, 8, 6*E*Iy/(l*l));
-		K_elem.set(10, 10, 4*E*Iy/l);
-		K_elem.set(11, 1, 6*E*Iz/(l*l));
-		K_elem.set(11, 5, 2*E*Iz/l);
-		K_elem.set(11, 7, -6*E*Iz/(l*l));
-		K_elem.set(11, 11, 4*E*Iz/l);
-		
-		Matrix T = getTransformation();
-		
-		return T.transpose().times(K_elem).times(T);
+		if (Tt_K_elem_T == null) {
+			Matrix K_elem = new Matrix(12, 12);
+			
+			double E, A, Iz, Iy, G, It, l;
+			E = material.getYoungsModulus();
+			A = section.getArea();
+			Iy = section.getIy();
+			Iz = section.getIz();
+			It = section.getIt();
+			G = E/(2.0*(1.0+material.getPoissonsRatio()));
+			l = getLength();
+			
+			K_elem.set(0, 0, E*A/l);
+			K_elem.set(0, 6, -E*A/l);
+			K_elem.set(1, 1, 12*E*Iz/(l*l*l));
+			K_elem.set(1, 5, 6*E*Iz/(l*l));
+			K_elem.set(1, 7, -12*E*Iz/(l*l*l));
+			K_elem.set(1, 11, 6*E*Iz/(l*l));		
+			K_elem.set(2, 2, 12*E*Iy/(l*l*l));
+			K_elem.set(2, 4, -6*E*Iy/(l*l));
+			K_elem.set(2, 8, -12*E*Iy/(l*l*l));
+			K_elem.set(2, 10, -6*E*Iy/(l*l));
+			K_elem.set(3, 3, G*It/l);
+			K_elem.set(3, 9, -G*It/l);
+			K_elem.set(4, 2, -6*E*Iy/(l*l));
+			K_elem.set(4, 4, 4*E*Iy/l);
+			K_elem.set(4, 8, 6*E*Iy/(l*l));
+			K_elem.set(4, 10, 2*E*Iy/l);
+			K_elem.set(5, 1, 6*E*Iz/(l*l));
+			K_elem.set(5, 5, 4*E*Iz/l);
+			K_elem.set(5, 7, -6*E*Iz/(l*l));
+			K_elem.set(5, 11, 2*E*Iz/l);
+			K_elem.set(6, 0, -E*A/l);
+			K_elem.set(6, 6, E*A/l);
+			K_elem.set(7, 1, -12*E*Iz/(l*l*l));
+			K_elem.set(7, 5, -6*E*Iz/(l*l));
+			K_elem.set(7, 7, 12*E*Iz/(l*l*l));
+			K_elem.set(7, 11, -6*E*Iz/(l*l));
+			K_elem.set(8, 2, -12*E*Iy/(l*l*l));
+			K_elem.set(8, 4, 6*E*Iy/(l*l));
+			K_elem.set(8, 8, 12*E*Iy/(l*l*l));
+			K_elem.set(8, 10, 6*E*Iy/(l*l));
+			K_elem.set(9, 3, -G*It/l);
+			K_elem.set(9, 9, G*It/l);		
+			K_elem.set(10, 2, -6*E*Iy/(l*l));
+			K_elem.set(10, 4, 2*E*Iy/l);
+			K_elem.set(10, 8, 6*E*Iy/(l*l));
+			K_elem.set(10, 10, 4*E*Iy/l);
+			K_elem.set(11, 1, 6*E*Iz/(l*l));
+			K_elem.set(11, 5, 2*E*Iz/l);
+			K_elem.set(11, 7, -6*E*Iz/(l*l));
+			K_elem.set(11, 11, 4*E*Iz/l);
+			
+			Matrix T = getTransformation();
+			
+			Tt_K_elem_T = T.transpose().times(K_elem).times(T);
+		}
+		return Tt_K_elem_T;
 	}
 
 	@Override

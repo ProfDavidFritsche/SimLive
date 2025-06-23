@@ -13,7 +13,7 @@ public abstract class Element implements DeepEqualsInterface {
 	protected int id;
 	protected double stiffnessDamping;
 	protected double massDamping;
-	public Matrix M_elem; //solution speed-up
+	public Matrix M_elem, Tt_K_elem_T; //solution speed-up
 	
 	public Element() {
 		id = SimLive.model.getElements().size();
