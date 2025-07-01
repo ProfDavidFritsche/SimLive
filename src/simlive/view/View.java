@@ -2536,6 +2536,7 @@ public class View extends GLCanvas {
 	
 	public void groupSelectedSets() {
 		groupSets(selectedSets);
+		SimLive.model.updateModel();
 		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
 				SWT.NONE, selectedSets, SimLive.settings);
 	}
