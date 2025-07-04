@@ -1690,12 +1690,26 @@ public class Increment {
 				Matrix R0z = R0.getMatrix(0, 2, 2, 2);
 				double[] normal = new double[3];
 				double[] shapeFunctionValues = planeElement.getShapeFunctionValues(r[0], r[1]);
-				for (int i = 0; i < 3; i++) {
-					double[] n = new double[planeElement.getElementNodes().length];
-					for (int j = 0; j < planeElement.getElementNodes().length; j++) {
-						n[j] = View.nodeNormals[planeElement.getElementNodes()[j]][i];
+				double[][] n = new double[3][planeElement.getElementNodes().length];
+				for (int j = 0; j < planeElement.getElementNodes().length; j++) {
+					int nodeID = planeElement.getElementNodes()[j];
+					if (SimLive.view.isOutlineNode[nodeID]) {
+						for (int k = 0; k < View.outlineNormals0[nodeID].length; k++) {
+							if (View.outlineNormals0[nodeID][k].dotProduct(R0z) > SimLive.COS_ANGLE_INNER_EDGE) {
+								for (int i = 0; i < 3; i++) {
+									n[i][j] = View.outlineNormals[nodeID][k][i];
+								}
+							}
+						}
 					}
-					normal[i] = planeElement.interpolateNodeValues(shapeFunctionValues, n);
+					else {
+						for (int i = 0; i < 3; i++) {
+							n[i][j] = View.nodeNormals[nodeID][i];
+						}
+					}
+				}
+				for (int i = 0; i < 3; i++) {
+					normal[i] = planeElement.interpolateNodeValues(shapeFunctionValues, n[i]);
 				}
 				Matrix d1 = new Matrix(normal, 3);
 				d1 = d1.times(1.0/d1.normF());

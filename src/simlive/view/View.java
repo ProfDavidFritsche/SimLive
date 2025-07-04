@@ -155,8 +155,8 @@ public class View extends GLCanvas {
 	public static double[][][] Rr = null;
 	public static double[] deltaL = null;
 	public static double[][] nodeNormals = null;
-	private static double[][][] outlineNormals = null;
-	private static Matrix[][] outlineNormals0 = null;
+	public static double[][][] outlineNormals = null;
+	public static Matrix[][] outlineNormals0 = null;
 	public static double[][][] pVertices = null;
 	public static double[][][] pPart3dBox = null;
 	
