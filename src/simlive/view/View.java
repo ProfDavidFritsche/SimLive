@@ -4594,7 +4594,7 @@ public class View extends GLCanvas {
 				int[] index = {0, 1, 3, 1, 2, 3};
 				for (int j = 0; j < index.length; j++) {
 					int i = index[j];
-					if (isOutlineNode[elemNodes[i]]) {
+					if (outlineNormals0[elemNodes[i]].length > 1) {
 						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
 							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
 								gl2.glNormal3d(outlineNormals[elemNodes[i]][k][0], outlineNormals[elemNodes[i]][k][1], outlineNormals[elemNodes[i]][k][2]);
@@ -4608,7 +4608,7 @@ public class View extends GLCanvas {
 				}
 				for (int j = index.length-1; j > -1; j--) {
 					int i = index[j];
-					if (isOutlineNode[elemNodes[i]]) {
+					if (outlineNormals0[elemNodes[i]].length > 1) {
 						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
 							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
 								gl2.glNormal3d(-outlineNormals[elemNodes[i]][k][0], -outlineNormals[elemNodes[i]][k][1], -outlineNormals[elemNodes[i]][k][2]);
@@ -4625,7 +4625,7 @@ public class View extends GLCanvas {
 			if (element.getType() == Element.Type.TRI) {
 				gl2.glBegin(GL2.GL_TRIANGLES);
 				for (int i = 0; i < elemNodes.length; i++) {
-					if (isOutlineNode[elemNodes[i]]) {
+					if (outlineNormals0[elemNodes[i]].length > 1) {
 						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
 							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
 								gl2.glNormal3d(outlineNormals[elemNodes[i]][k][0], outlineNormals[elemNodes[i]][k][1], outlineNormals[elemNodes[i]][k][2]);
@@ -4638,7 +4638,7 @@ public class View extends GLCanvas {
 					gl2.glVertex3d(coords[i][0]+top[i][0], coords[i][1]+top[i][1], coords[i][2]+top[i][2]);
 				}
 				for (int i = elemNodes.length-1; i > -1; i--) {
-					if (isOutlineNode[elemNodes[i]]) {
+					if (outlineNormals0[elemNodes[i]].length > 1) {
 						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
 							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
 								gl2.glNormal3d(-outlineNormals[elemNodes[i]][k][0], -outlineNormals[elemNodes[i]][k][1], -outlineNormals[elemNodes[i]][k][2]);

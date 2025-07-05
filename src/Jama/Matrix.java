@@ -920,7 +920,8 @@ public class Matrix implements Cloneable, java.io.Serializable {
    */
 
    public double dotProduct (Matrix B) {
-      return transpose().times(B).get(0, 0);
+      return A[0][0]*B.A[0][0]+A[1][0]*B.A[1][0]+A[2][0]*B.A[2][0];
+      //return transpose().times(B).get(0, 0);
    }
 
    /** Matrix rank

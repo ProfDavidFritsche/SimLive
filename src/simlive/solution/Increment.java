@@ -1693,7 +1693,7 @@ public class Increment {
 				double[][] n = new double[3][planeElement.getElementNodes().length];
 				for (int j = 0; j < planeElement.getElementNodes().length; j++) {
 					int nodeID = planeElement.getElementNodes()[j];
-					if (SimLive.view.isOutlineNode[nodeID]) {
+					if (View.outlineNormals0[nodeID].length > 1) {
 						for (int k = 0; k < View.outlineNormals0[nodeID].length; k++) {
 							if (View.outlineNormals0[nodeID][k].dotProduct(R0z) > SimLive.COS_ANGLE_INNER_EDGE) {
 								for (int i = 0; i < 3; i++) {
