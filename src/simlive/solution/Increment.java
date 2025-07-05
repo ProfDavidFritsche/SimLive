@@ -1691,8 +1691,13 @@ public class Increment {
 				double[] normal = new double[3];
 				double[] shapeFunctionValues = planeElement.getShapeFunctionValues(r[0], r[1]);
 				double[][] n = new double[3][planeElement.getElementNodes().length];
+				double[] rz = new double[planeElement.getElementNodes().length];
+				double scaling = SimLive.post.getScaling();
 				for (int j = 0; j < planeElement.getElementNodes().length; j++) {
 					int nodeID = planeElement.getElementNodes()[j];
+					int dof = solution.getDofOfNodeID(nodeID);
+					Matrix nodeRot = u_global.getMatrix(dof+3, dof+5, 0, 0).times(scaling);
+					rz[j] = nodeRot.dotProduct(R0z);
 					if (View.outlineNormals0[nodeID].length > 1) {
 						for (int k = 0; k < View.outlineNormals0[nodeID].length; k++) {
 							if (View.outlineNormals0[nodeID][k].dotProduct(R0z) > SimLive.COS_ANGLE_INNER_EDGE) {
@@ -1713,8 +1718,11 @@ public class Increment {
 				}
 				Matrix d1 = new Matrix(normal, 3);
 				d1 = d1.times(1.0/d1.normF());
-				return GeomUtility.getRotationMatrix(Math.acos(d1.dotProduct(R0z)),
+				Matrix Rn = GeomUtility.getRotationMatrix(Math.acos(d1.dotProduct(R0z)),
 						R0z.crossProduct(d1).getColumnPackedCopy());
+				Matrix Rz = GeomUtility.getRotationMatrix(planeElement.interpolateNodeValues(shapeFunctionValues, rz),
+						R0z.getColumnPackedCopy());
+				return Rz.times(Rn);
 			}
 		}
 		return Matrix.identity(3, 3);
