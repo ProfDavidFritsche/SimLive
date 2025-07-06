@@ -1718,8 +1718,10 @@ public class Increment {
 				}
 				Matrix d1 = new Matrix(normal, 3);
 				d1 = d1.times(1.0/d1.normF());
-				Matrix Rn = GeomUtility.getRotationMatrix(Math.acos(d1.dotProduct(R0z)),
-						R0z.crossProduct(d1).getColumnPackedCopy());
+				double cosangle = d1.dotProduct(R0z);
+				Matrix axis = cosangle > -1.0+SimLive.ZERO_TOL ? R0z.crossProduct(d1) : R0.getMatrix(0, 2, 0, 0);
+				Matrix Rn = GeomUtility.getRotationMatrix(Math.acos(cosangle),
+						axis.getColumnPackedCopy());
 				Matrix Rz = GeomUtility.getRotationMatrix(planeElement.interpolateNodeValues(shapeFunctionValues, rz),
 						R0z.getColumnPackedCopy());
 				return Rz.times(Rn);
