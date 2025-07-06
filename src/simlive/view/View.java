@@ -155,7 +155,7 @@ public class View extends GLCanvas {
 	public static double[][][] Rr = null;
 	public static double[] deltaL = null;
 	public static double[][] nodeNormals = null;
-	private static Matrix[] nodeR = null;
+	private static double[][][] outlineNormals = null;
 	public static double[][][] pVertices = null;
 	public static double[][][] pPart3dBox = null;
 	
@@ -2938,28 +2938,28 @@ public class View extends GLCanvas {
 			}
 		}
 		
-		nodeNormals = new double[SimLive.model.getNodes().size()][];
+		double[][] nodeNormals0 = new double[SimLive.model.getNodes().size()][];
 		for (int e = 0; e < SimLive.model.getElements().size(); e++) {
 			Element element = SimLive.model.getElements().get(e);
 			if (element.isPlaneElement()) {
 				int[] elemNodes = element.getElementNodes();
 				Matrix norm = ((PlaneElement) element).getR0().getMatrix(0, 2, 2, 2);
 				for (int i = 0; i < elemNodes.length; i++) {
-					if (nodeNormals[elemNodes[i]] == null) {
-						nodeNormals[elemNodes[i]] = norm.getColumnPackedCopy();
+					if (nodeNormals0[elemNodes[i]] == null) {
+						nodeNormals0[elemNodes[i]] = norm.getColumnPackedCopy();
 					}
 					else {
-						nodeNormals[elemNodes[i]][0] += norm.get(0, 0);
-						nodeNormals[elemNodes[i]][1] += norm.get(1, 0);
-						nodeNormals[elemNodes[i]][2] += norm.get(2, 0);
+						nodeNormals0[elemNodes[i]][0] += norm.get(0, 0);
+						nodeNormals0[elemNodes[i]][1] += norm.get(1, 0);
+						nodeNormals0[elemNodes[i]][2] += norm.get(2, 0);
 					}
 				}
 			}
 		}
-		nodeR = new Matrix[SimLive.model.getNodes().size()];
+		
+		Matrix[] nodeR = new Matrix[SimLive.model.getNodes().size()];
 		for (int i = 0; i < SimLive.model.getNodes().size(); i++) {
-			if (nodeNormals[i] != null) {
-				Matrix normal = new Matrix(nodeNormals[i], 3);
+			if (nodeNormals0[i] != null) {
 				if (SimLive.mode == Mode.RESULTS) {
 					Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
 					int dof = SimLive.post.getSolution().getDofOfNodeID(i);
@@ -2974,9 +2974,27 @@ public class View extends GLCanvas {
 				else {
 					nodeR[i] = Matrix.identity(3, 3);
 				}
-				normal = nodeR[i].times(normal);
-				normal = normal.times(1.0/normal.normF());
-				nodeNormals[i] = normal.getColumnPackedCopy();
+			}
+		}
+		
+		nodeNormals = new double[SimLive.model.getNodes().size()][];
+		outlineNormals = new double[SimLive.model.getElements().size()][4][];
+		for (int e = 0; e < SimLive.model.getElements().size(); e++) {
+			Element element = SimLive.model.getElements().get(e);
+			if (element.isPlaneElement()) {
+				int[] elemNodes = element.getElementNodes();
+				Matrix norm0 = ((PlaneElement) element).getR0().getMatrix(0, 2, 2, 2);
+				for (int i = 0; i < elemNodes.length; i++) {
+					if (isOutlineNode[elemNodes[i]]) {
+						outlineNormals[e][i] = nodeR[elemNodes[i]].times(norm0).getColumnPackedCopy();
+					}
+					Matrix nodeNormal0 = new Matrix(nodeNormals0[elemNodes[i]], 3);
+					double length = nodeNormal0.normF();
+					if (length > SimLive.ZERO_TOL) {
+						nodeNormal0 = nodeNormal0.times(1.0/length);
+					}
+					nodeNormals[elemNodes[i]] = nodeR[elemNodes[i]].times(nodeNormal0).getColumnPackedCopy();
+				}
 			}
 		}
 	}
@@ -4349,7 +4367,6 @@ public class View extends GLCanvas {
 		for (int i = 0; i < elemNodes.length; i++) {
 			coords[i] = getCoordsWithScaledDisp(elemNodes[i]);
 		}
-		Matrix norm0 = ((PlaneElement) element).getR0().getMatrix(0, 2, 2, 2);
 		double[] norm = new double[3];
 		double[][] Rr = View.Rr[element.getID()];
 		norm[0] = Rr[0][2];
@@ -4360,11 +4377,7 @@ public class View extends GLCanvas {
 		double[][] outlineNormals = new double[elemNodes.length][];
 		double halfThickness = ((PlaneElement) element).getThickness()/2.0;
 		for (int i = 0; i < elemNodes.length; i++) {
-			int j = (i+1)%elemNodes.length;
-			if (SimLive.contains(innerEdge[elemNodes[i]], elemNodes[j])) {
-				outlineNormals[i] = nodeR[elemNodes[i]].times(norm0).getColumnPackedCopy();
-				outlineNormals[j] = nodeR[elemNodes[j]].times(norm0).getColumnPackedCopy();
-			}
+			outlineNormals[i] = View.outlineNormals[element.getID()][i];
 			double[] nodeNorm = nodeNormals[elemNodes[i]];
 			top[i][0] = nodeNorm[0]*halfThickness;
 			top[i][1] = nodeNorm[1]*halfThickness;
