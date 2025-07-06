@@ -155,8 +155,7 @@ public class View extends GLCanvas {
 	public static double[][][] Rr = null;
 	public static double[] deltaL = null;
 	public static double[][] nodeNormals = null;
-	private static double[][][] outlineNormals = null;
-	private static Matrix[][] outlineNormals0 = null;
+	private static Matrix[] nodeR = null;
 	public static double[][][] pVertices = null;
 	public static double[][][] pPart3dBox = null;
 	
@@ -2939,52 +2938,12 @@ public class View extends GLCanvas {
 			}
 		}
 		
-		outlineNormals0 = new Matrix[SimLive.model.getNodes().size()][0];
-		for (int e = 0; e < SimLive.model.getElements().size(); e++) {
-			Element element = SimLive.model.getElements().get(e);
-			if (element.isPlaneElement()) {
-				int[] elemNodes = element.getElementNodes();
-				Matrix norm0 = ((PlaneElement) element).getR0().getMatrix(0, 2, 2, 2);
-				for (int i = 0; i < elemNodes.length; i++) {
-					if (isOutlineNode[elemNodes[i]]) {
-						int j;
-						for (j = 0; j < outlineNormals0[elemNodes[i]].length; j++) {
-							if (outlineNormals0[elemNodes[i]][j].dotProduct(norm0) > 1.0-SimLive.ZERO_TOL) {
-								break;
-							}
-						}
-						if (j == outlineNormals0[elemNodes[i]].length) {
-							outlineNormals0[elemNodes[i]] = Arrays.copyOf(outlineNormals0[elemNodes[i]], outlineNormals0[elemNodes[i]].length+1);
-							outlineNormals0[elemNodes[i]][outlineNormals0[elemNodes[i]].length-1] = norm0;
-						}
-					}
-				}
-			}
-		}
-		
-		outlineNormals = new double[SimLive.model.getNodes().size()][][];
-		for (int i = 0; i < SimLive.model.getNodes().size(); i++) {
-			outlineNormals[i] = new double[outlineNormals0[i].length][];
-		}
 		nodeNormals = new double[SimLive.model.getNodes().size()][];
 		for (int e = 0; e < SimLive.model.getElements().size(); e++) {
 			Element element = SimLive.model.getElements().get(e);
 			if (element.isPlaneElement()) {
 				int[] elemNodes = element.getElementNodes();
-				Matrix norm0 = ((PlaneElement) element).getR0().getMatrix(0, 2, 2, 2);
-				Matrix[] c = new Matrix[elemNodes.length];
-				for (int i = 0; i < elemNodes.length; i++) {
-					c[i] = new Matrix(getCoordsWithScaledDisp(elemNodes[i]), 3);
-				}
-				Matrix norm = null;
-				if (elemNodes.length > 3) {
-					norm = (c[2].minus(c[0])).crossProduct(c[3].minus(c[1]));
-					norm = norm.times(1.0/norm.normF());
-				}
-				else {
-					norm = (c[2].minus(c[1])).crossProduct(c[0].minus(c[1]));
-					norm = norm.times(1.0/norm.normF());
-				}
+				Matrix norm = ((PlaneElement) element).getR0().getMatrix(0, 2, 2, 2);
 				for (int i = 0; i < elemNodes.length; i++) {
 					if (nodeNormals[elemNodes[i]] == null) {
 						nodeNormals[elemNodes[i]] = norm.getColumnPackedCopy();
@@ -2994,41 +2953,30 @@ public class View extends GLCanvas {
 						nodeNormals[elemNodes[i]][1] += norm.get(1, 0);
 						nodeNormals[elemNodes[i]][2] += norm.get(2, 0);
 					}
-					if (isOutlineNode[elemNodes[i]]) {
-						for (int j = 0; j < outlineNormals0[elemNodes[i]].length; j++) {
-							if (outlineNormals0[elemNodes[i]][j].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
-								if (outlineNormals[elemNodes[i]][j] == null) {
-									outlineNormals[elemNodes[i]][j] = norm.getColumnPackedCopy();
-								}
-								else {
-									outlineNormals[elemNodes[i]][j][0] += norm.get(0, 0);
-									outlineNormals[elemNodes[i]][j][1] += norm.get(1, 0);
-									outlineNormals[elemNodes[i]][j][2] += norm.get(2, 0);
-								}
-							}
-						}
-					}
 				}
 			}
 		}
+		nodeR = new Matrix[SimLive.model.getNodes().size()];
 		for (int i = 0; i < SimLive.model.getNodes().size(); i++) {
 			if (nodeNormals[i] != null) {
-				double length = Math.sqrt(nodeNormals[i][0]*nodeNormals[i][0]+nodeNormals[i][1]*nodeNormals[i][1]+
-						nodeNormals[i][2]*nodeNormals[i][2]);
-				if (length > 0) {
-					nodeNormals[i][0] /= length;
-					nodeNormals[i][1] /= length;
-					nodeNormals[i][2] /= length;
+				Matrix normal = new Matrix(nodeNormals[i], 3);
+				if (SimLive.mode == Mode.RESULTS) {
+					Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
+					int dof = SimLive.post.getSolution().getDofOfNodeID(i);
+					Matrix nodeRot = u_global.getMatrix(dof+3, dof+5, 0, 0).times(SimLive.post.getScaling());
+					if (!SimLive.post.getSolution().getRefSettings().isLargeDisplacement) {
+						for (int n = 0; n < 3; n++) {
+							nodeRot.set(n, 0, Math.atan(nodeRot.get(n, 0)));
+						}
+					}
+					nodeR[i] = Beam.rotationMatrixFromAngles(nodeRot);
 				}
-			}
-			for (int j = 0; j < outlineNormals[i].length; j++) if (outlineNormals[i][j] != null) {
-				double length = Math.sqrt(outlineNormals[i][j][0]*outlineNormals[i][j][0]+outlineNormals[i][j][1]*outlineNormals[i][j][1]+
-						outlineNormals[i][j][2]*outlineNormals[i][j][2]);
-				if (length > 0) {
-					outlineNormals[i][j][0] /= length;
-					outlineNormals[i][j][1] /= length;
-					outlineNormals[i][j][2] /= length;
+				else {
+					nodeR[i] = Matrix.identity(3, 3);
 				}
+				normal = nodeR[i].times(normal);
+				normal = normal.times(1.0/normal.normF());
+				nodeNormals[i] = normal.getColumnPackedCopy();
 			}
 		}
 	}
@@ -4409,23 +4357,15 @@ public class View extends GLCanvas {
 		norm[2] = Rr[2][2];
 		double[][] top = new double[elemNodes.length][3];
 		double[][] bottom = new double[elemNodes.length][3];
+		double[][] outlineNormals = new double[elemNodes.length][];
 		double halfThickness = ((PlaneElement) element).getThickness()/2.0;
 		for (int i = 0; i < elemNodes.length; i++) {
-			double[] nodeNorm = null;
-			if (nodeNormals[elemNodes[i]] != null) {
-				double scal = norm[0]*nodeNormals[elemNodes[i]][0]+norm[1]*nodeNormals[elemNodes[i]][1]+norm[2]*nodeNormals[elemNodes[i]][2];
-				if (scal != 0) {
-					nodeNorm = nodeNormals[elemNodes[i]].clone();
-					if (scal < 0) {
-						nodeNorm[0] = -nodeNorm[0];
-						nodeNorm[1] = -nodeNorm[1];
-						nodeNorm[2] = -nodeNorm[2];
-					}
-				}
+			int j = (i+1)%elemNodes.length;
+			if (SimLive.contains(innerEdge[elemNodes[i]], elemNodes[j])) {
+				outlineNormals[i] = nodeR[elemNodes[i]].times(norm0).getColumnPackedCopy();
+				outlineNormals[j] = nodeR[elemNodes[j]].times(norm0).getColumnPackedCopy();
 			}
-			if (nodeNorm == null) {
-				nodeNorm = norm.clone();
-			}
+			double[] nodeNorm = nodeNormals[elemNodes[i]];
 			top[i][0] = nodeNorm[0]*halfThickness;
 			top[i][1] = nodeNorm[1]*halfThickness;
 			top[i][2] = nodeNorm[2]*halfThickness;
@@ -4594,12 +4534,8 @@ public class View extends GLCanvas {
 				int[] index = {0, 1, 3, 1, 2, 3};
 				for (int j = 0; j < index.length; j++) {
 					int i = index[j];
-					if (outlineNormals0[elemNodes[i]].length > 1) {
-						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
-							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
-								gl2.glNormal3d(outlineNormals[elemNodes[i]][k][0], outlineNormals[elemNodes[i]][k][1], outlineNormals[elemNodes[i]][k][2]);
-							}
-						}
+					if (outlineNormals[i] != null) {
+						gl2.glNormal3d(outlineNormals[i][0], outlineNormals[i][1], outlineNormals[i][2]);
 					}
 					else {
 						gl2.glNormal3d(top[i][0], top[i][1], top[i][2]);
@@ -4608,12 +4544,8 @@ public class View extends GLCanvas {
 				}
 				for (int j = index.length-1; j > -1; j--) {
 					int i = index[j];
-					if (outlineNormals0[elemNodes[i]].length > 1) {
-						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
-							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
-								gl2.glNormal3d(-outlineNormals[elemNodes[i]][k][0], -outlineNormals[elemNodes[i]][k][1], -outlineNormals[elemNodes[i]][k][2]);
-							}
-						}
+					if (outlineNormals[i] != null) {
+						gl2.glNormal3d(-outlineNormals[i][0], -outlineNormals[i][1], -outlineNormals[i][2]);
 					}
 					else {
 						gl2.glNormal3d(bottom[i][0], bottom[i][1], bottom[i][2]);
@@ -4625,12 +4557,8 @@ public class View extends GLCanvas {
 			if (element.getType() == Element.Type.TRI) {
 				gl2.glBegin(GL2.GL_TRIANGLES);
 				for (int i = 0; i < elemNodes.length; i++) {
-					if (outlineNormals0[elemNodes[i]].length > 1) {
-						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
-							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
-								gl2.glNormal3d(outlineNormals[elemNodes[i]][k][0], outlineNormals[elemNodes[i]][k][1], outlineNormals[elemNodes[i]][k][2]);
-							}
-						}
+					if (outlineNormals[i] != null) {
+						gl2.glNormal3d(outlineNormals[i][0], outlineNormals[i][1], outlineNormals[i][2]);
 					}
 					else {
 						gl2.glNormal3d(top[i][0], top[i][1], top[i][2]);
@@ -4638,12 +4566,8 @@ public class View extends GLCanvas {
 					gl2.glVertex3d(coords[i][0]+top[i][0], coords[i][1]+top[i][1], coords[i][2]+top[i][2]);
 				}
 				for (int i = elemNodes.length-1; i > -1; i--) {
-					if (outlineNormals0[elemNodes[i]].length > 1) {
-						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
-							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
-								gl2.glNormal3d(-outlineNormals[elemNodes[i]][k][0], -outlineNormals[elemNodes[i]][k][1], -outlineNormals[elemNodes[i]][k][2]);
-							}
-						}
+					if (outlineNormals[i] != null) {
+						gl2.glNormal3d(-outlineNormals[i][0], -outlineNormals[i][1], -outlineNormals[i][2]);
 					}
 					else {
 						gl2.glNormal3d(bottom[i][0], bottom[i][1], bottom[i][2]);
@@ -4674,19 +4598,8 @@ public class View extends GLCanvas {
 		    	for (int i = 0; i < elemNodes.length; i++) {
 		    		gl2.glBegin(GL2.GL_LINES);
 					gl2.glVertex3d(coords[i][0], coords[i][1], coords[i][2]);
-		    		if (isOutlineNode[elemNodes[i]]) {
-						for (int k = 0; k < outlineNormals0[elemNodes[i]].length; k++) {
-							if (outlineNormals0[elemNodes[i]][k].dotProduct(norm0) > SimLive.COS_ANGLE_INNER_EDGE) {
-								gl2.glVertex3d(coords[i][0]+d*outlineNormals[elemNodes[i]][k][0],
-										coords[i][1]+d*outlineNormals[elemNodes[i]][k][1],
-										coords[i][2]+d*outlineNormals[elemNodes[i]][k][2]);
-							}
-						}
-					}
-					else {
-						gl2.glVertex3d(coords[i][0]+d*top[i][0], coords[i][1]+d*top[i][1], coords[i][2]+d*top[i][2]);
-					}
-		    		gl2.glEnd();
+		    		gl2.glVertex3d(coords[i][0]+d*top[i][0], coords[i][1]+d*top[i][1], coords[i][2]+d*top[i][2]);
+					gl2.glEnd();
 		    	}
 		    	gl2.glEnable(GL2.GL_LIGHTING);
 			}*/
