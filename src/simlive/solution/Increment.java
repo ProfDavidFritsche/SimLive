@@ -1686,45 +1686,22 @@ public class Increment {
 			}
 			if (element.isPlaneElement()) {
 				PlaneElement planeElement = (PlaneElement) element;
-				Matrix R0 = planeElement.getR0();
-				Matrix R0z = R0.getMatrix(0, 2, 2, 2);
-				double[] normal = new double[3];
+				double[] rotation = new double[3];
 				double[] shapeFunctionValues = planeElement.getShapeFunctionValues(r[0], r[1]);
-				double[][] n = new double[3][planeElement.getElementNodes().length];
-				double[] rz = new double[planeElement.getElementNodes().length];
+				double[][] rot = new double[3][planeElement.getElementNodes().length];
 				double scaling = SimLive.post.getScaling();
 				for (int j = 0; j < planeElement.getElementNodes().length; j++) {
 					int nodeID = planeElement.getElementNodes()[j];
 					int dof = solution.getDofOfNodeID(nodeID);
 					Matrix nodeRot = u_global.getMatrix(dof+3, dof+5, 0, 0).times(scaling);
-					rz[j] = nodeRot.dotProduct(R0z);
-					if (View.outlineNormals0[nodeID].length > 1) {
-						for (int k = 0; k < View.outlineNormals0[nodeID].length; k++) {
-							if (View.outlineNormals0[nodeID][k].dotProduct(R0z) > SimLive.COS_ANGLE_INNER_EDGE) {
-								for (int i = 0; i < 3; i++) {
-									n[i][j] = View.outlineNormals[nodeID][k][i];
-								}
-							}
-						}
-					}
-					else {
-						for (int i = 0; i < 3; i++) {
-							n[i][j] = View.nodeNormals[nodeID][i];
-						}
+					for (int i = 0; i < 3; i++) {
+						rot[i][j] = solution.getRefSettings().isLargeDisplacement ? nodeRot.get(i, 0) : Math.atan(nodeRot.get(i, 0));
 					}
 				}
 				for (int i = 0; i < 3; i++) {
-					normal[i] = planeElement.interpolateNodeValues(shapeFunctionValues, n[i]);
+					rotation[i] = planeElement.interpolateNodeValues(shapeFunctionValues, rot[i]);
 				}
-				Matrix d1 = new Matrix(normal, 3);
-				d1 = d1.times(1.0/d1.normF());
-				double cosangle = d1.dotProduct(R0z);
-				Matrix axis = cosangle > -1.0+SimLive.ZERO_TOL ? R0z.crossProduct(d1) : R0.getMatrix(0, 2, 0, 0);
-				Matrix Rn = GeomUtility.getRotationMatrix(Math.acos(cosangle),
-						axis.getColumnPackedCopy());
-				Matrix Rz = GeomUtility.getRotationMatrix(planeElement.interpolateNodeValues(shapeFunctionValues, rz),
-						R0z.getColumnPackedCopy());
-				return Rz.times(Rn);
+				return Beam.rotationMatrixFromAngles(new Matrix(rotation, 3));
 			}
 		}
 		return Matrix.identity(3, 3);
