@@ -2988,12 +2988,14 @@ public class View extends GLCanvas {
 					if (isOutlineNode[elemNodes[i]]) {
 						outlineNormals[e][i] = nodeR[elemNodes[i]].times(norm0).getColumnPackedCopy();
 					}
-					Matrix nodeNormal0 = new Matrix(nodeNormals0[elemNodes[i]], 3);
-					double length = nodeNormal0.normF();
-					if (length > SimLive.ZERO_TOL) {
-						nodeNormal0 = nodeNormal0.times(1.0/length);
+					if (nodeNormals[elemNodes[i]] == null) {
+						Matrix nodeNormal0 = new Matrix(nodeNormals0[elemNodes[i]], 3);
+						double length = nodeNormal0.normF();
+						if (length > SimLive.ZERO_TOL) {
+							nodeNormal0 = nodeNormal0.times(1.0/length);
+						}
+						nodeNormals[elemNodes[i]] = nodeR[elemNodes[i]].times(nodeNormal0).getColumnPackedCopy();
 					}
-					nodeNormals[elemNodes[i]] = nodeR[elemNodes[i]].times(nodeNormal0).getColumnPackedCopy();
 				}
 			}
 		}
