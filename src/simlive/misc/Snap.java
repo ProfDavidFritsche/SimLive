@@ -115,6 +115,11 @@ public abstract class Snap {
 	
 	public static void initData(int[] mousePos, boolean snapToGrid, boolean snapToObject) {
 		SimLive.view.labelAtMousePos = null;
+		Snap.node = null;
+		Snap.element = null;
+		Snap.contactPair = null;
+		Snap.set = null;
+		Snap.part3d = null;
 		Snap.snapToGrid = snapToGrid;
 		Snap.snapToObject = snapToObject;
 		coords2d = View.screenToModelCoordinates(mousePos[0], mousePos[1]);
