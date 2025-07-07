@@ -2977,6 +2977,18 @@ public class View extends GLCanvas {
 			}
 		}
 		
+		int[][] topology = new int[SimLive.model.getNodes().size()][0];
+		for (int e = 0; e < SimLive.model.getElements().size(); e++) {
+			Element element = SimLive.model.getElements().get(e);
+			if (element.isPlaneElement()) {
+				int[] elemNodes = element.getElementNodes();
+				for (int i = 0; i < elemNodes.length; i++) {
+					topology[elemNodes[i]] = Arrays.copyOf(topology[elemNodes[i]], topology[elemNodes[i]].length+1);
+					topology[elemNodes[i]][topology[elemNodes[i]].length-1] = e;
+				}
+			}
+		}
+		
 		nodeNormals = new double[SimLive.model.getNodes().size()][];
 		outlineNormals = new double[SimLive.model.getElements().size()][4][];
 		for (int e = 0; e < SimLive.model.getElements().size(); e++) {
@@ -2987,6 +2999,16 @@ public class View extends GLCanvas {
 				for (int i = 0; i < elemNodes.length; i++) {
 					if (isOutlineNode[elemNodes[i]]) {
 						outlineNormals[e][i] = nodeR[elemNodes[i]].times(norm0).getColumnPackedCopy();
+						for (int t = 0; t < topology[elemNodes[i]].length; t++) if (topology[elemNodes[i]][t] != e) {
+							Element element1 = SimLive.model.getElements().get(topology[elemNodes[i]][t]);
+							Matrix norm1 = ((PlaneElement) element1).getR0().getMatrix(0, 2, 2, 2);
+							if (norm0.dotProduct(norm1) > SimLive.COS_ANGLE_INNER_EDGE) {
+								double[] newNormal = nodeR[elemNodes[i]].times(norm1).getColumnPackedCopy();
+								outlineNormals[e][i][0] += newNormal[0];
+								outlineNormals[e][i][1] += newNormal[1];
+								outlineNormals[e][i][2] += newNormal[2];
+							}
+						}
 					}
 					if (nodeNormals[elemNodes[i]] == null) {
 						Matrix nodeNormal0 = new Matrix(nodeNormals0[elemNodes[i]], 3);
@@ -4614,6 +4636,12 @@ public class View extends GLCanvas {
 		    		gl2.glBegin(GL2.GL_LINES);
 					gl2.glVertex3d(coords[i][0], coords[i][1], coords[i][2]);
 		    		gl2.glVertex3d(coords[i][0]+d*top[i][0], coords[i][1]+d*top[i][1], coords[i][2]+d*top[i][2]);
+					gl2.glEnd();
+		    	}
+		    	for (int i = 0; i < elemNodes.length; i++) if (outlineNormals[i] != null) {
+		    		gl2.glBegin(GL2.GL_LINES);
+					gl2.glVertex3d(coords[i][0], coords[i][1], coords[i][2]);
+		    		gl2.glVertex3d(coords[i][0]+d*outlineNormals[i][0], coords[i][1]+d*outlineNormals[i][1], coords[i][2]+d*outlineNormals[i][2]);
 					gl2.glEnd();
 		    	}
 		    	gl2.glEnable(GL2.GL_LIGHTING);
