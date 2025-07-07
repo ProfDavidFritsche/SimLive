@@ -113,6 +113,14 @@ public abstract class Snap {
 		}
 	}
 	
+	public static void resetData() {
+		Snap.node = null;
+		Snap.element = null;
+		Snap.contactPair = null;
+		Snap.set = null;
+		Snap.part3d = null;		
+	}
+	
 	public static void initData(int[] mousePos, boolean snapToGrid, boolean snapToObject) {
 		SimLive.view.labelAtMousePos = null;
 		Snap.snapToGrid = snapToGrid;

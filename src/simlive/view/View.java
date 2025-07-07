@@ -2766,6 +2766,7 @@ public class View extends GLCanvas {
 			}
 		};
 		timer.schedule(animation, 0, 1);
+		Snap.resetData();
 	}
 	
 	public void stopAnimation() {
