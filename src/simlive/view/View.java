@@ -816,7 +816,7 @@ public class View extends GLCanvas {
 						
 						if (e.button == 1 && !labelAdded && SimLive.select != Select.DISTANCE && SimLive.select != Select.ANGLE &&
 								selectedLabel == null && selectedMeasurement == null &&
-								side == Side.NONE && animation == null) {
+								side == Side.NONE) {
 							
 							{
 								if ((selectedSets.isEmpty() && selectedParts3d.isEmpty() || !isControlKeyPressed) &&
