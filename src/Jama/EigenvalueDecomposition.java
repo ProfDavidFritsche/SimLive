@@ -1,5 +1,6 @@
 package Jama;
 import Jama.util.*;
+import simlive.SimLive;
 
 /** Eigenvalues and eigenvectors of a real matrix. 
 <P>
@@ -52,6 +53,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
    @serial working storage for nonsymmetric algorithm.
    */
    private double[] ort;
+   private boolean modalAnalysis;
 
 /* ------------------------
    Private Methods
@@ -308,6 +310,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
    
       for (int m = low+1; m <= high-1; m++) {
    
+         if (modalAnalysis) ((simlive.dialog.SolutionDialog) SimLive.dialogArea).incrementProgressBar();
          // Scale column.
    
          double scale = 0.0;
@@ -368,6 +371,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
       }
 
       for (int m = high-1; m >= low+1; m--) {
+         if (modalAnalysis) ((simlive.dialog.SolutionDialog) SimLive.dialogArea).incrementProgressBar();
          if (H[m][m-1] != 0.0) {
             for (int i = m+1; i <= high; i++) {
                ort[i] = H[i][m-1];
@@ -444,6 +448,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
       int iter = 0;
       while (n >= low) {
    
+         if (modalAnalysis) ((simlive.dialog.SolutionDialog) SimLive.dialogArea).incrementProgressBar();
          // Look for single small sub-diagonal element
    
          int l = n;
@@ -698,6 +703,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
       }
    
       for (n = nn-1; n >= 0; n--) {
+         if (modalAnalysis) ((simlive.dialog.SolutionDialog) SimLive.dialogArea).incrementProgressBar();
          p = d[n];
          q = e[n];
    
@@ -839,6 +845,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
       // Back transformation to get eigenvectors of original matrix
    
       for (int j = nn-1; j >= low; j--) {
+         if (modalAnalysis) ((simlive.dialog.SolutionDialog) SimLive.dialogArea).incrementProgressBar();
          for (int i = low; i <= high; i++) {
             z = 0.0;
             for (int k = low; k <= Math.min(j,high); k++) {
@@ -859,8 +866,9 @@ public class EigenvalueDecomposition implements java.io.Serializable {
    @param Arg    Square matrix
    */
 
-   public EigenvalueDecomposition (Matrix Arg) {
-      double[][] A = Arg.getArray();
+   public EigenvalueDecomposition (Matrix Arg, boolean modalAnalysis) {
+      this.modalAnalysis = modalAnalysis;
+	  double[][] A = Arg.getArray();
       n = Arg.getColumnDimension();
       V = new double[n][n];
       d = new double[n];

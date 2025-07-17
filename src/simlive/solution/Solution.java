@@ -1,6 +1,7 @@
 package simlive.solution;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
@@ -21,6 +22,7 @@ import simlive.model.PlaneElement;
 import simlive.model.Section;
 import simlive.model.Spring;
 import simlive.model.Step;
+import simlive.model.Step.Type;
 import simlive.model.Support;
 import simlive.model.TimeTable;
 
@@ -291,7 +293,7 @@ public class Solution {
 	
 	public void calculate(SolutionDialog dialog) {
 		
-		dialog.initProgressBar(nIncrements + 1);
+		dialog.initProgressBar(refModel.getSteps().get(0).type == Type.MODAL_ANALYSIS ? 5*nDofs : nIncrements + 1);
 		
 		int startInc = 0;
 		double startTime = 0.0;
@@ -637,7 +639,7 @@ public class Solution {
 	
 	private boolean modalAnalysis(SolutionDialog dialog) {
 		
-		log.add("MODAL ANALYSIS\nCalculate Eigenmodes...");
+		log.add("MODAL ANALYSIS\nCalculate Matrix...");
 		dialog.updateLog();
 		
 		Increment increment = new Increment(this, 0.0, 0);
@@ -656,7 +658,12 @@ public class Solution {
 				M_constr = getMatrix2d(M_constr);
 				K_constr = getMatrix2d(K_constr);
 			}
-			EigenvalueDecomposition eig = M_constr.inverse().times(K_constr).eig();
+			Matrix A = M_constr.inverse().timesParallel(K_constr);
+			
+			log.add("Calculate Eigenmodes...");
+			dialog.updateLog();
+			
+			EigenvalueDecomposition eig = A.eig(true);
 			Matrix Dmatrix = eig.getD();
 			D = new Matrix(Dmatrix.getRowDimension(), 1);
 			for (int i = 0; i < Dmatrix.getRowDimension(); i++) {
@@ -671,47 +678,37 @@ public class Solution {
 		log.add("Sort Eigenmodes...");
 		dialog.updateLog();
 		
-		/* get full solution for eigenvectors */
-		Matrix Vnew = new Matrix(nDofs, V.getColumnDimension());
-		for (int i = 0; i < V.getColumnDimension(); i++) {
+		/* get full solution for eigenvectors and normalize */
+		final Matrix Vnew = new Matrix(nDofs, V.getColumnDimension());
+		IntStream.range(0, V.getColumnDimension()).parallel().forEach(i -> {
 			Matrix eigenVector = V.getMatrix(0, V.getRowDimension()-1, i, i);
 			if (Model.twoDimensional) {
 				eigenVector = getVector2d(eigenVector, true);
 			}
 			eigenVector = constraintMethod.getFullSolution(eigenVector, G);
-			Vnew.setMatrix(0, nDofs-1, i, i, eigenVector);
-		}
-		V = Vnew;
-		
-		/* normalize eigenvectors */
-		for (int i = 0; i < V.getColumnDimension(); i++) {
-			Matrix eigenVector = V.getMatrix(0, V.getRowDimension()-1, i, i);
 			double norm = eigenVector.normF();
-			V.setMatrix(0, V.getRowDimension()-1, i, i, eigenVector.times(1.0/norm));
-		}
+			Vnew.setMatrix(0, nDofs-1, i, i, eigenVector.times(1.0/norm));
+		});
+		V = Vnew;
 		
 		/* sort eigenmodes after violation of constraint conditions */
 		double[] norm = new double[V.getColumnDimension()];
-		for (int i = 0; i < V.getColumnDimension(); i++) {
+		IntStream.range(0, V.getColumnDimension()).parallel().forEach(i -> {
 			Matrix eigenVector = V.getMatrix(0, V.getRowDimension()-1, i, i);
 			norm[i] = G.times(eigenVector).normF();
-		}
-		for (int n = norm.length; n > 1; n--) {
-			for (int i = 0; i < n-1; i++) {
-				if (norm[i] > norm[i+1]) {
-					double temp = norm[i];
-					norm[i] = norm[i+1];
-					norm[i+1] = temp;
-					temp = D.get(i, 0);
-					D.set(i, 0, D.get(i+1, 0));
-					D.set(i+1, 0, temp);
-					Matrix tempCol = V.getMatrix(0, V.getRowDimension()-1, i, i);
-					V.setMatrix(0, V.getRowDimension()-1, i, i,
-							V.getMatrix(0, V.getRowDimension()-1, i+1, i+1));
-					V.setMatrix(0, V.getRowDimension()-1, i+1, i+1, tempCol);
-				}
-			}
-		}
+		});
+	    int[] indices = IntStream.range(0, norm.length)
+                .boxed().sorted((i, j) -> Double.compare(norm[i], norm[j]) )
+                .mapToInt(ele -> ele).toArray();
+		Matrix Dsort = new Matrix(D.getRowDimension(), 1);
+		Matrix Vsort = new Matrix(nDofs, V.getColumnDimension());
+		IntStream.range(0, indices.length).parallel().forEach(i -> {
+			Dsort.set(i, 0, D.get(indices[i], 0));
+			Vsort.setMatrix(0, V.getRowDimension()-1, i, i,
+					V.getMatrix(0, V.getRowDimension()-1, indices[i], indices[i]));
+		});
+		D = Dsort;
+		V = Vsort;
 		
 		/* remove eigenmodes caused by artificial stiffness of plane elements */
 		boolean[] isBeamNode = new boolean[refModel.getNodes().size()];
@@ -723,7 +720,8 @@ public class Solution {
 				isBeamNode[elementNodes[1]] = true;
 			}
 		}
-		for (int i = 0; i < V.getColumnDimension()-1; i++) {
+		boolean[] remove = new boolean[V.getColumnDimension()];
+		IntStream.range(0, V.getColumnDimension()).parallel().forEach(i -> {
 			Matrix eigenVector = V.getMatrix(0, V.getRowDimension()-1, i, i);
 			boolean noDisp = true;
 			boolean maxRotIsPlaneElement = false;
@@ -748,18 +746,22 @@ public class Solution {
 				}
 			}
 			if (noDisp && maxRotIsPlaneElement) {
-				Matrix Dnew = new Matrix(D.getRowDimension()-1, 1);
-				Dnew.setMatrix(0, i-1, 0, 0, D.getMatrix(0, i-1, 0, 0));
-				Dnew.setMatrix(i, D.getRowDimension()-2, 0, 0, D.getMatrix(i+1, D.getRowDimension()-1, 0, 0));
-				D = Dnew;
-				Vnew = new Matrix(V.getRowDimension(), V.getColumnDimension()-1);
-				Vnew.setMatrix(0, V.getRowDimension()-1, 0, i, V.getMatrix(0, V.getRowDimension()-1, 0, i));
-				Vnew.setMatrix(0, V.getRowDimension()-1, i, V.getColumnDimension()-2,
-						V.getMatrix(0, V.getRowDimension()-1, i+1, V.getColumnDimension()-1));
-				V = Vnew;
-				i--;
+				remove[i] = true;
 			}
+		});
+		int[] ind = new int[V.getColumnDimension()];
+		int count = 0;
+		for (int i = 0; i < V.getColumnDimension(); i++) if (!remove[i]) {
+			ind[count++] = i;
 		}
+		Matrix Dmod = new Matrix(count, 1);
+		Matrix Vmod = new Matrix(V.getRowDimension(), count);
+		IntStream.range(0, count).parallel().forEach(i -> {
+			Dmod.set(i, 0, D.get(ind[i], 0));
+			Vmod.setMatrix(0, V.getRowDimension()-1, i, i, V.getMatrix(0, V.getRowDimension()-1, ind[i], ind[i]));
+		});
+		D = Dmod;
+		V = Vmod;
 		
 		/* remove eigenmodes that violate constraint conditions most excessive */
 		D = constraintMethod.removeInvalidEigenvalues(D, G);

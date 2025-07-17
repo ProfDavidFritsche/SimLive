@@ -1303,7 +1303,7 @@ public class Increment {
 				}
 			
 				try {
-					EigenvalueDecomposition eig = M_elem.inverse().times(K_elem).eig();
+					EigenvalueDecomposition eig = M_elem.inverse().times(K_elem).eig(false);
 					double[] eigenValues = eig.getRealEigenvalues();		
 					Arrays.sort(eigenValues);
 					double omega = Math.sqrt(eigenValues[eigenValues.length-1]);

@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import java.util.stream.IntStream;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.StreamTokenizer;
@@ -776,6 +777,24 @@ public class Matrix implements Cloneable, java.io.Serializable {
       }
       return X;
    }
+   
+   public Matrix timesParallel (Matrix B) {
+      if (B.m != n) {
+         throw new IllegalArgumentException("Matrix inner dimensions must agree.");
+      }
+      Matrix X = new Matrix(m,B.n);
+      double[][] C = X.getArray();
+      IntStream.range(0, B.n).parallel().forEach(j -> {
+         for (int i = 0; i < m; i++) {
+            double s = 0;
+            for (int k = 0; k < n; k++) {
+               s += A[i][k]*B.A[k][j];
+            }
+            C[i][j] = s;
+         }
+      });
+      return X;
+   }
 
    /** Linear algebraic matrix multiplication, A' * A
    @return     Matrix product, A' * A
@@ -847,8 +866,8 @@ public class Matrix implements Cloneable, java.io.Serializable {
    @see EigenvalueDecomposition
    */
 
-   public EigenvalueDecomposition eig () {
-      return new EigenvalueDecomposition(this);
+   public EigenvalueDecomposition eig (boolean modalAnalysis) {
+      return new EigenvalueDecomposition(this, modalAnalysis);
    }
 
    /** Solve A*X = B
