@@ -4,7 +4,6 @@ import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import java.util.stream.IntStream;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.StreamTokenizer;
@@ -748,51 +747,53 @@ public class Matrix implements Cloneable, java.io.Serializable {
       }
       Matrix X = new Matrix(m,B.n);
       double[][] C = X.getArray();
-      boolean[] ARowNonZero = new boolean[m];
-      for (int i = 0; i < m; i++) {
+      int[] startA = new int[m];
+      int[] endA = new int[m];
+      int[] startB = new int[B.n];
+      int[] endB = new int[B.n];
+      for (int j = 0; j < m; j++) {
+         startA[j] = -1;
          for (int k = 0; k < n; k++) {
-            if (A[i][k] != 0.0) {
-               ARowNonZero[i] = true;
+            if (A[j][k] != 0.0) {
+               startA[j] = k;
                break;
             }
          }
+         if (startA[j] != -1) {
+            for (int k = n-1; k > -1; k--) {
+               if (A[j][k] != 0.0) {
+                  endA[j] = k;
+                  break;
+               }
+            }
+         }
       }
-      boolean[] BColNonZero = new boolean[B.n];
       for (int j = 0; j < B.n; j++) {
+         startB[j] = -1;
          for (int k = 0; k < n; k++) {
             if (B.A[k][j] != 0.0) {
-               BColNonZero[j] = true;
+               startB[j] = k;
                break;
             }
          }
+         if (startB[j] != -1) {
+            for (int k = n-1; k > -1; k--) {
+               if (B.A[k][j] != 0.0) {
+                  endB[j] = k;
+                  break;
+               }
+            }
+         }
       }
-      for (int j = 0; j < B.n; j++) if (BColNonZero[j]) {
-         for (int i = 0; i < m; i++) if (ARowNonZero[i]) {
+      for (int j = 0; j < B.n; j++) if (startB[j] != -1) {
+         for (int i = 0; i < m; i++) if (startA[i] != -1) {
             double s = 0;
-            for (int k = 0; k < n; k++) {
+            for (int k = Math.max(startA[i], startB[j]); k <= Math.min(endA[i], endB[j]); k++) {
                s += A[i][k]*B.A[k][j];
             }
             C[i][j] = s;
          }
       }
-      return X;
-   }
-   
-   public Matrix timesParallel (Matrix B) {
-      if (B.m != n) {
-         throw new IllegalArgumentException("Matrix inner dimensions must agree.");
-      }
-      Matrix X = new Matrix(m,B.n);
-      double[][] C = X.getArray();
-      IntStream.range(0, B.n).parallel().forEach(j -> {
-         for (int i = 0; i < m; i++) {
-            double s = 0;
-            for (int k = 0; k < n; k++) {
-               s += A[i][k]*B.A[k][j];
-            }
-            C[i][j] = s;
-         }
-      });
       return X;
    }
 
