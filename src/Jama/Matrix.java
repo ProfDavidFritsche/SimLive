@@ -788,7 +788,9 @@ public class Matrix implements Cloneable, java.io.Serializable {
       for (int j = 0; j < B.n; j++) if (startB[j] != -1) {
          for (int i = 0; i < m; i++) if (startA[i] != -1) {
             double s = 0;
-            for (int k = Math.max(startA[i], startB[j]); k <= Math.min(endA[i], endB[j]); k++) {
+            int start = Math.max(startA[i], startB[j]);
+            int end = Math.min(endA[i], endB[j]);
+            for (int k = start; k <= end; k++) {
                s += A[i][k]*B.A[k][j];
             }
             C[i][j] = s;
