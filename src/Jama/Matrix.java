@@ -756,15 +756,13 @@ public class Matrix implements Cloneable, java.io.Serializable {
          for (int k = 0; k < n; k++) {
             if (A[j][k] != 0.0) {
                startA[j] = k;
-               break;
-            }
-         }
-         if (startA[j] != -1) {
-            for (int k = n-1; k > -1; k--) {
-               if (A[j][k] != 0.0) {
-                  endA[j] = k;
-                  break;
+               for (int l = n-1; l > -1; l--) {
+                  if (A[j][l] != 0.0) {
+                     endA[j] = l;
+                     break;
+                  }
                }
+               break;
             }
          }
       }
@@ -773,15 +771,13 @@ public class Matrix implements Cloneable, java.io.Serializable {
          for (int k = 0; k < n; k++) {
             if (B.A[k][j] != 0.0) {
                startB[j] = k;
-               break;
-            }
-         }
-         if (startB[j] != -1) {
-            for (int k = n-1; k > -1; k--) {
-               if (B.A[k][j] != 0.0) {
-                  endB[j] = k;
-                  break;
+               for (int l = n-1; l > -1; l--) {
+                  if (B.A[l][j] != 0.0) {
+                     endB[j] = l;
+                     break;
+                  }
                }
+               break;
             }
          }
       }
