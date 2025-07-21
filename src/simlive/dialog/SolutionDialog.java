@@ -301,11 +301,10 @@ public class SolutionDialog extends Composite {
 	public void updateLog() {
 		SimLive.shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
-				int rows = styledText.getBounds().height/styledText.getLineHeight();
-				if (styledText.getLineCount() > rows) {
+				if (styledText.getTopIndex() > 0) {
 					int index = 0;
-					for (int i = Solution.log.size()-styledText.getLineCount(); i < Solution.log.size()-rows; i++) {
-						index += Solution.log.get(i).length()+1;
+					for (int i = 0; i < styledText.getTopIndex(); i++) {
+						index += styledText.getLine(i).length();
 					}
 					styledText.replaceTextRange(0, index, "");
 				}
