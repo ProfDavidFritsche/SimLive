@@ -33,6 +33,7 @@ public class SolutionDialog extends Composite {
 	private Combo combo;
 	private ProgressBar progressBar;
 	private StyledText styledText;
+	private int logIndex;
 	private Composite resultComposite;
 	private Solution solution = null;
 	private Composite composite;
@@ -197,6 +198,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				styledText.setText("");
+				logIndex = 0;
 				
 				thread = new Thread(new Runnable() {			
 					public void run() {
@@ -205,27 +207,27 @@ public class SolutionDialog extends Composite {
 						Solution.resetLog();
 					
 						if (settings.isReorderNodes) {
-							SimLive.shell.getDisplay().syncExec(new Runnable() {
+							SimLive.shell.getDisplay().asyncExec(new Runnable() {
 								public void run() {
 									SimLive.setResultLabel(resultComposite, false, true, false);
 								}
 							});
 							model.reorderNodes();
-							SimLive.shell.getDisplay().syncExec(new Runnable() {
+							SimLive.shell.getDisplay().asyncExec(new Runnable() {
 								public void run() {
 									SimLive.view.redraw();
 								}
 							});
 						}
 						
-						SimLive.shell.getDisplay().syncExec(new Runnable() {
+						SimLive.shell.getDisplay().asyncExec(new Runnable() {
 							public void run() {
 								SimLive.setResultLabel(resultComposite, true, false, false);
 							}
 						});
 						model.finalUpdateModel();
 						
-						SimLive.shell.getDisplay().syncExec(new Runnable() {
+						SimLive.shell.getDisplay().asyncExec(new Runnable() {
 							public void run() {
 								SimLive.setResultLabel(resultComposite, false, false, true);
 							}
@@ -240,7 +242,7 @@ public class SolutionDialog extends Composite {
 							}
 						}
 						
-						SimLive.shell.getDisplay().syncExec(new Runnable() {
+						SimLive.shell.getDisplay().asyncExec(new Runnable() {
 							public void run() {
 								progressBar.setSelection(0);
 								SimLive.setResultLabel(resultComposite, false, false, false);
@@ -299,24 +301,26 @@ public class SolutionDialog extends Composite {
 	}
 	
 	public void updateLog() {
-		SimLive.shell.getDisplay().syncExec(new Runnable() {
+		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				int rows = styledText.getBounds().height/styledText.getLineHeight();
-				if (styledText.getLineCount() > rows) {
+				for (int i = logIndex; i < Solution.log.size(); i++) {
+					styledText.append(Solution.log.get(i)+"\n");
+				}
+				logIndex = Solution.log.size();
+				if (styledText.getTopIndex() > 0) {
 					int index = 0;
-					for (int i = Solution.log.size()-styledText.getLineCount(); i < Solution.log.size()-rows; i++) {
-						index += Solution.log.get(i).length()+1;
+					for (int i = 0; i < styledText.getTopIndex(); i++) {
+						index += styledText.getLine(i).length();
 					}
 					styledText.replaceTextRange(0, index, "");
 				}
-				styledText.append(Solution.log.get(Solution.log.size()-1)+"\n");
 				styledText.setTopIndex(styledText.getLineCount()-1);
 			}
 		});
 	}
 	
 	public void initProgressBar(final int nInc) {
-		SimLive.shell.getDisplay().syncExec(new Runnable() {
+		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				progressBar.setMaximum(nInc);
 				progressBar.setSelection(0);
@@ -325,7 +329,7 @@ public class SolutionDialog extends Composite {
 	}
 	
 	public void incrementProgressBar() {
-		SimLive.shell.getDisplay().syncExec(new Runnable() {
+		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if (!progressBar.isDisposed()) {
 					progressBar.setSelection(progressBar.getSelection() + 1);
