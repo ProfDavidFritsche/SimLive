@@ -305,23 +305,50 @@ public class LUDecomposition implements java.io.Serializable {
       Matrix Xmat = B.getMatrix(piv,0,nx-1);
       double[][] X = Xmat.getArray();
 
-      // Solve L*Y = B(piv,:)
-      for (int k = 0; k < n; k++) {
-    	 int j = nx == 1 ? 0 : k;
-    	 for (int i = k+1; i < n; i++) if (LU[i][k] != 0.0) {
-            X[i][j] -= X[k][j]*LU[i][k];
+      if (nx == 1) {
+         // Solve L*Y = B(piv,:)
+         for (int k = 0; k < n; k++) {
+            for (int i = k+1; i < n; i++) if (LU[i][k] != 0.0) {
+               X[i][0] -= X[k][0]*LU[i][k];
+            }
+         }
+         // Solve U*X = Y;
+         for (int k = n-1; k >= 0; k--) {
+            X[k][0] /= LU[k][k];
+            for (int i = 0; i < k; i++) if (LU[i][k] != 0.0) {
+               X[i][0] -= X[k][0]*LU[i][k];
+            }
+            // check result is finite
+            if (!Double.isFinite(X[k][0])) {
+               throw new RuntimeException("Solver failed.");
+            }
          }
       }
-      // Solve U*X = Y;
-      for (int k = n-1; k >= 0; k--) {
-    	 int j = nx == 1 ? 0 : k;
-    	 X[k][j] /= LU[k][k];
-         for (int i = 0; i < k; i++) if (LU[i][k] != 0.0) {
-            X[i][j] -= X[k][j]*LU[i][k];
+      else {
+         // Solve L*Y = B(piv,:)
+         for (int k = 0; k < n; k++) {
+            for (int i = k+1; i < n; i++) if (LU[i][k] != 0.0) {
+               for (int j = 0; j < nx; j++) {
+                  X[i][j] -= X[k][j]*LU[i][k];
+               }
+            }
          }
-         // check result is finite
-         if (!Double.isFinite(X[k][j])) {
-            throw new RuntimeException("Solver failed.");
+         // Solve U*X = Y;
+         for (int k = n-1; k >= 0; k--) {
+            for (int j = 0; j < nx; j++) {
+               X[k][j] /= LU[k][k];
+            }
+            for (int i = 0; i < k; i++) if (LU[i][k] != 0.0) {
+               for (int j = 0; j < nx; j++) {
+                  X[i][j] -= X[k][j]*LU[i][k];
+               }
+            }
+            // check result is finite
+            for (int j = 0; j < nx; j++) {
+               if (!Double.isFinite(X[k][j])) {
+                  throw new RuntimeException("Solver failed.");
+               }
+            }
          }
       }
       return Xmat;
