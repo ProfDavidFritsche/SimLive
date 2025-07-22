@@ -288,18 +288,22 @@ public class SolutionDialog extends Composite {
 	}*/
 	
 	public void fillLogComplete() {			
-		String str = "";
-		for (int i = 0; i < Solution.log.size(); i++) {
-			str += Solution.log.get(i)+"\n";
-		}
-		for (int i = 0; i < Solution.errors.size(); i++) {
-			str += "ERROR: "+Solution.errors.get(i)+"\n";
-		}
-		for (int i = 0; i < Solution.warnings.size(); i++) {
-			str += "WARNING: "+Solution.warnings.get(i)+"\n";
-		}
-		styledText.setText(str);
-		styledText.setTopIndex(styledText.getLineCount()-1);
+		SimLive.shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {		
+				String str = "";
+				for (int i = 0; i < Solution.log.size(); i++) {
+					str += Solution.log.get(i)+"\n";
+				}
+				for (int i = 0; i < Solution.errors.size(); i++) {
+					str += "ERROR: "+Solution.errors.get(i)+"\n";
+				}
+				for (int i = 0; i < Solution.warnings.size(); i++) {
+					str += "WARNING: "+Solution.warnings.get(i)+"\n";
+				}
+				styledText.setText(str);
+				styledText.setTopIndex(styledText.getLineCount()-1);
+			}
+		});
 	}
 	
 	public void updateLog() {
