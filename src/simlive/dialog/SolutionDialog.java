@@ -199,6 +199,7 @@ public class SolutionDialog extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				styledText.setText("");
 				logIndex = 0;
+				progressBarInc = 0;
 				
 				thread = new Thread(new Runnable() {			
 					public void run() {
@@ -332,7 +333,6 @@ public class SolutionDialog extends Composite {
 			public void run() {
 				progressBar.setMaximum(nInc);
 				progressBar.setSelection(0);
-				progressBarInc = 0;
 			}
 		});
 	}
