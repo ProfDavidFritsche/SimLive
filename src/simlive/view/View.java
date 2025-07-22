@@ -313,11 +313,15 @@ public class View extends GLCanvas {
 							double[] end = selectedMeasurement.getEndPoint();
 							Matrix dir = new Matrix(new double[]{end[0]-start[0], end[1]-start[1], end[2]-start[2]}, 3);
 							dir = dir.times(1.0/dir.normF());
+							Matrix moveDir = null;
 							if (moveOld.normF() < SimLive.ZERO_TOL) {
 								Matrix z = new Matrix(new double[]{0, 0, 1}, 3);
-								moveOld = dir.crossProduct(R0.times(z));
+								Matrix h = dir.crossProduct(R0.times(z));
+								moveDir = h.times(1.0/h.normF());
 							}
-							Matrix moveDir = moveOld.times(1.0/moveOld.normF());
+							else {
+								moveDir = moveOld.times(1.0/moveOld.normF());
+							}
 							
 							if (isControlKeyPressed) {
 								Matrix mid = (new Matrix(start, 3).plus(new Matrix(end, 3))).times(0.5);
