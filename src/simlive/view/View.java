@@ -325,8 +325,8 @@ public class View extends GLCanvas {
 							
 							if (isControlKeyPressed) {
 								Matrix mid = (new Matrix(start, 3).plus(new Matrix(end, 3))).times(0.5);
-								double[] p0 = mid.plus(moveOld).getColumnPackedCopy();
-								double[] p1 = mid.plus(moveOld.crossProduct(dir)).getColumnPackedCopy();
+								double[] p0 = mid.plus(moveDir).getColumnPackedCopy();
+								double[] p1 = mid.plus(moveDir.crossProduct(dir)).getColumnPackedCopy();
 								double[] p = GeomUtility.getIntersectionLinePlane(c1,
 										viewDirC1, mid.getColumnPackedCopy(), p0, p1);
 								if (p != c1) {
