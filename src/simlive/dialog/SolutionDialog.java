@@ -216,11 +216,6 @@ public class SolutionDialog extends Composite {
 									}
 								});
 								model.reorderNodes();
-								SimLive.shell.getDisplay().asyncExec(new Runnable() {
-									public void run() {
-										SimLive.view.redraw();
-									}
-								});
 							}
 							
 							SimLive.shell.getDisplay().asyncExec(new Runnable() {
