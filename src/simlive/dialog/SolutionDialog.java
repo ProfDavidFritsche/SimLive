@@ -33,7 +33,8 @@ public class SolutionDialog extends Composite {
 	private Combo combo;
 	private ProgressBar progressBar;
 	private StyledText styledText;
-	private int logIndex, progressBarInc;
+	private int logIndex, progressBarInc, progressBarMax;
+	private final int PROGRESS_BAR = 1000;
 	private Composite resultComposite;
 	private Solution solution = null;
 	private Composite composite;
@@ -177,6 +178,7 @@ public class SolutionDialog extends Composite {
 		
 		progressBar = new ProgressBar(composite, SWT.SMOOTH);
 		progressBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+		progressBar.setMaximum(PROGRESS_BAR);
 		
 		resultComposite = new Composite(composite, SWT.NONE);
 		resultComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
@@ -199,7 +201,6 @@ public class SolutionDialog extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				styledText.setText("");
 				logIndex = 0;
-				progressBarInc = 0;
 				
 				thread = new Thread(new Runnable() {			
 					public void run() {
@@ -310,18 +311,21 @@ public class SolutionDialog extends Composite {
 	public void updateLog() {
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				if (Solution.log.size() > logIndex && !styledText.isDisposed()) {
-					for (int i = logIndex; i < Solution.log.size(); i++) {
-						styledText.append(Solution.log.get(i)+"\n");
+				final int logSize = Solution.log.size();
+				if (!styledText.isDisposed() && logSize > logIndex) {
+					String text = styledText.getText();
+					for (int i = logIndex; i < logSize; i++) {
+						text += Solution.log.get(i)+"\n";
 					}
-					logIndex = Solution.log.size();
+					logIndex = logSize;
 					if (styledText.getTopIndex() > 1) {
 						int index = 0;
 						for (int i = 0; i < styledText.getTopIndex()-1; i++) {
 							index += styledText.getLine(i).length();
 						}
-						styledText.replaceTextRange(0, index, "");
+						text = text.substring(index);
 					}
+					styledText.setText(text);
 					styledText.setTopIndex(styledText.getLineCount()-1);
 				}
 			}
@@ -329,20 +333,18 @@ public class SolutionDialog extends Composite {
 	}
 	
 	public void initProgressBar(final int nInc) {
-		SimLive.shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				progressBar.setMaximum(nInc);
-				progressBar.setSelection(0);
-			}
-		});
+		progressBarInc = 0;
+		progressBarMax = nInc;
 	}
 	
 	public void incrementProgressBar() {
 		progressBarInc++;
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				if (!progressBar.isDisposed()) {
-					progressBar.setSelection(progressBarInc);
+				double fraction = progressBarInc/(double) progressBarMax;
+				int inc = (int) Math.floor(fraction*PROGRESS_BAR);
+				if (!progressBar.isDisposed() && inc > progressBar.getSelection()) {
+					progressBar.setSelection(inc);
 				}
 			}
 		});
