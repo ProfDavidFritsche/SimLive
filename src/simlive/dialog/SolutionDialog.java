@@ -305,7 +305,7 @@ public class SolutionDialog extends Composite {
 	public void updateLog() {
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				if (Solution.log.size() > logIndex) {
+				if (Solution.log.size() > logIndex && !styledText.isDisposed()) {
 					for (int i = logIndex; i < Solution.log.size(); i++) {
 						styledText.append(Solution.log.get(i)+"\n");
 					}
@@ -337,7 +337,9 @@ public class SolutionDialog extends Composite {
 		progressBarInc++;
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				progressBar.setSelection(progressBarInc);
+				if (!progressBar.isDisposed()) {
+					progressBar.setSelection(progressBarInc);
+				}
 			}
 		});
 	}
