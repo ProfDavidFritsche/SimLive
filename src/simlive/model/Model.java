@@ -1259,6 +1259,7 @@ public class Model implements DeepEqualsInterface {
 			if (set.getType() == Set.Type.CIRCULAR) {
 				removeChordErrorOfRefinedSet(set);
 				if (set.getSpurGearValues() != null) {
+					updateModel();
 					removeFlankErrorOfRefinedSpurGear(set);
 				}
 			}
