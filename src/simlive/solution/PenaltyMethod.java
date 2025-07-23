@@ -54,8 +54,7 @@ public class PenaltyMethod extends ConstraintMethod {
 	@Override
 	public Matrix getConstraintForce(Matrix C_global, Matrix solutionConstr, Matrix G, Matrix g, Matrix matrix) {
 		double penalty = getPenaltyValue(matrix);
-		return G.transpose().times(g.times(penalty)).minus(
-				G.transposeTimesItself().times(penalty).times(solutionConstr));
+		return G.transpose().times(g.minus(G.times(solutionConstr)).times(penalty));
 	}
 
 	@Override
