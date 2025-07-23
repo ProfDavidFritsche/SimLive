@@ -575,7 +575,7 @@ public class Model implements DeepEqualsInterface {
 			
 			storeModelHistory();
 			
-			SimLive.shell.getDisplay().syncExec(new Runnable() {
+			SimLive.shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					if (!SimLive.modelTree.isDisposed()) {
 						updateModelTree();
