@@ -313,10 +313,10 @@ public class SolutionDialog extends Composite {
 						text += Solution.log.get(i)+"\n";
 					}
 					logIndex = logSize;
-					if (styledText.getTopIndex() > 1) {
+					if (styledText.getTopIndex() > 0) {
 						int index = 0;
-						for (int i = 0; i < styledText.getTopIndex()-1; i++) {
-							index += styledText.getLine(i).length();
+						for (int i = 0; i < styledText.getTopIndex(); i++) {
+							index += styledText.getLine(i).length()+1;
 						}
 						text = text.substring(index);
 					}
