@@ -1251,10 +1251,10 @@ public class Model implements DeepEqualsInterface {
 			}
 			
 			mergeCoincidentNodes(set.getElements());
-			Mode mode = SimLive.mode;
+			/*Mode mode = SimLive.mode;
 			SimLive.mode = Mode.NONE;
 			updateModel();
-			SimLive.mode = mode;
+			SimLive.mode = mode;*/
 			
 			if (set.getType() == Set.Type.CIRCULAR) {
 				removeChordErrorOfRefinedSet(set);
@@ -1274,10 +1274,10 @@ public class Model implements DeepEqualsInterface {
 		}
 		
 		mergeCoincidentNodes(set.getElements());
-		Mode mode = SimLive.mode;
+		/*Mode mode = SimLive.mode;
 		SimLive.mode = Mode.NONE;
 		updateModel();
-		SimLive.mode = mode;
+		SimLive.mode = mode;*/
 		
 		mapLabelsToNewMesh(coords);
 	}
