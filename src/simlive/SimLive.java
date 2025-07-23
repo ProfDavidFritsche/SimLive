@@ -2113,17 +2113,18 @@ public class SimLive {
 		if (mode == Mode.PARTS && modelTree.getItem(0).getExpanded()) {
 			ArrayList<Set> selectedSets = view.getSelectedSets();
 			ArrayList<Part3d> selectedParts3d = view.getSelectedParts3d();
+			TreeItem[] items = modelTree.getItem(0).getItems();
 			if (!selectedSets.isEmpty()) {
 				TreeItem[] selection = new TreeItem[selectedSets.size()];
 				for (int s = 0; s < selectedSets.size(); s++) {
-					selection[s] = modelTree.getItem(0).getItem(selectedSets.get(s).getID());
+					selection[s] = items[selectedSets.get(s).getID()];
 				}
 				modelTree.setSelection(selection);
 			}
 			else if (!selectedParts3d.isEmpty()) {
 				TreeItem[] selection = new TreeItem[selectedParts3d.size()];
 				for (int s = 0; s < selectedParts3d.size(); s++) {
-					selection[s] = modelTree.getItem(0).getItem(model.getSets().size()+selectedParts3d.get(s).getID());
+					selection[s] = items[model.getSets().size()+selectedParts3d.get(s).getID()];
 				}
 				modelTree.setSelection(selection);
 			}
