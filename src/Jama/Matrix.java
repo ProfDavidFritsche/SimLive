@@ -752,37 +752,29 @@ public class Matrix implements Cloneable, java.io.Serializable {
       int[] startB = new int[B.n];
       int[] endB = new int[B.n];
       for (int j = 0; j < m; j++) {
-         startA[j] = -1;
-         for (int k = 0; k < n; k++) {
-            if (A[j][k] != 0.0) {
-               startA[j] = k;
-               for (int l = n-1; l > -1; l--) {
-                  if (A[j][l] != 0.0) {
-                     endA[j] = l;
-                     break;
-                  }
-               }
-               break;
+         while (startA[j] < n && A[j][startA[j]] == 0.0) {
+            startA[j]++;
+         }
+         if (startA[j] < n) {
+            endA[j] = n-1;
+            while (endA[j] > startA[j] && A[j][endA[j]] == 0.0) {
+               endA[j]--;
             }
          }
       }
       for (int j = 0; j < B.n; j++) {
-         startB[j] = -1;
-         for (int k = 0; k < n; k++) {
-            if (B.A[k][j] != 0.0) {
-               startB[j] = k;
-               for (int l = n-1; l > -1; l--) {
-                  if (B.A[l][j] != 0.0) {
-                     endB[j] = l;
-                     break;
-                  }
-               }
-               break;
+         while (startB[j] < n && B.A[startB[j]][j] == 0.0) {
+            startB[j]++;
+         }
+         if (startB[j] < n) {
+            endB[j] = n-1;
+            while (endB[j] > startB[j] && B.A[endB[j]][j] == 0.0) {
+               endB[j]--;
             }
          }
       }
-      for (int j = 0; j < B.n; j++) if (startB[j] != -1) {
-         for (int i = 0; i < m; i++) if (startA[i] != -1) {
+      for (int j = 0; j < B.n; j++) if (startB[j] < n) {
+         for (int i = 0; i < m; i++) if (startA[i] < n) {
             double s = 0;
             int start = Math.max(startA[i], startB[j]);
             int end = Math.min(endA[i], endB[j]);
