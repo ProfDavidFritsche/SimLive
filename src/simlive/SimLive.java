@@ -308,6 +308,12 @@ public class SimLive {
 		END_ICON = resize(END_ICON, ICON_HEIGHT_FACTORS[0]);
 		createContents();
 		shell.open();
+		shell.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent arg0) {
+				System.exit(0);
+			}
+		});
 		shell.layout();
 		newFile(null);
 		
