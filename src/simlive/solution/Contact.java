@@ -264,20 +264,21 @@ public class Contact {
 								}
 								if (Rr != null) {
 									SectionShape sectionShape = ((LineElement) element).getSection().getSectionShape();
-									double w, h;
+									Matrix masterNormal = new Matrix(masterNormals[e], 3);
+									double scal = 0.0;
 									if (sectionShape.getType() == SectionShape.Type.CIRCLE || sectionShape.getType() == SectionShape.Type.HOLLOW_CIRCLE) {
-										w = h = sectionShape.getDiameter();
+										double d = sectionShape.getDiameter();
+										Matrix rx = Rr.getMatrix(0, 2, 0, 0);
+										scal = rx.crossProduct(masterNormal).crossProduct(rx).times(d/2.0).dotProduct(masterNormal);
 									}
 									else {
-										w = sectionShape.getWidth();
-										h = sectionShape.getHeight();
+										double w = sectionShape.getWidth();
+										double h = sectionShape.getHeight();
+										Matrix ry = Rr.getMatrix(0, 2, 1, 1).times(w/2.0);
+										Matrix rz = Rr.getMatrix(0, 2, 2, 2).times(h/2.0);
+										scal = Math.max(Math.abs(ry.plus(rz).dotProduct(masterNormal)), Math.abs(ry.minus(rz).dotProduct(masterNormal)));
 									}
-									double[] normal = Rr.getMatrix(0, 2, 1, 1).getColumnPackedCopy();
-									double scal = normal[0]*masterNormals[e][0]+normal[1]*masterNormals[e][1]+normal[2]*masterNormals[e][2];
-									slaveNodeHalfThickness = Math.max(slaveNodeHalfThickness, w/2.0*Math.abs(scal));
-									normal = Rr.getMatrix(0, 2, 2, 2).getColumnPackedCopy();
-									scal = normal[0]*masterNormals[e][0]+normal[1]*masterNormals[e][1]+normal[2]*masterNormals[e][2];
-									slaveNodeHalfThickness = Math.max(slaveNodeHalfThickness, h/2.0*Math.abs(scal));
+									slaveNodeHalfThickness = Math.max(slaveNodeHalfThickness, scal);
 								}
 							}
 						}
