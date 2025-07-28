@@ -616,7 +616,7 @@ public class Increment {
 					G_row1.set(0, refDof+1, -dir1.get(1, 0));
 					G_row1.set(0, refDof+2, -dir1.get(2, 0));
 					
-					G = addRowToMatrix(G, G_row0);
+					if (!Model.twoDimensional) G = addRowToMatrix(G, G_row0);
 					G = addRowToMatrix(G, G_row1);
 				}
 			}
@@ -1066,7 +1066,7 @@ public class Increment {
 				g = addRowToMatrix(g, g_row);
 				if (contacts[c].isSticking()) {
 					g_row = new Matrix(1, 1);
-					g = addRowToMatrix(g, g_row);
+					if (!Model.twoDimensional) g = addRowToMatrix(g, g_row);
 					g = addRowToMatrix(g, g_row);
 				}
 			}

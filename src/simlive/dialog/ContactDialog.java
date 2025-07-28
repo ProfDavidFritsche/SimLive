@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Event;
 import simlive.SimLive;
 import simlive.misc.Units;
 import simlive.model.ContactPair;
+import simlive.model.Model;
 import simlive.model.ContactPair.Type;
 
 import org.eclipse.swt.widgets.Button;
@@ -119,6 +120,7 @@ public class ContactDialog extends StoreDialog {
 		btnSwitchContactSide.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
 		btnSwitchContactSide.setText("Switch Contact Side");
 		btnSwitchContactSide.setSelection(contactPair.isSwitchContactSide());
+		btnSwitchContactSide.setEnabled(!Model.twoDimensional);
 		new Label(this, SWT.NONE);
 		
 		final Button btnNoSeparation = new Button(this, SWT.CHECK);

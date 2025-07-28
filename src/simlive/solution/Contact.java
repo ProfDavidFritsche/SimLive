@@ -9,6 +9,7 @@ import simlive.model.Beam;
 import simlive.model.ContactPair;
 import simlive.model.Element;
 import simlive.model.LineElement;
+import simlive.model.Model;
 import simlive.model.Node;
 import simlive.model.PlaneElement;
 import simlive.model.Rod;
@@ -25,6 +26,7 @@ public class Contact {
 	private boolean isSticking;
 	private static ArrayList<Node> slaveNodes;
 	private static int[][] slaveNodeElements;
+	private static ArrayList<ArrayList<Integer[]>> edges;
 	private boolean isDeformableDeformable;
 
 	public Contact(Element masterElement, double penetration, double[] norm, double frictionCoefficient, double[] shapeFunctionValues, boolean isDeformableDeformable) {
@@ -90,17 +92,66 @@ public class Contact {
 		}
 	}
 	
-	private static double[] getMasterNodeCoords(ContactPair contactPair, int k, int[] masterNodeIDs, Solution solution, Matrix u_global) {
+	public static void generateEdgeList(ArrayList<ContactPair> contactPairs) {
+		edges = new ArrayList<ArrayList<Integer[]>>();
+		for (int c = 0; c < contactPairs.size(); c++) {
+			ContactPair contactPair = contactPairs.get(c);
+			
+			ArrayList<Element> masterElements = new ArrayList<Element>();
+			for (int s = 0; s < contactPair.getMasterSets().size(); s++) {
+				masterElements.addAll(contactPair.getMasterSets().get(s).getElements());
+			}
+			
+			int maxNodeNr = 0;
+			for (int e = 0; e < masterElements.size(); e++) {
+				Element masterElement = masterElements.get(e);
+				int[] element_nodes = masterElement.getElementNodes();
+				for (int i = 0; i < element_nodes.length; i++) {
+					if (element_nodes[i] > maxNodeNr) maxNodeNr = element_nodes[i];
+				}
+			}
+			int[][] outlineEdge = new int[maxNodeNr+1][0];
+			
+			for (int e = 0; e < masterElements.size(); e++) {
+				Element masterElement = masterElements.get(e);
+				int[] element_nodes = masterElement.getElementNodes();
+				for (int i = 0; i < element_nodes.length; i++) {
+					int n0 = element_nodes[i];
+					int n1 = element_nodes[(i+1)%element_nodes.length];
+					if (((PlaneElement) masterElement).getR0().get(2, 2) < 0.0) {
+						n0 = n1; //swap n0 and n1
+						n1 = element_nodes[i];
+					}
+					outlineEdge[n0] = SimLive.add(outlineEdge[n0], n1);
+					if (SimLive.contains(outlineEdge[n1], n0)) {
+						outlineEdge[n0] = SimLive.remove(outlineEdge[n0], n1);
+						outlineEdge[n1] = SimLive.remove(outlineEdge[n1], n0);
+					}
+				}
+			}
+			
+			ArrayList<Integer[]> edgesTemp = new ArrayList<Integer[]>();
+			for (int i = 0; i < outlineEdge.length; i++) {
+				if (outlineEdge[i].length > 0 &&
+						(contactPair.getType() == Type.RIGID_DEFORMABLE || SimLive.view.outlineEdge[i].length > 0)) {
+					edgesTemp.add(new Integer[]{i, outlineEdge[i][0]});
+				}
+			}
+			edges.add(edgesTemp);			
+		}
+	}
+	
+	private static double[] getMasterNodeCoords(ContactPair contactPair, int masterNodeID, Solution solution, Matrix u_global) {
 		double[] masterNodeCoords = new double[3];
 		if (contactPair.getType() == Type.DEFORMABLE_DEFORMABLE) {
-			Node masterNode = solution.getRefModel().getNodes().get(masterNodeIDs[k]);
-			int dofMasterNode = solution.getDofOfNodeID(masterNodeIDs[k]);
+			Node masterNode = solution.getRefModel().getNodes().get(masterNodeID);
+			int dofMasterNode = solution.getDofOfNodeID(masterNodeID);
 			masterNodeCoords[0] = masterNode.getXCoord() + u_global.get(dofMasterNode, 0);
 			masterNodeCoords[1] = masterNode.getYCoord() + u_global.get(dofMasterNode+1, 0);
 			masterNodeCoords[2] = masterNode.getZCoord() + u_global.get(dofMasterNode+2, 0);
 		}
 		if (contactPair.getType() == Type.RIGID_DEFORMABLE) {
-			Node masterNode = contactPair.getRigidNodes().get(masterNodeIDs[k]);
+			Node masterNode = contactPair.getRigidNodes().get(masterNodeID);
 			masterNodeCoords[0] = masterNode.getXCoord();
 			masterNodeCoords[1] = masterNode.getYCoord();
 			masterNodeCoords[2] = masterNode.getZCoord();
@@ -108,8 +159,47 @@ public class Contact {
 		return masterNodeCoords;
 	}
 	
+	private static double getSlaveNodeHalfThicknessForSection(Element element, ArrayList<Node> nodes, Matrix u_elem0, double[] normal) {
+		double scal = 0.0;
+		if ((element.getType() == Element.Type.BEAM || element.getType() == Element.Type.ROD) &&
+				((LineElement) element).getSection().getSectionShape().getType() !=
+				SectionShape.Type.DIRECT_INPUT) {
+			double length = ((LineElement) element).getCurrentLength(nodes, u_elem0);
+			Matrix r1 = ((LineElement) element).getr1(nodes, u_elem0, length);
+			Matrix Rr = null;
+			if (element.getType() == Element.Type.BEAM) {
+				Rr = ((Beam) element).getRr(u_elem0, r1);
+			}
+			if (element.getType() == Element.Type.ROD) {
+				Rr = ((Rod) element).getVectorTransformation(r1.getColumnPackedCopy());
+			}
+			if (Rr != null) {
+				SectionShape sectionShape = ((LineElement) element).getSection().getSectionShape();
+				Matrix masterNormal = new Matrix(normal, 3);
+				if (sectionShape.getType() == SectionShape.Type.CIRCLE || sectionShape.getType() == SectionShape.Type.HOLLOW_CIRCLE) {
+					double d = sectionShape.getDiameter();
+					Matrix rx = Rr.getMatrix(0, 2, 0, 0);
+					scal = rx.crossProduct(masterNormal).crossProduct(rx).times(d/2.0).dotProduct(masterNormal);
+				}
+				else {
+					double w = sectionShape.getWidth();
+					double h = sectionShape.getHeight();
+					Matrix ry = Rr.getMatrix(0, 2, 1, 1).times(w/2.0);
+					Matrix rz = Rr.getMatrix(0, 2, 2, 2).times(h/2.0);
+					scal = Math.max(Math.abs(ry.plus(rz).dotProduct(masterNormal)), Math.abs(ry.minus(rz).dotProduct(masterNormal)));
+				}
+			}
+		}
+		return scal;
+	}
+	
 	public static void search(Contact[] contacts, ArrayList<ContactPair> contactPairs,
 			Solution solution, Matrix u_global, Matrix u_global0, Matrix C_global) {
+		
+		if (Model.twoDimensional) {
+			search2d(contacts, contactPairs, solution, u_global, u_global0, C_global);
+			return;
+		}
 		
 		/* do search for all slave nodes */
 		Stream<Node> stream = slaveNodes.parallelStream();
@@ -152,7 +242,7 @@ public class Contact {
 					Element masterElement = masterElements.get(e);
 					int[] masterElemNodes = masterElement.getElementNodes();
 					for (int k = 0; k < masterElemNodes.length; k++) {
-						masterNodeCoords[masterElemNodes[k]] = getMasterNodeCoords(contactPair, k, masterElemNodes, solution, u_global);
+						masterNodeCoords[masterElemNodes[k]] = getMasterNodeCoords(contactPair, masterElemNodes[k], solution, u_global);
 					}
 					int k0 = masterElemNodes[0];
 					int k1 = masterElemNodes[1];
@@ -250,37 +340,7 @@ public class Contact {
 								planeNormal[1] += normal[1];
 								planeNormal[2] += normal[2];
 							}
-							if ((element.getType() == Element.Type.BEAM || element.getType() == Element.Type.ROD) &&
-									((LineElement) element).getSection().getSectionShape().getType() !=
-									SectionShape.Type.DIRECT_INPUT) {
-								double length = ((LineElement) element).getCurrentLength(nodes, u_elem0);
-								Matrix r1 = ((LineElement) element).getr1(nodes, u_elem0, length);
-								Matrix Rr = null;
-								if (element.getType() == Element.Type.BEAM) {
-									Rr = ((Beam) element).getRr(u_elem0, r1);
-								}
-								if (element.getType() == Element.Type.ROD) {
-									Rr = ((Rod) element).getVectorTransformation(r1.getColumnPackedCopy());
-								}
-								if (Rr != null) {
-									SectionShape sectionShape = ((LineElement) element).getSection().getSectionShape();
-									Matrix masterNormal = new Matrix(masterNormals[e], 3);
-									double scal = 0.0;
-									if (sectionShape.getType() == SectionShape.Type.CIRCLE || sectionShape.getType() == SectionShape.Type.HOLLOW_CIRCLE) {
-										double d = sectionShape.getDiameter();
-										Matrix rx = Rr.getMatrix(0, 2, 0, 0);
-										scal = rx.crossProduct(masterNormal).crossProduct(rx).times(d/2.0).dotProduct(masterNormal);
-									}
-									else {
-										double w = sectionShape.getWidth();
-										double h = sectionShape.getHeight();
-										Matrix ry = Rr.getMatrix(0, 2, 1, 1).times(w/2.0);
-										Matrix rz = Rr.getMatrix(0, 2, 2, 2).times(h/2.0);
-										scal = Math.max(Math.abs(ry.plus(rz).dotProduct(masterNormal)), Math.abs(ry.minus(rz).dotProduct(masterNormal)));
-									}
-									slaveNodeHalfThickness = Math.max(slaveNodeHalfThickness, scal);
-								}
-							}
+							slaveNodeHalfThickness = Math.max(slaveNodeHalfThickness, getSlaveNodeHalfThicknessForSection(element, nodes, u_elem0, masterNormals[e]));
 						}
 						double length = Math.sqrt(planeNormal[0]*planeNormal[0]+planeNormal[1]*planeNormal[1]+planeNormal[2]*planeNormal[2]);
 						if (length > 0) {
@@ -343,6 +403,118 @@ public class Contact {
 				contacts[slaveNodeID] = null;
 			}
 		});
+	}
+	
+	private static void search2d(Contact[] contacts, ArrayList<ContactPair> contactPairs,
+			Solution solution, Matrix u_global, Matrix u_global0, Matrix C_global) {
+		
+		/* do search for all slave nodes */
+		for (int n = 0; n < slaveNodes.size(); n++) {
+		
+			double[] coords = new double[3];
+			Node slaveNode = slaveNodes.get(n);
+			int slaveNodeID = slaveNode.getID();
+			int dofNode = solution.getDofOfNodeID(slaveNodeID);
+			coords[0] = slaveNode.getXCoord() + u_global.get(dofNode, 0);
+			coords[1] = slaveNode.getYCoord() + u_global.get(dofNode+1, 0);
+					
+			/* search master element with max penetration, store in masterElement0/masterEdge0 */
+			Element masterElement0 = null;
+			double maxPenetration = -Double.MAX_VALUE;
+			double frictionCoefficient = 0.0;
+			double forwardTol = 0.0;
+			boolean noSeparation = false;
+			boolean isDeformableDeformable = false;
+			double[] edgeNormal0 = new double[3];
+			double edgeT = 0;
+			
+			for (int c = 0; c < contactPairs.size(); c++) if (contactPairs.get(c).getSlaveNodes().contains(slaveNode)) {
+				ContactPair contactPair = contactPairs.get(c);
+				
+				Element masterElement_CP = null;
+				double minPenetration_CP = Double.MAX_VALUE;
+				double[] edgeNormal_CP = new double[3];
+				double edgeT_CP = 0;
+				
+				for (int e = 0; e < edges.get(c).size(); e++) {
+					int k0 = edges.get(c).get(e)[0];
+					int k1 = edges.get(c).get(e)[1];
+					double[] masterNodeCoords0 = getMasterNodeCoords(contactPair, k0, solution, u_global);
+					double[] masterNodeCoords1 = getMasterNodeCoords(contactPair, k1, solution, u_global);
+				
+					double[] diff = new double[2];
+					diff[0] = coords[0] - masterNodeCoords0[0];
+					diff[1] = coords[1] - masterNodeCoords0[1];
+					double[] a = new double[2];
+					a[0] = masterNodeCoords1[0] - masterNodeCoords0[0];
+					a[1] = masterNodeCoords1[1] - masterNodeCoords0[1];
+					double length = Math.sqrt(a[0]*a[0]+a[1]*a[1]);
+					double t = (diff[0]*a[0]+diff[1]*a[1])/(length*length);
+					double[] edgeNormal = new double[3];
+					edgeNormal[0] = -a[1]/length;
+					edgeNormal[1] = a[0]/length;
+					
+					double penetration = diff[0]*edgeNormal[0]+diff[1]*edgeNormal[1];
+					
+					double slaveNodeHalfThickness = 0;
+					ArrayList<Node> nodes = solution.getRefModel().getNodes();
+					for (int e1 = 0; e1 < slaveNodeElements[slaveNodeID].length; e1++) {
+						Element element = solution.getRefModel().getElements().get(slaveNodeElements[slaveNodeID][e1]);
+						Matrix u_elem0 = element.globalToLocalVector(u_global0);
+						slaveNodeHalfThickness = Math.max(slaveNodeHalfThickness, getSlaveNodeHalfThicknessForSection(element, nodes, u_elem0, edgeNormal));
+					}
+					penetration += slaveNodeHalfThickness;
+			
+					if (penetration < minPenetration_CP && 
+							(!contactPair.isMaxPenetration() || penetration < contactPair.getMaxPenetration())) {
+						minPenetration_CP = penetration;
+						masterElement_CP = new Rod(new int[]{k0, k1});
+						edgeNormal_CP = edgeNormal;
+						edgeT_CP = t;
+					}
+				}
+				if (minPenetration_CP > maxPenetration) {
+					maxPenetration = minPenetration_CP;
+					masterElement0 = masterElement_CP;
+					frictionCoefficient = contactPair.getFrictionCoefficient();
+					forwardTol = contactPair.getForwardTol();
+					noSeparation = contactPair.isNoSeparation();
+					isDeformableDeformable = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE;
+					edgeNormal0 = edgeNormal_CP;
+					edgeT = edgeT_CP;
+				}
+			}
+				
+			/* check contact with masterElement0 */
+			if (masterElement0 != null) {
+				
+				double contactForce = 0.0;
+				if (C_global != null) {
+					contactForce = C_global.get(dofNode, 0)*edgeNormal0[0]+C_global.get(dofNode+1, 0)*edgeNormal0[1];
+				}
+				if ((contacts[slaveNodeID] == null && maxPenetration > -forwardTol) ||
+						(contacts[slaveNodeID] != null && ((maxPenetration > -forwardTol && contactForce <= 0.0 && C_global != null) ||
+						 noSeparation))) {
+					
+					double[] shapeFunctionValues = null;
+					if (isDeformableDeformable) {
+						if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking && contacts[slaveNodeID].getShapeFunctionValues() != null) {
+							shapeFunctionValues = contacts[slaveNodeID].getShapeFunctionValues();
+						}
+						else {
+							shapeFunctionValues = ((LineElement) masterElement0).getShapeFunctionValues(edgeT);
+						}
+					}
+					contacts[slaveNodeID] = new Contact(masterElement0, maxPenetration, edgeNormal0, frictionCoefficient, shapeFunctionValues, isDeformableDeformable);
+				}
+				else {
+					contacts[slaveNodeID] = null;
+				}
+			}
+			else {
+				contacts[slaveNodeID] = null;
+			}
+		}
 	}
 	
 }
