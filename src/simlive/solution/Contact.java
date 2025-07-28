@@ -137,7 +137,7 @@ public class Contact {
 					edgesTemp.add(new Integer[]{i, outlineEdge[i][0]});
 				}
 			}
-			edges.add(edgesTemp);			
+			edges.add(edgesTemp);
 		}
 	}
 	
@@ -436,41 +436,71 @@ public class Contact {
 				double[] edgeNormal_CP = new double[3];
 				double edgeT_CP = 0;
 				
+				double[][][] masterNodeCoords = new double[edges.get(c).size()][2][];
+				
+				int maxNodeNr = 0;
 				for (int e = 0; e < edges.get(c).size(); e++) {
 					int k0 = edges.get(c).get(e)[0];
 					int k1 = edges.get(c).get(e)[1];
-					double[] masterNodeCoords0 = getMasterNodeCoords(contactPair, k0, solution, u_global);
-					double[] masterNodeCoords1 = getMasterNodeCoords(contactPair, k1, solution, u_global);
+					masterNodeCoords[e][0] = getMasterNodeCoords(contactPair, k0, solution, u_global);
+					masterNodeCoords[e][1] = getMasterNodeCoords(contactPair, k1, solution, u_global);
+					maxNodeNr = Math.max(maxNodeNr, Math.max(k0, k1));
+				}
 				
-					double[] diff = new double[2];
-					diff[0] = coords[0] - masterNodeCoords0[0];
-					diff[1] = coords[1] - masterNodeCoords0[1];
+				double[][] edgeNormals = new double[edges.get(c).size()][3];
+				double[][] nodeNormals = new double[maxNodeNr+1][];
+									
+				for (int e = 0; e < edges.get(c).size(); e++) {
+					int k0 = edges.get(c).get(e)[0];
+					int k1 = edges.get(c).get(e)[1];
 					double[] a = new double[2];
-					a[0] = masterNodeCoords1[0] - masterNodeCoords0[0];
-					a[1] = masterNodeCoords1[1] - masterNodeCoords0[1];
+					a[0] = masterNodeCoords[e][1][0] - masterNodeCoords[e][0][0];
+					a[1] = masterNodeCoords[e][1][1] - masterNodeCoords[e][0][1];
 					double length = Math.sqrt(a[0]*a[0]+a[1]*a[1]);
-					double t = (diff[0]*a[0]+diff[1]*a[1])/(length*length);
-					double[] edgeNormal = new double[3];
-					edgeNormal[0] = -a[1]/length;
-					edgeNormal[1] = a[0]/length;
+					edgeNormals[e][0] = -a[1]/length;
+					edgeNormals[e][1] = a[0]/length;
+					if (nodeNormals[k0] == null) nodeNormals[k0] = new double[2];
+					nodeNormals[k0][0] += edgeNormals[e][0];
+					nodeNormals[k0][1] += edgeNormals[e][1];
+					if (nodeNormals[k1] == null) nodeNormals[k1] = new double[2];
+					nodeNormals[k1][0] += edgeNormals[e][0];
+					nodeNormals[k1][1] += edgeNormals[e][1];
+				}
+				
+				for (int e = 0; e < edges.get(c).size(); e++) {
+					int k0 = edges.get(c).get(e)[0];
+					int k1 = edges.get(c).get(e)[1];
+					double[] diff0 = new double[2];
+					diff0[0] = coords[0] - masterNodeCoords[e][0][0];
+					diff0[1] = coords[1] - masterNodeCoords[e][0][1];
+					double[] diff1 = new double[2];
+					diff1[0] = coords[0] - masterNodeCoords[e][1][0];
+					diff1[1] = coords[1] - masterNodeCoords[e][1][1];
+					if (nodeNormals[k0][0]*diff0[1]-nodeNormals[k0][1]*diff0[0] < 0.0 &&
+						nodeNormals[k1][0]*diff1[1]-nodeNormals[k1][1]*diff1[0] > 0.0) {
 					
-					double penetration = diff[0]*edgeNormal[0]+diff[1]*edgeNormal[1];
-					
-					double slaveNodeHalfThickness = 0;
-					ArrayList<Node> nodes = solution.getRefModel().getNodes();
-					for (int e1 = 0; e1 < slaveNodeElements[slaveNodeID].length; e1++) {
-						Element element = solution.getRefModel().getElements().get(slaveNodeElements[slaveNodeID][e1]);
-						Matrix u_elem0 = element.globalToLocalVector(u_global0);
-						slaveNodeHalfThickness = Math.max(slaveNodeHalfThickness, getSlaveNodeHalfThicknessForSection(element, nodes, u_elem0, edgeNormal));
-					}
-					penetration += slaveNodeHalfThickness;
-			
-					if (penetration < minPenetration_CP && 
-							(!contactPair.isMaxPenetration() || penetration < contactPair.getMaxPenetration())) {
-						minPenetration_CP = penetration;
-						masterElement_CP = new Rod(new int[]{k0, k1});
-						edgeNormal_CP = edgeNormal;
-						edgeT_CP = t;
+						double penetration = diff0[0]*edgeNormals[e][0]+diff0[1]*edgeNormals[e][1];
+						
+						double slaveNodeHalfThickness = 0;
+						ArrayList<Node> nodes = solution.getRefModel().getNodes();
+						for (int e1 = 0; e1 < slaveNodeElements[slaveNodeID].length; e1++) {
+							Element element = solution.getRefModel().getElements().get(slaveNodeElements[slaveNodeID][e1]);
+							Matrix u_elem0 = element.globalToLocalVector(u_global0);
+							slaveNodeHalfThickness = Math.max(slaveNodeHalfThickness, getSlaveNodeHalfThicknessForSection(element, nodes, u_elem0, edgeNormals[e]));
+						}
+						penetration += slaveNodeHalfThickness;
+				
+						if (penetration < minPenetration_CP && 
+								(!contactPair.isMaxPenetration() || penetration < contactPair.getMaxPenetration())) {
+							minPenetration_CP = penetration;
+							masterElement_CP = new Rod(new int[]{k0, k1});
+							edgeNormal_CP = edgeNormals[e];
+							double[] a = new double[2];
+							a[0] = masterNodeCoords[e][1][0] - masterNodeCoords[e][0][0];
+							a[1] = masterNodeCoords[e][1][1] - masterNodeCoords[e][0][1];
+							double length = Math.sqrt(a[0]*a[0]+a[1]*a[1]);
+							edgeT_CP = (diff0[0]*a[0]+diff0[1]*a[1])/(length*length);
+						}
 					}
 				}
 				if (minPenetration_CP > maxPenetration) {
