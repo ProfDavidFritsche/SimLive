@@ -298,7 +298,7 @@ public class Solution {
 	
 	public void calculate(SolutionDialog dialog) {
 		
-		dialog.initProgressBar(refModel.getSteps().get(0).type == Type.MODAL_ANALYSIS ? 5*nDofs : nIncrements + 1);
+		dialog.initProgressBar(refModel.getSteps().get(0).type == Type.MODAL_ANALYSIS ? 5*(nDofs-nSuppressedDofs) : nIncrements + 1);
 		
 		int startInc = 0;
 		double startTime = 0.0;
