@@ -231,7 +231,7 @@ public class SimLive {
 	public static Label statusBar;
 	private static Label displayPartsIcon;
 	private static Label displayParts;
-	private static Label selection;
+	private static Label modelDimension;
 	private static Label resultIcon;
 	private static Label result;
 	public static Composite compositeLeft;
@@ -439,8 +439,8 @@ public class SimLive {
 				menuItem_new.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						newFile(null);
 						Model.twoDimensional = false;
+						newFile(null);						
 					}
 				});			
 				MenuItem menuItem_new2dmodel = new MenuItem(menu, SWT.NONE);
@@ -448,8 +448,8 @@ public class SimLive {
 				menuItem_new2dmodel.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						newFile(null);
 						Model.twoDimensional = true;
+						newFile(null);
 					}
 				});
 				new MenuItem(menu, SWT.SEPARATOR);
@@ -811,7 +811,6 @@ public class SimLive {
 				select = select == Select.DISTANCE ? Select.DEFAULT : Select.DISTANCE;
 				//SimLive.view.deselectAllAndDisposeDialogs();
 				SimLive.view.removeUnfinalizedMeasurement();
-				setSelectionLabel();
 			}
 		});
 		tltmMeasureDistance.setText("Measure Distance");
@@ -823,7 +822,6 @@ public class SimLive {
 				select = select == Select.ANGLE ? Select.DEFAULT : Select.ANGLE;
 				//SimLive.view.deselectAllAndDisposeDialogs();
 				SimLive.view.removeUnfinalizedMeasurement();
-				setSelectionLabel();
 			}
 		});
 		tltmMeasureAngle.setText("Measure Angle");
@@ -835,7 +833,6 @@ public class SimLive {
 				select = select == Select.LABEL ? Select.DEFAULT : Select.LABEL;
 				//SimLive.view.deselectAllAndDisposeDialogs();
 				SimLive.view.removeUnfinalizedMeasurement();
-				setSelectionLabel();
 			}
 		});
 		tltmCreateLabels.setText("Create Labels");
@@ -2037,7 +2034,7 @@ public class SimLive {
 		Image img = INFO_ICON;
 		selectionIcon.setImage(resize(img, ICON_HEIGHT_FACTORS[1]));
 		
-		selection = new Label(compositeStatusBar, SWT.NONE);
+		modelDimension = new Label(compositeStatusBar, SWT.NONE);
 		
 		Label separator_4 = new Label(compositeStatusBar, SWT.SEPARATOR | SWT.VERTICAL);
 		GridData gd_separator_4 = new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1);
@@ -2283,7 +2280,6 @@ public class SimLive {
 		//view.deselectAll();
 		statusBar.setText("");
 		setDisplayPartsLabel();
-		setSelectionLabel();
 		view.setCursor(null);
 		View.Rr = null;
 		SimLive.model.updateModel();
@@ -2318,18 +2314,9 @@ public class SimLive {
 		compositeStatusBar.layout();
 	}
 	
-	private void setSelectionLabel() {
-		String string = null;
-		switch (select) {
-			case DISTANCE: 	string = "Measure Distance";
-							break;
-			case ANGLE: 	string = "Measure Angle";
-							break;
-			case LABEL: 	string = "Create Labels";
-							break;
-			default: 		string = "Default Selection";
-		}
-		selection.setText(string);
+	private void setModelDimension() {
+		String string = Model.twoDimensional ? "2D-Model" : "3D-Model";
+		modelDimension.setText(string);
 		compositeStatusBar.layout();
 	}
 	
@@ -2742,6 +2729,7 @@ public class SimLive {
 		select = Select.DEFAULT;
 		resetState();
 		resetToPartsMode();
+		setModelDimension();
 		setResultLabel(null, false, false, false);
 		
 		return true;
