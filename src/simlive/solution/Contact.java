@@ -133,7 +133,10 @@ public class Contact {
 			ArrayList<Integer[]> edgesTemp = new ArrayList<Integer[]>();
 			for (int i = 0; i < outlineEdge.length; i++) {
 				for (int j = 0; j < outlineEdge[i].length; j++) {
-					edgesTemp.add(new Integer[]{i, outlineEdge[i][j]});
+					if (contactPair.getType() == Type.RIGID_DEFORMABLE ||
+							(SimLive.view.outlineEdge[i].length > j && SimLive.view.outlineEdge[i][j] == outlineEdge[i][j])) {
+						edgesTemp.add(new Integer[]{i, outlineEdge[i][j]});
+					}
 				}
 			}
 			edges.add(edgesTemp);
@@ -430,11 +433,6 @@ public class Contact {
 			for (int c = 0; c < contactPairs.size(); c++) if (contactPairs.get(c).getSlaveNodes().contains(slaveNode)) {
 				ContactPair contactPair = contactPairs.get(c);
 				
-				Element masterElement_CP = null;
-				double minPenetration_CP = Double.MAX_VALUE;
-				double[] edgeNormal_CP = new double[3];
-				double edgeT_CP = 0;
-				
 				double[][][] masterNodeCoords = new double[edges.get(c).size()][2][];
 				
 				int maxNodeNr = 0;
@@ -489,28 +487,22 @@ public class Contact {
 						}
 						penetration += slaveNodeHalfThickness;
 				
-						if (penetration < minPenetration_CP && 
+						if (penetration > maxPenetration && 
 								(!contactPair.isMaxPenetration() || penetration < contactPair.getMaxPenetration())) {
-							minPenetration_CP = penetration;
-							masterElement_CP = new Rod(new int[]{k0, k1});
-							edgeNormal_CP = edgeNormals[e];
+							maxPenetration = penetration;
+							masterElement0 = new Rod(new int[]{k0, k1});
+							frictionCoefficient = contactPair.getFrictionCoefficient();
+							forwardTol = contactPair.getForwardTol();
+							noSeparation = contactPair.isNoSeparation();
+							isDeformableDeformable = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE;
+							edgeNormal0 = edgeNormals[e];
 							double[] a = new double[2];
 							a[0] = masterNodeCoords[e][1][0] - masterNodeCoords[e][0][0];
 							a[1] = masterNodeCoords[e][1][1] - masterNodeCoords[e][0][1];
 							double length = Math.sqrt(a[0]*a[0]+a[1]*a[1]);
-							edgeT_CP = (diff0[0]*a[0]+diff0[1]*a[1])/(length*length);
+							edgeT = (diff0[0]*a[0]+diff0[1]*a[1])/(length*length);
 						}
 					}
-				}
-				if (minPenetration_CP > maxPenetration) {
-					maxPenetration = minPenetration_CP;
-					masterElement0 = masterElement_CP;
-					frictionCoefficient = contactPair.getFrictionCoefficient();
-					forwardTol = contactPair.getForwardTol();
-					noSeparation = contactPair.isNoSeparation();
-					isDeformableDeformable = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE;
-					edgeNormal0 = edgeNormal_CP;
-					edgeT = edgeT_CP;
 				}
 			}
 				
