@@ -408,10 +408,10 @@ public class Contact {
 			Solution solution, Matrix u_global, Matrix u_global0, Matrix C_global) {
 		
 		/* do search for all slave nodes */
-		for (int n = 0; n < slaveNodes.size(); n++) {
+		Stream<Node> stream = slaveNodes.parallelStream();
+		stream.forEach(slaveNode -> {
 		
 			double[] coords = new double[3];
-			Node slaveNode = slaveNodes.get(n);
 			int slaveNodeID = slaveNode.getID();
 			int dofNode = solution.getDofOfNodeID(slaveNodeID);
 			coords[0] = slaveNode.getXCoord() + u_global.get(dofNode, 0);
@@ -543,7 +543,7 @@ public class Contact {
 			else {
 				contacts[slaveNodeID] = null;
 			}
-		}
+		});
 	}
 	
 }
