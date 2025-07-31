@@ -476,8 +476,8 @@ public class Contact {
 					double[] diff1 = new double[2];
 					diff1[0] = coords[0] - masterNodeCoords[e][1][0];
 					diff1[1] = coords[1] - masterNodeCoords[e][1][1];
-					if (nodeNormals[k0][0]*diff0[1]-nodeNormals[k0][1]*diff0[0] < 0.0 &&
-						nodeNormals[k1][0]*diff1[1]-nodeNormals[k1][1]*diff1[0] > 0.0) {
+					if (nodeNormals[k0][0]*diff0[1]-nodeNormals[k0][1]*diff0[0] < SimLive.ZERO_TOL &&
+						nodeNormals[k1][0]*diff1[1]-nodeNormals[k1][1]*diff1[0] > -SimLive.ZERO_TOL) {
 					
 						double penetration = diff0[0]*edgeNormals[e][0]+diff0[1]*edgeNormals[e][1];
 						
