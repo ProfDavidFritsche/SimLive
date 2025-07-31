@@ -132,9 +132,8 @@ public class Contact {
 			
 			ArrayList<Integer[]> edgesTemp = new ArrayList<Integer[]>();
 			for (int i = 0; i < outlineEdge.length; i++) {
-				if (outlineEdge[i].length > 0 &&
-						(contactPair.getType() == Type.RIGID_DEFORMABLE || SimLive.view.outlineEdge[i].length > 0)) {
-					edgesTemp.add(new Integer[]{i, outlineEdge[i][0]});
+				for (int j = 0; j < outlineEdge[i].length; j++) {
+					edgesTemp.add(new Integer[]{i, outlineEdge[i][j]});
 				}
 			}
 			edges.add(edgesTemp);
