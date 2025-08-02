@@ -108,12 +108,7 @@ public class Solution {
 		/*generateSlaveNodeList*/
 		Contact.generateSlaveNodeList(refModel.getContactPairs(), refModel.getElements(), refModel.getNodes().size());
 		
-		if (Model.twoDimensional) {
-			/*generateEdgeList*/
-			Contact.generateEdgeList(refModel.getContactPairs());
-			
-			setSuppressedDofs2d();
-		}
+		if (Model.twoDimensional) setSuppressedDofs2d();
 	}
 	
 	public boolean checkModel() {

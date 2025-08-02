@@ -558,7 +558,6 @@ public class Model implements DeepEqualsInterface {
 	public void updateModel() {
 		if (SimLive.mode != Mode.RESULTS) {
 			deleteUnusedNodes();
-			updateAllContacts();
 			updateAllNodes();
 			//updateAllPlaneElementOrientations();
 			updateAllElements();
@@ -570,6 +569,7 @@ public class Model implements DeepEqualsInterface {
 			updateAllConnectors();
 			updateAllConnectors3d();
 			updateAllOutlines();
+			updateAllContacts();
 			updateAllLabels();
 			SimLive.view.cleanViewData();
 			
