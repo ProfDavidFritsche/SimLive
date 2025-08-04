@@ -1423,6 +1423,34 @@ public class View extends GLCanvas {
 					(!selectedNodes.isEmpty() || (!selectedSets.isEmpty() &&
 					SimLive.model.doSetsContainOnlyPlaneElements(selectedSets)))) {
 				ContactPair contactPair = (ContactPair) objects.get(0);
+				if (Model.twoDimensional) {
+					ArrayList<Integer[]> selectedEdges = new ArrayList<Integer[]>();
+					for (int e = 0; e < contactPair.getEdges().size(); e++) {
+						int set = contactPair.getEdges().get(e)[0];
+						int elem = contactPair.getEdges().get(e)[1];
+						int edge = contactPair.getEdges().get(e)[2];
+						Element element = contactPair.getMasterSets().get(set).getElements().get(elem);
+						int[] element_nodes = element.getElementNodes();
+						int n0 = element_nodes[edge];
+						int n1 = element_nodes[(edge+1)%element_nodes.length];
+						if (selectedNodes.contains(SimLive.model.getNodes().get(n0)) &&
+								selectedNodes.contains(SimLive.model.getNodes().get(n1))) {
+							selectedEdges.add(contactPair.getEdges().get(e));
+						}
+					}
+					if (!selectedEdges.isEmpty()) {
+						new MenuItem(popup, SWT.SEPARATOR);
+						MenuItem deleteEdges = new MenuItem(popup, SWT.NONE);
+						deleteEdges.setText("Delete Edges");
+						deleteEdges.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								contactPair.getEdges().removeAll(selectedEdges);
+								deselectAll();
+							}
+						});
+					}
+				}
 				getStoreMenuItem(popup).addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -3493,15 +3521,23 @@ public class View extends GLCanvas {
 					double length = Math.sqrt(a[0]*a[0]+a[1]*a[1]);
 					gl2.glPushMatrix();
 					gl2.glTranslated((coords0[0]+coords1[0])/2.0, (coords0[1]+coords1[1])/2.0, (coords0[2]+coords1[2])/2.0);
-					gl2.glRotated(Math.acos(a[1]/length)*180.0/Math.PI, 0, 0, Math.signum(-a[0]));
+					gl2.glRotated(Math.acos(a[1]/length)*180.0/Math.PI, 0, 0, a[0] > 0.0 ? -1 : 1);
 					gl2.glRotatef(90, 0, 1, 0);
-		    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
+					if (selectedNodes.contains(SimLive.model.getNodes().get(n0)) && selectedNodes.contains(SimLive.model.getNodes().get(n1))) {
+						gl2.glDisable(GL2.GL_LIGHTING);
+						gl2.glColor3fv(SimLive.COLOR_SELECTION, 0);
+					}
+					else {
+						gl2.glEnable(GL2.GL_LIGHTING);
+						gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
+					}
 			    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
 							(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
 							SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
 			    	gl2.glPopMatrix();
 				}
 			}
+			gl2.glEnable(GL2.GL_LIGHTING);
 		}
 		
 		/* external reactions */
