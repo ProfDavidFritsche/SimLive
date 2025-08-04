@@ -1474,6 +1474,8 @@ public class Increment {
 				item.setBackground(1, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 				for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
 					item.setText(c, SimLive.double2String(matrix.get(r-1, c-2)));
+					if (SimLive.tableHighlights != null && r < SimLive.tableHighlights.length &&
+							c < SimLive.tableHighlights[r].length && SimLive.tableHighlights[r][c]) item.setBackground(c, SimLive.floatToColor(SimLive.COLOR_SELECTION));
 				}
 			}
 			

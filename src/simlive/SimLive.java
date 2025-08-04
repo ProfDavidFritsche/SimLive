@@ -258,6 +258,7 @@ public class SimLive {
 	
 	private static Tree tree;
 	private static Table table;
+	public static boolean[][] tableHighlights;
 	
 	private static SashForm sashForm, sashForm_1, sashForm_2, sashFormMatrixView;
 	private static int[] sashForm_Weights;
@@ -1937,6 +1938,7 @@ public class SimLive {
 		tree.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
+				tableHighlights = null;
 				updateMatrixView();
 			}
 		});
@@ -1958,7 +1960,7 @@ public class SimLive {
 		addFocusListener(table, tabFolderMatrixView);
 		table.addListener(SWT.MouseDown, new Listener(){
 	        public void handleEvent(Event event){
-	            Point pt = new Point(event.x, event.y);
+	        	Point pt = new Point(event.x, event.y);
 	            for (int i = 1; i < table.getItemCount(); i++) {
             		TableItem item = table.getItem(i);
             		Rectangle rect = item.getBounds();
@@ -1968,6 +1970,20 @@ public class SimLive {
 		                    if (pt.x > rect.x && pt.x < rect.x+rect.width) {
 		                    	table.getItem(i).setBackground(j, table.getItem(i).getBackground(j).equals(table.getBackground()) ?
 		                    			floatToColor(COLOR_SELECTION) : table.getBackground());
+		                    	if (tableHighlights == null) tableHighlights = new boolean[i+1][j+1];
+		                    	if (i > tableHighlights.length-1) {
+		                    		boolean[][] tableHighlightsNew = new boolean[i+1][tableHighlights[0].length];
+		                    		for (int k = 0; k < tableHighlights.length; k++) {
+		                    			tableHighlightsNew[k] = tableHighlights[k];
+		                    		}
+		                    		tableHighlights = tableHighlightsNew;                		
+		                    	}
+		                    	if (j > tableHighlights[0].length-1) {
+		                    		for (int k = 0; k < tableHighlights.length; k++) {
+		                    			tableHighlights[k] = Arrays.copyOf(tableHighlights[k], j+1);
+		                    		}
+		                    	}
+		                    	tableHighlights[i][j] = !tableHighlights[i][j];
 		                    	break;
 		                    }
 		                }
@@ -2476,6 +2492,7 @@ public class SimLive {
 		    table.getColumns()[0].dispose();
 		}
 		table.removeAll();
+		tableHighlights = null;
 		
 		//setResultLabel(null, false, false, false);
 		/*lastSolution = null;
