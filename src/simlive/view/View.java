@@ -3469,9 +3469,12 @@ public class View extends GLCanvas {
 			    	}
 		    	}
 			}
-			//orientations of edges
-			for (int c = 0; c < SimLive.model.getContactPairs().size(); c++) {
-				ContactPair contactPair = SimLive.model.getContactPairs().get(c);
+		}
+		//orientations of edges
+		if (SimLive.mode == Mode.CONTACTS) {
+			double arrowSize = SimLive.ORIENTATION_SIZE/width/zoom;
+			for (int c = 0; c < objects.size(); c++) {
+				ContactPair contactPair = (ContactPair) objects.get(c);
 				for (int e = 0; e < contactPair.getEdges().size(); e++) {
 					int set = contactPair.getEdges().get(e)[0];
 					int elem = contactPair.getEdges().get(e)[1];

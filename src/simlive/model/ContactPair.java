@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import simlive.SimLive;
-import simlive.SimLive.Mode;
 
 public class ContactPair implements DeepEqualsInterface {
 	
@@ -153,6 +152,7 @@ public class ContactPair implements DeepEqualsInterface {
 		if (this.type == Type.RIGID_DEFORMABLE) {
 			this.setRigidDeformable();
 		}
+		updateEdges();
 	}
 	
 	public ArrayList<Node> getSlaveNodes() {
@@ -169,6 +169,25 @@ public class ContactPair implements DeepEqualsInterface {
 
 	public void setEdges(ArrayList<Integer[]> edges) {
 		this.edges = edges;
+	}
+
+	private void updateEdges() {
+		if (Model.twoDimensional) {
+			edges.clear();
+			for (int s = 0; s < masterSets.size(); s++) {
+				for (int e = 0; e < masterSets.get(s).getElements().size(); e++) {
+					Element masterElement = masterSets.get(s).getElements().get(e);
+					int[] element_nodes = masterElement.getElementNodes();
+					for (int i = 0; i < element_nodes.length; i++) {
+						int n0 = element_nodes[i];
+						int n1 = element_nodes[(i+1)%element_nodes.length];
+						if (SimLive.view.outlineEdge.length > n0 && SimLive.contains(SimLive.view.outlineEdge[n0], n1)) {
+							edges.add(new Integer[]{s, e, i});
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public ContactPair clone(Model model) {
@@ -277,20 +296,22 @@ public class ContactPair implements DeepEqualsInterface {
 			masterSets.retainAll(SimLive.model.getSets());
 		}
 		updateForwardTol();
-		if (Model.twoDimensional && type == Type.DEFORMABLE_DEFORMABLE && SimLive.mode != Mode.NONE) {
-			edges.clear();
-			for (int s = 0; s < masterSets.size(); s++) {
-				for (int e = 0; e < masterSets.get(s).getElements().size(); e++) {
-					Element masterElement = masterSets.get(s).getElements().get(e);
-					int[] element_nodes = masterElement.getElementNodes();
-					for (int i = 0; i < element_nodes.length; i++) {
-						int n0 = element_nodes[i];
-						int n1 = element_nodes[(i+1)%element_nodes.length];
-						if (SimLive.view.outlineEdge.length > n0 && SimLive.contains(SimLive.view.outlineEdge[n0], n1)) {
-							edges.add(new Integer[]{s, e, i});
-						}
-					}
+		if (Model.twoDimensional && type == Type.DEFORMABLE_DEFORMABLE) {
+			for (int e = 0; e < edges.size(); e++) {
+				int set = edges.get(e)[0];
+				int element = edges.get(e)[1];
+				int edge = edges.get(e)[2];
+				if (set < masterSets.size() && element < masterSets.get(set).getElements().size() &&
+						edge < masterSets.get(set).getElements().get(element).getElementNodes().length) {
+					int[] element_nodes = masterSets.get(set).getElements().get(element).getElementNodes();
+					int n0 = element_nodes[edge];
+					int n1 = element_nodes[(edge+1)%element_nodes.length];
+					if (SimLive.view.outlineEdge.length > n0 && SimLive.contains(SimLive.view.outlineEdge[n0], n1)) {
+						continue;
+					}					
 				}
+				updateEdges();
+				break;
 			}
 		}
 	}
