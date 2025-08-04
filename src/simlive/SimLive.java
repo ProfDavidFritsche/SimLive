@@ -90,6 +90,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.FloatBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -565,11 +569,30 @@ public class SimLive {
 				new MenuItem(menu, SWT.SEPARATOR);
 				MenuItem menuItem_exportMatrixView = new MenuItem(menu, SWT.NONE);
 				menuItem_exportMatrixView.setText("Export Matrix View...");
-				menuItem_exportMatrixView.setEnabled(tree.getItemCount() > 0);
+				menuItem_exportMatrixView.setEnabled(table.getItemCount() > 1 && table.getItem(1).getText(1) != "");
 				menuItem_exportMatrixView.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						
+						FileDialog fileDialog = new FileDialog(shell, SWT.SAVE);
+						String[] filter = new String[1];
+						filter[0] = "*.csv";
+						fileDialog.setFilterExtensions(filter);
+						if (fileDialog.open() != null) {
+							ArrayList<String> lines = new ArrayList<String>();
+							for (int i = 0; i < table.getItemCount(); i++) {
+								String str = "";
+								for (int j = 1; j < table.getColumnCount(); j++) {
+									str += table.getItem(i).getText(j)+";";
+								}
+								lines.add(str);
+							}
+							try {
+								Files.write(Paths.get(fileDialog.getFilterPath()+
+										System.getProperty("file.separator")+fileDialog.getFileName()), lines, StandardCharsets.UTF_8,
+										StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);								
+							}
+							catch (Exception e1) {}
+						}
 					}
 				});
 				MenuItem menuItem_saveScreenshot = new MenuItem(menu, SWT.NONE);
