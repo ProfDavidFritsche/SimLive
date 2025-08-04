@@ -120,6 +120,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.widgets.Group;
@@ -1955,6 +1956,26 @@ public class SimLive {
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		table.setLinesVisible(true);
 		addFocusListener(table, tabFolderMatrixView);
+		table.addListener(SWT.MouseDown, new Listener(){
+	        public void handleEvent(Event event){
+	            Point pt = new Point(event.x, event.y);
+	            for (int i = 1; i < table.getItemCount(); i++) {
+            		TableItem item = table.getItem(i);
+            		Rectangle rect = item.getBounds();
+            		if (pt.y > rect.y && pt.y < rect.y+rect.height) {
+	                    for (int j = 2; j < table.getColumnCount(); j++) {
+		                    rect = item.getBounds(j);
+		                    if (pt.x > rect.x && pt.x < rect.x+rect.width) {
+		                    	table.getItem(i).setBackground(j, table.getItem(i).getBackground(j).equals(table.getBackground()) ?
+		                    			floatToColor(COLOR_SELECTION) : table.getBackground());
+		                    	break;
+		                    }
+		                }
+	                    break;
+            		}
+            	}
+	        }
+	    });
 		/*table.addMouseTrackListener(new MouseTrackAdapter() {
 			@Override
 			public void mouseEnter(MouseEvent e) {
