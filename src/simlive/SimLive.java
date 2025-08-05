@@ -1963,7 +1963,7 @@ public class SimLive {
 		tree.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				tableHighlights = null;
+				resetTable();
 				updateMatrixView();
 			}
 		});
@@ -2486,7 +2486,6 @@ public class SimLive {
 				public void run() {
 					if (post != null) {
 						post.getPostIncrement().initTree(tree, post.getPostIncrementID());
-						post.getPostIncrement().initTable(table);
 						int leftWidth = tree.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 						if (sashFormMatrixView_sashWidth != 0) {
 							sashFormMatrixView.setSashWidth(sashFormMatrixView_sashWidth);
@@ -2515,13 +2514,7 @@ public class SimLive {
 		diagramArea.reset();
 		tree.removeAll();
 		sashFormMatrixView.setWeights(new int[] {1, 0});
-		table.setRedraw(false);
-		for (int c = table.getColumnCount()-1; c > -1; c--) {
-			table.getColumn(c).dispose();
-		}
-		table.removeAll();
-		table.setRedraw(true);
-		tableHighlights = null;
+		resetTable();
 		
 		//setResultLabel(null, false, false, false);
 		/*lastSolution = null;
@@ -2531,6 +2524,16 @@ public class SimLive {
 		}*/
 	}
 	
+	private static void resetTable() {
+		table.setRedraw(false);
+		for (int c = table.getColumnCount()-1; c > -1; c--) {
+			table.getColumn(c).dispose();
+		}
+		table.removeAll();
+		table.setRedraw(true);
+		tableHighlights = null;
+	}
+
 	private static void setSashFormMatrixView(int leftWidth) {
 		int width = sashFormMatrixView.getClientArea().width;
 		int[] weights = new int[2];

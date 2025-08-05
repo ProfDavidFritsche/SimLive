@@ -1431,38 +1431,25 @@ public class Increment {
 				solution.getNumberOfIncrements());
 	}
 	
-	public void initTable(Table table) {
-		table.setRedraw(false);
-		int nDofs = solution.getNumberOfDofs();
-		int nConstrDofMax = 0;
-		for (int i = 0; i < solution.getNumberOfIncrements(); i++) {
-			int nConstrDof = solution.getConstraintMethod().getGlobalDofNames(
-					solution.getIncrement(i).G, solution.getRefModel()).length;
-			if (nConstrDof > nConstrDofMax) {
-				nConstrDofMax = nConstrDof;
-			}
-		}
-		int dim = Math.max(nDofs, nConstrDofMax);
-		for (int c = 0; c < dim+2; c++) {
-			new TableColumn(table, SWT.NONE);
-		}
-		for (int r = 0; r < dim+1; r++) {
-			new TableItem(table, SWT.NONE);
-		}
-		table.getColumn(0).setWidth(0);
-		for (int c = 1; c < dim+2; c++) {
-			table.getColumn(c).setAlignment(SWT.RIGHT);
-		}
-		table.setRedraw(true);
-	}
-	
 	public void updateTable(Table table, Tree tree) {		
 		table.setRedraw(false);
-		table.clearAll();
 		String[][] dofNames = new String[1][];
 		Matrix matrix = getMatrixFromTreeSelection(tree, dofNames);
 		if (matrix != null) {
-			
+			if (table.getItemCount() < matrix.getRowDimension()+1 || table.getColumnCount() < matrix.getColumnDimension()+2) {
+				for (int r = table.getItemCount(); r < matrix.getRowDimension()+1; r++) {
+					new TableItem(table, SWT.NONE);
+				}
+				for (int c = table.getColumnCount(); c < matrix.getColumnDimension()+2; c++) {
+					new TableColumn(table, SWT.NONE);
+					table.getColumn(c).setAlignment(SWT.RIGHT);
+				}
+				table.getColumn(0).setWidth(0);
+			}
+			else {
+				table.clearAll();
+			}
+				
 			TableItem item = table.getItem(0);
 			String[] str = new String[matrix.getColumnDimension()+2];
 			for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
