@@ -200,7 +200,7 @@ public class Solution {
 		}
 		
 		if (isWriteMatrixView) {
-			int max_nDofs = 500;
+			int max_nDofs = 1000;
 			if (nDofs > max_nDofs) {
 				errors.add("Write matrix view for large systems (nDof>"+Integer.toString(max_nDofs)+") is not possible.");
 			}
