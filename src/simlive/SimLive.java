@@ -2515,6 +2515,9 @@ public class SimLive {
 		diagramArea.reset();
 		tree.removeAll();
 		sashFormMatrixView.setWeights(new int[] {1, 0});
+		while (table.getColumnCount() > 0) {
+		    table.getColumns()[0].dispose();
+		}
 		table.removeAll();
 		tableHighlights = null;
 		
