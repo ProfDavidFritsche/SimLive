@@ -1432,6 +1432,7 @@ public class Increment {
 	}
 	
 	public void initTable(Table table) {
+		table.setRedraw(false);
 		int nDofs = solution.getNumberOfDofs();
 		int nConstrDofMax = 0;
 		for (int i = 0; i < solution.getNumberOfIncrements(); i++) {
@@ -1452,6 +1453,7 @@ public class Increment {
 		for (int c = 1; c < dim+2; c++) {
 			table.getColumn(c).setAlignment(SWT.RIGHT);
 		}
+		table.setRedraw(true);
 	}
 	
 	public void updateTable(Table table, Tree tree) {		
