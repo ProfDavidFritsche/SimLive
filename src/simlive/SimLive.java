@@ -64,6 +64,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.wb.swt.SWTResourceManager;
+
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawableFactory;
@@ -1991,6 +1993,10 @@ public class SimLive {
 	                    for (int j = 2; j < table.getColumnCount(); j++) {
 		                    rect = item.getBounds(j);
 		                    if (pt.x > rect.x && pt.x < rect.x+rect.width) {
+		                    	table.getItem(i).setBackground(j, table.getItem(i).getBackground(j).equals(table.getBackground()) ?
+		                    			SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION) : table.getBackground());
+		                    	table.getItem(i).setForeground(j, table.getItem(i).getForeground(j).equals(table.getForeground()) ?
+		                    			table.getBackground() : table.getForeground());
 		                    	if (tableHighlights == null) tableHighlights = new boolean[i+1][j+1];
 		                    	if (i > tableHighlights.length-1) {
 		                    		boolean[][] tableHighlightsNew = new boolean[i+1][tableHighlights[0].length];
@@ -2005,7 +2011,6 @@ public class SimLive {
 		                    		}
 		                    	}
 		                    	tableHighlights[i][j] = !tableHighlights[i][j];
-		                    	post.getPostIncrement().updateTable(table, tree);
 		                    	break;
 		                    }
 		                }
