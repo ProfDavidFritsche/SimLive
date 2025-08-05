@@ -1455,31 +1455,36 @@ public class Increment {
 	}
 	
 	public void updateTable(Table table, Tree tree) {		
+		table.setRedraw(false);
 		table.clearAll();
 		String[][] dofNames = new String[1][];
 		Matrix matrix = getMatrixFromTreeSelection(tree, dofNames);
 		if (matrix != null) {
 			
 			TableItem item = table.getItem(0);
+			String[] str = new String[matrix.getColumnDimension()+2];
 			for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
 				if (matrix.getColumnDimension() > 1) {
-					item.setText(c, dofNames[0][c-2]);
+					str[c] = dofNames[0][c-2];
 				}
 				item.setBackground(c, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 			}
+			item.setText(str);
 			
 			for (int r = 1; r < matrix.getRowDimension()+1; r++) {
 				item = table.getItem(r);
-				item.setText(1, dofNames[0][r-1]);
+				str = new String[matrix.getColumnDimension()+2];
+				str[1] = dofNames[0][r-1];
 				item.setBackground(1, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 				for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
-					item.setText(c, SimLive.double2String(matrix.get(r-1, c-2)));
+					str[c] = SimLive.double2String(matrix.get(r-1, c-2));
 					if (SimLive.tableHighlights != null && r < SimLive.tableHighlights.length &&
 							c < SimLive.tableHighlights[r].length && SimLive.tableHighlights[r][c]) {
 						item.setBackground(c, SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
 						item.setForeground(c, table.getBackground());
 					}
 				}
+				item.setText(str);
 			}
 			
 			table.getColumn(1).pack();
@@ -1494,8 +1499,8 @@ public class Increment {
 				}	
 				table.getColumn(c).setWidth(widthHint);
 			}
-			
 		}
+		table.setRedraw(true);
 	}
 
 	private Matrix getMatrixFromTreeSelection(Tree tree, String[][] dofNames) {
