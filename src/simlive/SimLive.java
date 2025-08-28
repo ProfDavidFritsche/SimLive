@@ -2478,6 +2478,8 @@ public class SimLive {
 							sashFormMatrixView.setSashWidth(sashFormMatrixView_sashWidth);
 						}
 						setSashFormMatrixView(leftWidth);
+						table.setFont(shell.getDisplay().getSystemFont());
+						toggleNonZeroEntries = false;
 					}
 				}
 			});
@@ -2488,6 +2490,7 @@ public class SimLive {
 		SimLive.shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				tree.removeAll();
+				resetTable();
 			}
 		});
 		post = new Post(solution);

@@ -1452,32 +1452,32 @@ public class Increment {
 				
 			TableItem item = table.getItem(0);
 			String[] str = new String[matrix.getColumnDimension()+2];
-			for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
+			for (int c = 0; c < matrix.getColumnDimension(); c++) {
 				if (matrix.getColumnDimension() > 1) {
-					str[c] = dofNames[0][c-2];
+					str[c+2] = dofNames[0][c];
 				}
-				item.setBackground(c, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+				item.setBackground(c+2, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 			}
 			item.setText(str);
 			
-			for (int r = 1; r < matrix.getRowDimension()+1; r++) {
-				item = table.getItem(r);
+			for (int r = 0; r < matrix.getRowDimension(); r++) {
+				item = table.getItem(r+1);
 				str = new String[matrix.getColumnDimension()+2];
-				str[1] = dofNames[0][r-1];
+				str[1] = dofNames[0][r];
 				item.setBackground(1, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
-				for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
-					double value = matrix.get(r-1, c-2);
+				for (int c = 0; c < matrix.getColumnDimension(); c++) {
+					double value = matrix.get(r, c);
 					if (SimLive.toggleNonZeroEntries && value != 0.0) {
-						item.setBackground(c, SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
-						item.setForeground(c, table.getBackground());
+						item.setBackground(c+2, SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
+						item.setForeground(c+2, table.getBackground());
 					}
-					str[c] = SimLive.double2String(value);
+					str[c+2] = SimLive.double2String(value);
 				}
 				item.setText(str);
 			}
 			
 			table.getColumn(1).pack();
-			for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
+			for (int c = 0; c < matrix.getColumnDimension(); c++) {
 				int widthHint = -1;
 				{
 					GC gc = new GC(table);
@@ -1486,7 +1486,7 @@ public class Increment {
 					widthHint = gc.stringExtent("-,E-00XX"+new String(chars)).x;
 					gc.dispose();
 				}	
-				table.getColumn(c).setWidth(widthHint);
+				table.getColumn(c+2).setWidth(widthHint);
 			}
 		}
 		table.setRedraw(true);
