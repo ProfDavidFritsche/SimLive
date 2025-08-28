@@ -1467,11 +1467,11 @@ public class Increment {
 				item.setBackground(1, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 				for (int c = 0; c < matrix.getColumnDimension(); c++) {
 					double value = matrix.get(r, c);
-					if (SimLive.toggleNonZeroEntries && value != 0.0) {
-						item.setBackground(c+2, SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
-						item.setForeground(c+2, table.getBackground());
-					}
-					if (!SimLive.toggleNonZeroEntries || value != 0.0) {
+					if (value != 0.0) {
+						if (SimLive.toggleNonZeroEntries) {
+							item.setBackground(c+2, SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
+							item.setForeground(c+2, table.getBackground());
+						}
 						str[c+2] = SimLive.double2String(value);
 					}
 				}
