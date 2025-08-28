@@ -1436,7 +1436,6 @@ public class Increment {
 		String[][] dofNames = new String[1][];
 		Matrix matrix = getMatrixFromTreeSelection(tree, dofNames);
 		if (matrix != null) {
-			boolean pack = false;
 			if (table.getItemCount() < matrix.getRowDimension()+1 || table.getColumnCount() < matrix.getColumnDimension()+2) {
 				for (int r = table.getItemCount(); r < matrix.getRowDimension()+1; r++) {
 					new TableItem(table, SWT.NONE);
@@ -1446,7 +1445,6 @@ public class Increment {
 					table.getColumn(c).setAlignment(SWT.RIGHT);
 				}
 				table.getColumn(0).setWidth(0);
-				pack = true;
 			}
 			else {
 				table.clearAll();
@@ -1480,24 +1478,23 @@ public class Increment {
 				item.setText(str);
 			}
 			
-			if (pack) packTable(table);
+			packTable(table);
 		}
 		table.setRedraw(true);
 	}
 	
 	public void packTable(Table table) {
-		System.out.println("pack");
 		table.setRedraw(false);
 		table.getColumn(1).pack();
+		int widthHint = -1;
+		{
+			GC gc = new GC(table);
+			char[] chars = new char[SimLive.OUTPUT_DIGITS];
+			Arrays.fill(chars, '0');
+			widthHint = gc.stringExtent("-,E-00XX"+new String(chars)).x;
+			gc.dispose();
+		}	
 		for (int c = 2; c < table.getColumnCount(); c++) {
-			int widthHint = -1;
-			{
-				GC gc = new GC(table);
-				char[] chars = new char[SimLive.OUTPUT_DIGITS];
-				Arrays.fill(chars, '0');
-				widthHint = gc.stringExtent("-,E-00XX"+new String(chars)).x;
-				gc.dispose();
-			}	
 			table.getColumn(c).setWidth(widthHint);
 		}
 		table.setRedraw(true);
