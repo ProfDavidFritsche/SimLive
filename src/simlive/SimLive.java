@@ -64,8 +64,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.wb.swt.SWTResourceManager;
-
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawableFactory;
@@ -122,11 +120,11 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.widgets.Group;
@@ -264,7 +262,7 @@ public class SimLive {
 	
 	private static Tree tree;
 	private static Table table;
-	public static boolean[][] tableHighlights;
+	public static boolean toggleNonZeroEntries;
 	
 	private static SashForm sashForm, sashForm_1, sashForm_2, sashFormMatrixView;
 	private static int[] sashForm_Weights;
@@ -1983,40 +1981,29 @@ public class SimLive {
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		table.setLinesVisible(true);
 		addFocusListener(table, tabFolderMatrixView);
+		table.addMouseWheelListener(new MouseWheelListener() {
+			public void mouseScrolled(MouseEvent arg0) {
+	        	if (view.isControlKeyPressed) {
+	        		if (arg0.count > 0 && table.getFont().getFontData()[0].getHeight() < 
+							shell.getDisplay().getSystemFont().getFontData()[0].getHeight()) {
+	        			FontData fontData = table.getFont().getFontData()[0];
+						fontData.setHeight(fontData.getHeight()+1);
+						table.setFont(new Font(shell.getDisplay(), fontData));
+						post.getPostIncrement().updateTable(table, tree);
+	        		}
+	        		if (arg0.count < 0 && table.getFont().getFontData()[0].getHeight() > 1) {
+	        			FontData fontData = table.getFont().getFontData()[0];
+						fontData.setHeight(fontData.getHeight()-1);
+						table.setFont(new Font(shell.getDisplay(), fontData));
+						post.getPostIncrement().updateTable(table, tree);
+	        		}
+	        	}
+	        }
+		});
 		table.addListener(SWT.MouseDown, new Listener(){
 	        public void handleEvent(Event event){
-	        	Point pt = new Point(event.x, event.y);
-	            for (int i = 1; i < table.getItemCount(); i++) {
-            		TableItem item = table.getItem(i);
-            		Rectangle rect = item.getBounds();
-            		if (pt.y > rect.y && pt.y < rect.y+rect.height) {
-	                    for (int j = 2; j < table.getColumnCount(); j++) {
-		                    rect = item.getBounds(j);
-		                    if (pt.x > rect.x && pt.x < rect.x+rect.width) {
-		                    	table.getItem(i).setBackground(j, table.getItem(i).getBackground(j).equals(table.getBackground()) ?
-		                    			SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION) : table.getBackground());
-		                    	table.getItem(i).setForeground(j, table.getItem(i).getForeground(j).equals(table.getForeground()) ?
-		                    			table.getBackground() : table.getForeground());
-		                    	if (tableHighlights == null) tableHighlights = new boolean[i+1][j+1];
-		                    	if (i > tableHighlights.length-1) {
-		                    		boolean[][] tableHighlightsNew = new boolean[i+1][tableHighlights[0].length];
-		                    		for (int k = 0; k < tableHighlights.length; k++) {
-		                    			tableHighlightsNew[k] = tableHighlights[k];
-		                    		}
-		                    		tableHighlights = tableHighlightsNew;                		
-		                    	}
-		                    	if (j > tableHighlights[0].length-1) {
-		                    		for (int k = 0; k < tableHighlights.length; k++) {
-		                    			tableHighlights[k] = Arrays.copyOf(tableHighlights[k], j+1);
-		                    		}
-		                    	}
-		                    	tableHighlights[i][j] = !tableHighlights[i][j];
-		                    	break;
-		                    }
-		                }
-	                    break;
-            		}
-            	}
+	        	toggleNonZeroEntries = !toggleNonZeroEntries;
+	        	post.getPostIncrement().updateTable(table, tree);
 	        }
 	    });
 		/*table.addMouseTrackListener(new MouseTrackAdapter() {
@@ -2531,7 +2518,6 @@ public class SimLive {
 		}
 		table.removeAll();
 		table.setRedraw(true);
-		tableHighlights = null;
 	}
 
 	private static void setSashFormMatrixView(int leftWidth) {

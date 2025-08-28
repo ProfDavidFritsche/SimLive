@@ -1466,12 +1466,12 @@ public class Increment {
 				str[1] = dofNames[0][r-1];
 				item.setBackground(1, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 				for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
-					str[c] = SimLive.double2String(matrix.get(r-1, c-2));
-					if (SimLive.tableHighlights != null && r < SimLive.tableHighlights.length &&
-							c < SimLive.tableHighlights[r].length && SimLive.tableHighlights[r][c]) {
+					double value = matrix.get(r-1, c-2);
+					if (SimLive.toggleNonZeroEntries && value != 0.0) {
 						item.setBackground(c, SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
 						item.setForeground(c, table.getBackground());
 					}
+					str[c] = SimLive.double2String(value);
 				}
 				item.setText(str);
 			}
@@ -1480,7 +1480,7 @@ public class Increment {
 			for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
 				int widthHint = -1;
 				{
-					GC gc = new GC(SimLive.shell);
+					GC gc = new GC(table);
 					char[] chars = new char[SimLive.OUTPUT_DIGITS];
 					Arrays.fill(chars, '0');
 					widthHint = gc.stringExtent("-,E-00XX"+new String(chars)).x;
