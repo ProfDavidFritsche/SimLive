@@ -1989,13 +1989,13 @@ public class SimLive {
 	        			FontData fontData = table.getFont().getFontData()[0];
 						fontData.setHeight(fontData.getHeight()+1);
 						table.setFont(new Font(shell.getDisplay(), fontData));
-						post.getPostIncrement().updateTable(table, tree);
+						post.getPostIncrement().packTable(table);
 	        		}
 	        		if (arg0.count < 0 && table.getFont().getFontData()[0].getHeight() > 1) {
 	        			FontData fontData = table.getFont().getFontData()[0];
 						fontData.setHeight(fontData.getHeight()-1);
 						table.setFont(new Font(shell.getDisplay(), fontData));
-						post.getPostIncrement().updateTable(table, tree);
+						post.getPostIncrement().packTable(table);
 	        		}
 	        	}
 	        }
