@@ -1471,7 +1471,9 @@ public class Increment {
 						item.setBackground(c+2, SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
 						item.setForeground(c+2, table.getBackground());
 					}
-					str[c+2] = SimLive.double2String(value);
+					if (!SimLive.toggleNonZeroEntries || value != 0.0) {
+						str[c+2] = SimLive.double2String(value);
+					}
 				}
 				item.setText(str);
 			}
