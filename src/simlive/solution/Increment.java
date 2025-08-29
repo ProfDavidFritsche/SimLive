@@ -1485,7 +1485,6 @@ public class Increment {
 	}
 	
 	public void packTable(Table table) {
-		table.setRedraw(false);
 		table.getColumn(1).pack();
 		int widthHint = -1;
 		{
@@ -1498,7 +1497,6 @@ public class Increment {
 		for (int c = 2; c < table.getColumnCount(); c++) {
 			table.getColumn(c).setWidth(widthHint);
 		}
-		table.setRedraw(true);
 	}
 
 	private Matrix getMatrixFromTreeSelection(Tree tree, String[][] dofNames) {

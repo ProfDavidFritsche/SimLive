@@ -1984,6 +1984,7 @@ public class SimLive {
 		table.addMouseWheelListener(new MouseWheelListener() {
 			public void mouseScrolled(MouseEvent arg0) {
 	        	if (view.isControlKeyPressed) {
+	        		table.setRedraw(false);
 	        		if (arg0.count > 0 && table.getFont().getFontData()[0].getHeight() < 
 							shell.getDisplay().getSystemFont().getFontData()[0].getHeight()) {
 	        			FontData fontData = table.getFont().getFontData()[0];
@@ -1997,6 +1998,7 @@ public class SimLive {
 						table.setFont(new Font(shell.getDisplay(), fontData));
 						post.getPostIncrement().packTable(table);
 	        		}
+	        		table.setRedraw(true);
 	        	}
 	        }
 		});
