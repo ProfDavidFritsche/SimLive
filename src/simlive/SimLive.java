@@ -569,7 +569,7 @@ public class SimLive {
 				new MenuItem(menu, SWT.SEPARATOR);
 				MenuItem menuItem_exportMatrixView = new MenuItem(menu, SWT.NONE);
 				menuItem_exportMatrixView.setText("Export Matrix View...");
-				menuItem_exportMatrixView.setEnabled(table.getItemCount() > 1 && table.getItem(1).getText(1) != "");
+				menuItem_exportMatrixView.setEnabled(table.getItemCount() > 1 && table.getItem(1).getText(1) != "" && !toggleNonZeroEntries);
 				menuItem_exportMatrixView.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
