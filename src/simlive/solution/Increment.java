@@ -1431,65 +1431,71 @@ public class Increment {
 				solution.getNumberOfIncrements());
 	}
 	
-	public void initTable(Table table) {
-		int nDofs = solution.getNumberOfDofs();
-		int nConstrDofMax = 0;
-		for (int i = 0; i < solution.getNumberOfIncrements(); i++) {
-			int nConstrDof = solution.getConstraintMethod().getGlobalDofNames(
-					solution.getIncrement(i).G, solution.getRefModel()).length;
-			if (nConstrDof > nConstrDofMax) {
-				nConstrDofMax = nConstrDof;
-			}
-		}
-		int dim = Math.max(nDofs, nConstrDofMax);
-		for (int c = 0; c < dim+2; c++) {
-			new TableColumn(table, SWT.NONE);
-		}
-		for (int r = 0; r < dim+1; r++) {
-			new TableItem(table, SWT.NONE);
-		}
-		table.getColumn(0).setWidth(0);
-		for (int c = 1; c < dim+2; c++) {
-			table.getColumn(c).setAlignment(SWT.RIGHT);
-		}
-	}
-	
 	public void updateTable(Table table, Tree tree) {		
-		table.clearAll();
+		table.setRedraw(false);
 		String[][] dofNames = new String[1][];
 		Matrix matrix = getMatrixFromTreeSelection(tree, dofNames);
 		if (matrix != null) {
-			
+			if (table.getItemCount() < matrix.getRowDimension()+1 || table.getColumnCount() < matrix.getColumnDimension()+2) {
+				for (int r = table.getItemCount(); r < matrix.getRowDimension()+1; r++) {
+					new TableItem(table, SWT.NONE);
+				}
+				for (int c = table.getColumnCount(); c < matrix.getColumnDimension()+2; c++) {
+					new TableColumn(table, SWT.NONE);
+					table.getColumn(c).setAlignment(SWT.RIGHT);
+				}
+				table.getColumn(0).setWidth(0);
+			}
+			else {
+				table.clearAll();
+			}
+				
 			TableItem item = table.getItem(0);
-			for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
+			String[] str = new String[matrix.getColumnDimension()+2];
+			for (int c = 0; c < matrix.getColumnDimension(); c++) {
 				if (matrix.getColumnDimension() > 1) {
-					item.setText(c, dofNames[0][c-2]);
+					str[c+2] = dofNames[0][c];
 				}
-				item.setBackground(c, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+				item.setBackground(c+2, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 			}
+			item.setText(str);
 			
-			for (int r = 1; r < matrix.getRowDimension()+1; r++) {
-				item = table.getItem(r);
-				item.setText(1, dofNames[0][r-1]);
+			for (int r = 0; r < matrix.getRowDimension(); r++) {
+				item = table.getItem(r+1);
+				str = new String[matrix.getColumnDimension()+2];
+				str[1] = dofNames[0][r];
 				item.setBackground(1, SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
-				for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
-					item.setText(c, SimLive.double2String(matrix.get(r-1, c-2)));
+				for (int c = 0; c < matrix.getColumnDimension(); c++) {
+					double value = matrix.get(r, c);
+					if (SimLive.toggleNonZeroEntries) {
+						if (value != 0.0) {
+							item.setBackground(c+2, SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
+						}
+					}
+					else {
+						str[c+2] = value == 0.0 ? "0" : SimLive.double2String(value);
+					}
 				}
+				item.setText(str);
 			}
 			
-			table.getColumn(1).pack();
-			for (int c = 2; c < matrix.getColumnDimension()+2; c++) {
-				int widthHint = -1;
-				{
-					GC gc = new GC(SimLive.shell);
-					char[] chars = new char[SimLive.OUTPUT_DIGITS];
-					Arrays.fill(chars, '0');
-					widthHint = gc.stringExtent("-,E-00XX"+new String(chars)).x;
-					gc.dispose();
-				}	
-				table.getColumn(c).setWidth(widthHint);
-			}
-			
+			packTable(table);
+		}
+		table.setRedraw(true);
+	}
+	
+	public void packTable(Table table) {
+		table.getColumn(1).pack();
+		int widthHint = -1;
+		{
+			GC gc = new GC(table);
+			char[] chars = new char[SimLive.OUTPUT_DIGITS];
+			Arrays.fill(chars, '0');
+			widthHint = gc.stringExtent("-,E-00XX"+new String(chars)).x;
+			gc.dispose();
+		}	
+		for (int c = 2; c < table.getColumnCount(); c++) {
+			table.getColumn(c).setWidth(widthHint);
 		}
 	}
 

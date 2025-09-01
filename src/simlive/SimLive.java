@@ -90,6 +90,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.FloatBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -116,6 +120,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
@@ -257,6 +262,7 @@ public class SimLive {
 	
 	private static Tree tree;
 	private static Table table;
+	public static boolean toggleNonZeroEntries;
 	
 	private static SashForm sashForm, sashForm_1, sashForm_2, sashFormMatrixView;
 	private static int[] sashForm_Weights;
@@ -563,11 +569,30 @@ public class SimLive {
 				new MenuItem(menu, SWT.SEPARATOR);
 				MenuItem menuItem_exportMatrixView = new MenuItem(menu, SWT.NONE);
 				menuItem_exportMatrixView.setText("Export Matrix View...");
-				menuItem_exportMatrixView.setEnabled(tree.getItemCount() > 0);
+				menuItem_exportMatrixView.setEnabled(table.getItemCount() > 1 && table.getItem(1).getText(1) != "" && !toggleNonZeroEntries);
 				menuItem_exportMatrixView.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						
+						FileDialog fileDialog = new FileDialog(shell, SWT.SAVE);
+						String[] filter = new String[1];
+						filter[0] = "*.csv";
+						fileDialog.setFilterExtensions(filter);
+						if (fileDialog.open() != null) {
+							ArrayList<String> lines = new ArrayList<String>();
+							for (int i = 0; i < table.getItemCount(); i++) {
+								String str = "";
+								for (int j = 1; j < table.getColumnCount(); j++) {
+									str += table.getItem(i).getText(j)+";";
+								}
+								lines.add(str);
+							}
+							try {
+								Files.write(Paths.get(fileDialog.getFilterPath()+
+										System.getProperty("file.separator")+fileDialog.getFileName()), lines, StandardCharsets.UTF_8,
+										StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);								
+							}
+							catch (Exception e1) {}
+						}
 					}
 				});
 				MenuItem menuItem_saveScreenshot = new MenuItem(menu, SWT.NONE);
@@ -1936,6 +1961,7 @@ public class SimLive {
 		tree.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
+				resetTable();
 				updateMatrixView();
 			}
 		});
@@ -1955,6 +1981,33 @@ public class SimLive {
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		table.setLinesVisible(true);
 		addFocusListener(table, tabFolderMatrixView);
+		table.addMouseWheelListener(new MouseWheelListener() {
+			public void mouseScrolled(MouseEvent arg0) {
+	        	if (view.isControlKeyPressed) {
+	        		table.setRedraw(false);
+	        		if (arg0.count > 0 && table.getFont().getFontData()[0].getHeight() < 
+							shell.getDisplay().getSystemFont().getFontData()[0].getHeight()) {
+	        			FontData fontData = table.getFont().getFontData()[0];
+						fontData.setHeight(fontData.getHeight()+1);
+						table.setFont(new Font(shell.getDisplay(), fontData));
+						post.getPostIncrement().packTable(table);
+	        		}
+	        		if (arg0.count < 0 && table.getFont().getFontData()[0].getHeight() > 1) {
+	        			FontData fontData = table.getFont().getFontData()[0];
+						fontData.setHeight(fontData.getHeight()-1);
+						table.setFont(new Font(shell.getDisplay(), fontData));
+						post.getPostIncrement().packTable(table);
+	        		}
+	        		table.setRedraw(true);
+	        	}
+	        }
+		});
+		table.addListener(SWT.MouseDown, new Listener(){
+	        public void handleEvent(Event event){
+	        	toggleNonZeroEntries = !toggleNonZeroEntries;
+	        	post.getPostIncrement().updateTable(table, tree);
+	        }
+	    });
 		/*table.addMouseTrackListener(new MouseTrackAdapter() {
 			@Override
 			public void mouseEnter(MouseEvent e) {
@@ -2422,12 +2475,13 @@ public class SimLive {
 				public void run() {
 					if (post != null) {
 						post.getPostIncrement().initTree(tree, post.getPostIncrementID());
-						post.getPostIncrement().initTable(table);
 						int leftWidth = tree.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 						if (sashFormMatrixView_sashWidth != 0) {
 							sashFormMatrixView.setSashWidth(sashFormMatrixView_sashWidth);
 						}
 						setSashFormMatrixView(leftWidth);
+						table.setFont(shell.getDisplay().getSystemFont());
+						toggleNonZeroEntries = false;
 					}
 				}
 			});
@@ -2438,6 +2492,7 @@ public class SimLive {
 		SimLive.shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				tree.removeAll();
+				resetTable();
 			}
 		});
 		post = new Post(solution);
@@ -2451,10 +2506,7 @@ public class SimLive {
 		diagramArea.reset();
 		tree.removeAll();
 		sashFormMatrixView.setWeights(new int[] {1, 0});
-		while (table.getColumnCount() > 0) {
-		    table.getColumns()[0].dispose();
-		}
-		table.removeAll();
+		resetTable();
 		
 		//setResultLabel(null, false, false, false);
 		/*lastSolution = null;
@@ -2464,6 +2516,15 @@ public class SimLive {
 		}*/
 	}
 	
+	private static void resetTable() {
+		table.setRedraw(false);
+		for (int c = table.getColumnCount()-1; c > -1; c--) {
+			table.getColumn(c).dispose();
+		}
+		table.removeAll();
+		table.setRedraw(true);
+	}
+
 	private static void setSashFormMatrixView(int leftWidth) {
 		int width = sashFormMatrixView.getClientArea().width;
 		int[] weights = new int[2];

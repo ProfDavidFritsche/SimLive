@@ -1206,6 +1206,8 @@ public class View extends GLCanvas {
 				SimLive.post.setPostIncrementID(SimLive.post.getSolution().getNumberOfIncrements());
 			}
 			((ResultsDialog) SimLive.dialogArea).setSliderValue(SimLive.post.getPostIncrementID());
+			SimLive.post.updateMinMaxLabels();
+			SimLive.updateMatrixView();
 		}
 	}
 	
