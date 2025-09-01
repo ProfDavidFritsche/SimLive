@@ -3525,7 +3525,7 @@ public class View extends GLCanvas {
 					gl2.glTranslated((coords0[0]+coords1[0])/2.0, (coords0[1]+coords1[1])/2.0, (coords0[2]+coords1[2])/2.0);
 					gl2.glRotated(Math.acos(a[1]/length)*180.0/Math.PI, 0, 0, a[0] > 0.0 ? -1 : 1);
 					gl2.glRotatef(90, 0, 1, 0);
-					if (selectedNodes.contains(SimLive.model.getNodes().get(n0)) && selectedNodes.contains(SimLive.model.getNodes().get(n1))) {
+					if (!selectedNodes.isEmpty() && selectedNodes.contains(SimLive.model.getNodes().get(n0)) && selectedNodes.contains(SimLive.model.getNodes().get(n1))) {
 						gl2.glDisable(GL2.GL_LIGHTING);
 						gl2.glColor3fv(SimLive.COLOR_SELECTION, 0);
 					}
