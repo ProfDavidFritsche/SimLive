@@ -384,7 +384,7 @@ public class Contact {
 					
 					double[] shapeFunctionValues = null;
 					if (isDeformableDeformable) {
-						if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking && contacts[slaveNodeID].getShapeFunctionValues() != null) {
+						if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking && contacts[slaveNodeID].getMasterElement() == masterElement0) {
 							shapeFunctionValues = contacts[slaveNodeID].getShapeFunctionValues();
 						}
 						else {
@@ -528,7 +528,7 @@ public class Contact {
 					
 					double[] shapeFunctionValues = null;
 					if (isDeformableDeformable) {
-						if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking && contacts[slaveNodeID].getShapeFunctionValues() != null) {
+						if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking && contacts[slaveNodeID].getMasterElement() == masterElement0) {
 							shapeFunctionValues = contacts[slaveNodeID].getShapeFunctionValues();
 						}
 						else {
