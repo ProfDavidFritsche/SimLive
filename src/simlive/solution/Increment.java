@@ -1,8 +1,7 @@
 package simlive.solution;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Stream;
-
+import java.util.stream.IntStream;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Table;
@@ -41,7 +40,6 @@ public class Increment {
 	private double[][][] angles, angularVel, angularAcc;
 	private double time;
 	private int stepNr;
-	private Matrix temp; //parallelStream
 	
 	public Increment(Solution solution, double time, int stepNr) {
 		this.solution = solution;
@@ -66,23 +64,21 @@ public class Increment {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		
-		temp = new Matrix(nDofs, nDofs);
-		
-		Stream<Element> stream = elements.parallelStream();
-		stream.forEach(element -> {
-			Matrix K_elem = null;
+		Matrix[] K_elem = new Matrix[elements.size()];
+		IntStream.range(0, elements.size()).parallel().forEach(e -> {
 			if (solution.getRefSettings().isLargeDisplacement) {
-				K_elem = element.getElementStiffnessNL(nodes, u_global);
+				K_elem[e] = elements.get(e).getElementStiffnessNL(nodes, u_global);
 			}
 			else {
-				K_elem = element.getElementStiffness(nodes);
+				K_elem[e] = elements.get(e).getElementStiffness(nodes);
 			}
-			synchronized (this) {
-				temp = element.addLocalToGlobalMatrix(K_elem, temp);
-			}
-		});
+	    });
+		Matrix result = new Matrix(nDofs, nDofs);
+		for (int e = 0; e < elements.size(); e++) {
+			result = elements.get(e).addLocalToGlobalMatrix(K_elem[e], result);
+		}
 		
-		return temp;
+		return result;
 	}
 	
 	public Matrix[] getElementMassArray() {
@@ -119,23 +115,21 @@ public class Increment {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		
-		temp = new Matrix(nDofs, 1);
-		
-		Stream<Element> stream = elements.parallelStream();
-		stream.forEach(element -> {
-			Matrix f_elem = null;
-			if (solution.getRefSettings().isLargeDisplacement) {				
-				f_elem = element.getElementForceNL(nodes, u_global, false);
+		Matrix[] f_elem = new Matrix[elements.size()];
+		IntStream.range(0, elements.size()).parallel().forEach(e -> {
+			if (solution.getRefSettings().isLargeDisplacement) {
+				f_elem[e] = elements.get(e).getElementForceNL(nodes, u_global, false);
 			}
 			else {
-				f_elem = element.getElementForce(nodes, u_global, false);
+				f_elem[e] = elements.get(e).getElementForce(nodes, u_global, false);
 			}
-			synchronized (this) {
-				temp = element.addLocalToGlobalMatrix(f_elem, temp);
-			}
-		});
+	    });
+		Matrix result = new Matrix(nDofs, 1);
+		for (int e = 0; e < elements.size(); e++) {
+			result = elements.get(e).addLocalToGlobalMatrix(f_elem[e], result);
+		}
 		
-		return temp;
+		return result;
 	}
 	
 	public Matrix getDMassMatrix(int nDofs) {
@@ -154,23 +148,22 @@ public class Increment {
 	public Matrix getDStiffMatrix(int nDofs, Matrix u_global, ArrayList<Element> dStiffElems) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		
-		temp = new Matrix(nDofs, nDofs);
-		
-		Stream<Element> stream = dStiffElems.parallelStream();
-		stream.forEach(element -> {
-			Matrix K_elem = null;
+		Matrix[] K_elem = new Matrix[dStiffElems.size()];
+		IntStream.range(0, dStiffElems.size()).parallel().forEach(e -> {
 			if (solution.getRefSettings().isLargeDisplacement) {
-				K_elem = element.getElementStiffnessNL(nodes, u_global);
+				K_elem[e] = dStiffElems.get(e).getElementStiffnessNL(nodes, u_global);
 			}
 			else {
-				K_elem = element.getElementStiffness(nodes);
+				K_elem[e] = dStiffElems.get(e).getElementStiffness(nodes);
 			}
-			synchronized (this) {
-				temp = element.addLocalToGlobalMatrix(K_elem.times(element.getStiffnessDamping()), temp);
-			}
-		});
+	    });
+		Matrix result = new Matrix(nDofs, nDofs);
+		for (int e = 0; e < dStiffElems.size(); e++) {
+			Element element = dStiffElems.get(e);
+			result = element.addLocalToGlobalMatrix(K_elem[e].times(element.getStiffnessDamping()), result);
+		}
 		
-		return temp;
+		return result;
 	}
 	
 	public Matrix getFrictionForce(int nDofs, Contact[] contacts, Matrix C_global, Matrix v_global, Matrix M_global, double timeStep) {
