@@ -141,6 +141,7 @@ public class View extends GLCanvas {
 	private Rectangle selectionBox = null;
 	public Label labelAtMousePos = null;
 	public boolean lockSelectParts3d = false;
+	private boolean copyPart = false;
 	
 	public boolean isControlKeyPressed;
 	private TimerTask animation = null;
@@ -1564,6 +1565,7 @@ public class View extends GLCanvas {
 					public void widgetSelected(SelectionEvent e) {
 						if (!selectedSets.isEmpty()) copySelectedSets();
 						if (!selectedParts3d.isEmpty()) copySelectedParts3d();
+						copyPart = true;
 					}
 				});
         		MenuItem flip = new MenuItem(popup, SWT.NONE);
@@ -1668,6 +1670,18 @@ public class View extends GLCanvas {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					SimLive.model.updateModel();
+					double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;					
+					if (!selectedSets.isEmpty()) {
+						SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
+								SWT.NONE, selectedSets, SimLive.settings);
+						if (copyPart) ((PartDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
+					}
+					if (!selectedParts3d.isEmpty()) {
+						SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
+								SWT.NONE, selectedParts3d, SimLive.settings);
+						if (copyPart) ((Part3dDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
+					}
+					copyPart = false;
 					SimLive.synchronizeModelTreeWithViewSelection();
 				}
             });
@@ -2400,13 +2414,8 @@ public class View extends GLCanvas {
 			}			
 		}
 		
-		SimLive.model.updateModel();
 		deselectAll();
 		selectedSets.addAll(newSets);
-		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedSets, SimLive.settings);
-		double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;
-		((PartDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
 	}
 	
 	private void copySubSets(Set set, int[] indices) {
@@ -2452,12 +2461,7 @@ public class View extends GLCanvas {
 	}
 	
 	public void flipSelectedSets() {
-		flipSets(selectedSets);
-		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedSets, SimLive.settings);
-	}
-
-	private void flipSets(ArrayList<Set> sets) {
+		ArrayList<Set> sets = selectedSets;
 		for (int s = 0; s < sets.size(); s++) {
 			for (int e = 0; e < sets.get(s).getElements().size(); e++) {
 				Element element = sets.get(s).getElements().get(e);
@@ -2481,12 +2485,7 @@ public class View extends GLCanvas {
 	}
 
 	public void ungroupSelectedSets() {
-		ungroupSets(selectedSets);
-		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedSets, SimLive.settings);
-	}
-	
-	private void ungroupSets(ArrayList<Set> sets) {
+		ArrayList<Set> sets = selectedSets;
 		for (int s = sets.size()-1; s > -1; s--) {
 			Set set = sets.get(s);
 			if (!set.getSets().isEmpty()) {
@@ -2540,13 +2539,7 @@ public class View extends GLCanvas {
 	}
 	
 	public void groupSelectedSets() {
-		groupSets(selectedSets);
-		SimLive.model.updateModel();
-		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedSets, SimLive.settings);
-	}
-	
-	private void groupSets(ArrayList<Set> sets) {
+		ArrayList<Set> sets = selectedSets;
 		ArrayList<Element> elements = new ArrayList<Element>();
 		for (int s = 0; s < sets.size(); s++) {
 			Set set = sets.get(s);
@@ -2563,18 +2556,10 @@ public class View extends GLCanvas {
 	
 	public void relaxSelectedSets() {
 		SimLive.model.relaxMesh(selectedSets);
-		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedSets, SimLive.settings);
 	}
 	
 	public void splitSelectedSets() {
-		splitSets(selectedSets);
-		SimLive.model.updateModel();
-		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedSets, SimLive.settings);
-	}
-	
-	private void splitSets(ArrayList<Set> sets) {
+		ArrayList<Set> sets = selectedSets;
 		for (int s = 0; s < sets.size(); s++) {
 			Set set = sets.get(s);
 			if (!(set.getType() == Set.Type.BASIC && set.getElements().size() > 1)) {
@@ -2593,13 +2578,7 @@ public class View extends GLCanvas {
 	}
 	
 	public void mergeSelectedSets() {
-		mergeSets(selectedSets);
-		SimLive.model.updateModel();
-		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedSets, SimLive.settings);
-	}
-	
-	private void mergeSets(ArrayList<Set> sets) {
+		ArrayList<Set> sets = selectedSets;
 		ArrayList<Element> elements = new ArrayList<Element>();
 		for (int s = 0; s < sets.size(); s++) {
 			Set set = sets.get(s);
@@ -2613,8 +2592,6 @@ public class View extends GLCanvas {
 			Set set = selectedSets.get(s);
 			SimLive.model.refineSet(set, levels);
 		}
-		SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedSets, SimLive.settings);
 	}
 	
 	public void deleteSelectedParts3d() {
@@ -2637,11 +2614,6 @@ public class View extends GLCanvas {
 			selectedParts3d.remove(s);
 			selectedParts3d.add(newPart3d);
 		}
-		
-		SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedParts3d, SimLive.settings);
-		double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;
-		((Part3dDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
 	}
 	
 	public void flipSelectedParts3d() {
@@ -2649,18 +2621,10 @@ public class View extends GLCanvas {
 			Part3d part3d = selectedParts3d.get(s);
 			part3d.flip();
 		}
-		
-		SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedParts3d, SimLive.settings);
 	}
 	
 	public void ungroupSelectedParts3d() {
-		ungroupParts3d(selectedParts3d);
-		SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedParts3d, SimLive.settings);
-	}
-	
-	private void ungroupParts3d(ArrayList<Part3d> parts3d) {
+		ArrayList<Part3d> parts3d = selectedParts3d;
 		for (int s = parts3d.size()-1; s > -1; s--) {
 			Part3d part3d = parts3d.get(s);
 			SubTree subTree = part3d.getSubTree();
@@ -2694,12 +2658,7 @@ public class View extends GLCanvas {
 	}
 	
 	public void groupSelectedParts3d() {
-		groupParts3d(selectedParts3d);
-		SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
-				SWT.NONE, selectedParts3d, SimLive.settings);
-	}
-	
-	private void groupParts3d(ArrayList<Part3d> parts3d) {
+		ArrayList<Part3d> parts3d = selectedParts3d;
 		int nrVertices = 0, nrFacets = 0;
 		SubTree subTree = new SubTree();
 		for (int s = 0; s < parts3d.size(); s++) {
