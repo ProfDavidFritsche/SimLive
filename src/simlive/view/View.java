@@ -3131,10 +3131,8 @@ public class View extends GLCanvas {
 		
 		for (int p = 0; p < SimLive.model.getParts3d().size(); p++) {
 	    	Part3d part3d = SimLive.model.getParts3d().get(p);
-	    	if (!selectedParts3d.contains(part3d) && !connectParts3d.contains(part3d)) {
-	    		switchSingleDoubleSided(gl2, part3d.doubleSided);
-	    		renderPart3d(gl2, part3d, scaling, false, false);
-	    	}
+	    	switchSingleDoubleSided(gl2, part3d.doubleSided);
+			renderPart3d(gl2, part3d, scaling, selectedParts3d.contains(part3d), connectParts3d.contains(part3d));
 	    }
 		gl2.glEnable(GL2.GL_LIGHTING);
 		switchSingleDoubleSided(gl2, false);
@@ -3312,19 +3310,6 @@ public class View extends GLCanvas {
     		drawGrid(gl2, width, height);
 			gl2.glEnable(GL2.GL_LIGHTING);
 		}
-		
-		/* connected and selected parts3d */
-		gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-		switchSingleDoubleSided(gl2, true);
-		for (int p = 0; p < connectParts3d.size(); p++) {
-	    	renderPart3d(gl2, connectParts3d.get(p), scaling, false, true);
-	    }
-		gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-		for (int p = 0; p < selectedParts3d.size(); p++) {
-	    	renderPart3d(gl2, selectedParts3d.get(p), scaling, true, false);
-	    }
-		gl2.glEnable(GL2.GL_LIGHTING);
-		switchSingleDoubleSided(gl2, false);
 		
     	gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 		/* sets */
