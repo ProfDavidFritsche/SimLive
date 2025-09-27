@@ -1346,7 +1346,7 @@ public class View extends GLCanvas {
             visibility.setMenu(menu1);
 		}
         ArrayList<Object> objects = SimLive.getModelTreeSelection();
-        if (objects.size() == 1 && selectedLabel == null && selectedMeasurement == null) {
+        if (SimLive.mode != Mode .RESULTS && objects.size() == 1 && selectedLabel == null && selectedMeasurement == null) {
 			if (objects.get(0) instanceof Support && !selectedNodes.isEmpty()) {
 				Support support = (Support) objects.get(0);
 				getStoreMenuItem(popup).addSelectionListener(new SelectionAdapter() {
