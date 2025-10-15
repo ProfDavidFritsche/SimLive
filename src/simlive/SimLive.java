@@ -1271,6 +1271,12 @@ public class SimLive {
 							setSashFormMatrixView(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
 						}
 						sashForm_2.setWeights(new int[] {1, 3});
+						//
+						toggleNonZeroEntries = false;
+						table.setFont(shell.getDisplay().getSystemFont());
+						if (settings.isWriteMatrixView && post != null) {
+							post.getPostIncrement().updateTable(table, tree);
+						}
 					}
 				});
 				menu.setVisible(true);
