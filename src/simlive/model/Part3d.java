@@ -70,9 +70,9 @@ public class Part3d implements DeepEqualsInterface {
 		}
 		if (!this.subTree.deepEquals(part3d.subTree)) return false;
 		if (this.id != part3d.id) return false;
-		//do not check because it is only for rendering
-		//if (this.render != part3d.render) return false;
-		//if (this.doubleSided != part3d.doubleSided) return false;
+		//do check to have it in model history
+		if (this.render != part3d.render) return false;
+		if (this.doubleSided != part3d.doubleSided) return false;
 		//do not check following because it was not copied
 		/*for (int i = 0; i < connect.length; i++) {
 			if (!Arrays.equals(this.connect[i], part3d.connect[i])) return false;

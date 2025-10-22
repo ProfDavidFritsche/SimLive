@@ -91,6 +91,7 @@ public class Set implements DeepEqualsInterface {
 		if (this.spurGearValues != null && set.spurGearValues != null) {
 			if (!this.spurGearValues.deepEquals(set.spurGearValues)) return false;
 		}
+		if (this.view != set.view) return false;
 		return true;
 	}
 
