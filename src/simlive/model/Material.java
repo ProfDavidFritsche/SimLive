@@ -105,13 +105,13 @@ public class Material implements DeepEqualsInterface {
 		return material;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Material material = (Material) obj;
-		if (this.name != material.name) return false;
-		if (this.density != material.density) return false;
-		if (this.youngsModulus != material.youngsModulus) return false;
-		if (this.poissonsRatio != material.poissonsRatio) return false;
-		if (!Arrays.equals(this.lameConstants, material.lameConstants)) return false;
-		return true;
+		if (this.name != material.name && result != Result.RECALC) result = Result.CHANGE;
+		if (this.density != material.density) return Result.RECALC;
+		if (this.youngsModulus != material.youngsModulus) return Result.RECALC;
+		if (this.poissonsRatio != material.poissonsRatio) return Result.RECALC;
+		if (!Arrays.equals(this.lameConstants, material.lameConstants)) return Result.RECALC;
+		return result;
 	}
 }

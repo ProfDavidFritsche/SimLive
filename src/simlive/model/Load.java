@@ -59,23 +59,25 @@ public class Load extends AbstractLoad implements DeepEqualsInterface {
 		return load;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Load load = (Load) obj;
-		if (!SimLive.deepEquals(this.nodes, load.nodes)) return false;
-		if (!Arrays.equals(this.axis, load.axis)) return false;
-		if (this.angle != load.angle) return false;
-		if (this.type != load.type) return false;
-		if (!Arrays.equals(this.force, load.force)) return false;
-		if (!Arrays.equals(this.moment, load.moment)) return false;
-		if (!Arrays.equals(this.isDisp, load.isDisp)) return false;
-		if (!Arrays.equals(this.isRotation, load.isRotation)) return false;
-		if (!Arrays.equals(this.disp, load.disp)) return false;
-		if (!Arrays.equals(this.rotation, load.rotation)) return false;
-		if (this.referenceNode != null && load.referenceNode != null &&
-				!this.referenceNode.deepEquals(load.referenceNode)) return false;
-		if (!this.timeTable.deepEquals(load.timeTable)) return false;
-		if (this.name != load.name) return false;
-		return true;
+		result = SimLive.deepEquals(this.nodes, load.nodes, result);
+		if (!Arrays.equals(this.axis, load.axis)) return Result.RECALC;
+		if (this.angle != load.angle) return Result.RECALC;
+		if (this.type != load.type) return Result.RECALC;
+		if (!Arrays.equals(this.force, load.force)) return Result.RECALC;
+		if (!Arrays.equals(this.moment, load.moment)) return Result.RECALC;
+		if (!Arrays.equals(this.isDisp, load.isDisp)) return Result.RECALC;
+		if (!Arrays.equals(this.isRotation, load.isRotation)) return Result.RECALC;
+		if (!Arrays.equals(this.disp, load.disp)) return Result.RECALC;
+		if (!Arrays.equals(this.rotation, load.rotation)) return Result.RECALC;
+		if (this.referenceNode != null && load.referenceNode != null) {
+			result = this.referenceNode.deepEquals(load.referenceNode, result);
+		}
+		result = this.timeTable.deepEquals(load.timeTable, result);
+		if (this.name != load.name && result != Result.RECALC) result = Result.CHANGE;
+		if (this.isShifted != load.isShifted && result != Result.RECALC) result = Result.CHANGE;
+		return result;
 	}
 	
 	public ArrayList<Node> getNodes() {

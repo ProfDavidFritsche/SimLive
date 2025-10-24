@@ -46,12 +46,12 @@ public class Part3dColor implements DeepEqualsInterface {
 		return part3dColor;
 	}
 
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Part3dColor part3dColor = (Part3dColor) obj;
-		if (!Arrays.equals(this.kd, part3dColor.kd)) return false;
-		if (!Arrays.equals(this.ks, part3dColor.ks)) return false;
-		if (this.shininess != part3dColor.shininess) return false;
-		return true;
+		if (!Arrays.equals(this.kd, part3dColor.kd)) return Result.RECALC;
+		if (!Arrays.equals(this.ks, part3dColor.ks)) return Result.RECALC;
+		if (this.shininess != part3dColor.shininess) return Result.RECALC;
+		return result;
 	}
 	
 	static public Part3dColor getDefaultColor() {

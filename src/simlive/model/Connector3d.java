@@ -33,12 +33,12 @@ public class Connector3d extends AbstractConnector implements DeepEqualsInterfac
 		return connector3d;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Connector3d connector3d = (Connector3d) obj;
-		if (!SimLive.deepEquals(parts3d, connector3d.parts3d)) return false;
-		if (!SimLive.deepEquals(sets, connector3d.sets)) return false;
-		if (this.name != connector3d.name) return false;
-		return true;
+		result = SimLive.deepEquals(parts3d, connector3d.parts3d, result);
+		result = SimLive.deepEquals(sets, connector3d.sets, result);
+		if (this.name != connector3d.name && result != Result.RECALC) result = Result.CHANGE;
+		return result;
 	}
 
 	public void setParts3d(ArrayList<Part3d> parts3d) {

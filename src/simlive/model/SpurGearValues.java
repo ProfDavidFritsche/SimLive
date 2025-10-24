@@ -20,13 +20,13 @@ public class SpurGearValues implements DeepEqualsInterface {
 		return spurGearValues;
 	}
 
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		SpurGearValues spurGearValues = (SpurGearValues) obj;
-		if (this.pressureAngle != spurGearValues.pressureAngle) return false;
-		if (this.module != spurGearValues.module) return false;
-		if (this.pitchRadius != spurGearValues.pitchRadius) return false;
-		if (this.isInternal != spurGearValues.isInternal) return false;
-		return true;
+		if (this.pressureAngle != spurGearValues.pressureAngle) return Result.RECALC;
+		if (this.module != spurGearValues.module) return Result.RECALC;
+		if (this.pitchRadius != spurGearValues.pitchRadius) return Result.RECALC;
+		if (this.isInternal != spurGearValues.isInternal) return Result.RECALC;
+		return result;
 	}
 
 	public double getPressureAngle() {

@@ -228,13 +228,13 @@ public class Section implements DeepEqualsInterface {
 		return section;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Section section = (Section) obj;
-		if (!this.sectionShape.deepEquals(section.sectionShape)) return false;
-		if (this.Area != section.Area) return false;
-		if (this.Iy != section.Iy) return false;
-		if (this.Iz != section.Iz) return false;
-		if (this.It != section.It) return false;
-		return true;
+		result = this.sectionShape.deepEquals(section.sectionShape, result);
+		if (this.Area != section.Area) return Result.RECALC;
+		if (this.Iy != section.Iy) return Result.RECALC;
+		if (this.Iz != section.Iz) return Result.RECALC;
+		if (this.It != section.It) return Result.RECALC;
+		return result;
 	}
 }

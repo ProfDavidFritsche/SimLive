@@ -50,24 +50,24 @@ public class Connector extends AbstractConnector implements DeepEqualsInterface 
 		return connector;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Connector connector = (Connector) obj;
 		//do not check coordinates, because not necessary and possibility of wrong false
 		//if (!Arrays.equals(this.coordinates, connector.coordinates)) return false;
-		if (this.set0 != null && connector.set0 != null) if (!this.set0.deepEquals(connector.set0)) return false;
-		if (this.set1 != null && connector.set1 != null) if (!this.set1.deepEquals(connector.set1)) return false;
-		if (this.element0 != null && connector.element0 != null) if (!this.element0.deepEquals(connector.element0)) return false;
-		if (this.element1 != null && connector.element1 != null) if (!this.element1.deepEquals(connector.element1)) return false;
+		if (this.set0 != null && connector.set0 != null) result = this.set0.deepEquals(connector.set0, result);
+		if (this.set1 != null && connector.set1 != null) result = this.set1.deepEquals(connector.set1, result);
+		if (this.element0 != null && connector.element0 != null) result = this.element0.deepEquals(connector.element0, result);
+		if (this.element1 != null && connector.element1 != null) result = this.element1.deepEquals(connector.element1, result);
 		//check with tolerance
-		if (Math.abs(this.r0[0]-connector.r0[0]) > SimLive.ZERO_TOL) return false;
-		if (Math.abs(this.r0[1]-connector.r0[1]) > SimLive.ZERO_TOL) return false;
-		if (Math.abs(this.r1[0]-connector.r1[0]) > SimLive.ZERO_TOL) return false;
-		if (Math.abs(this.r1[1]-connector.r1[1]) > SimLive.ZERO_TOL) return false;
-		if (Math.abs(this.t0-connector.t0) > SimLive.ZERO_TOL) return false;
-		if (Math.abs(this.t1-connector.t1) > SimLive.ZERO_TOL) return false;
-		if (this.type != connector.type) return false;
-		if (this.name != connector.name) return false;
-		return true;
+		if (Math.abs(this.r0[0]-connector.r0[0]) > SimLive.ZERO_TOL) return Result.RECALC;
+		if (Math.abs(this.r0[1]-connector.r0[1]) > SimLive.ZERO_TOL) return Result.RECALC;
+		if (Math.abs(this.r1[0]-connector.r1[0]) > SimLive.ZERO_TOL) return Result.RECALC;
+		if (Math.abs(this.r1[1]-connector.r1[1]) > SimLive.ZERO_TOL) return Result.RECALC;
+		if (Math.abs(this.t0-connector.t0) > SimLive.ZERO_TOL) return Result.RECALC;
+		if (Math.abs(this.t1-connector.t1) > SimLive.ZERO_TOL) return Result.RECALC;
+		if (this.type != connector.type) return Result.RECALC;
+		if (this.name != connector.name && result != Result.RECALC) result = Result.CHANGE;
+		return result;
 	}
 	
 	public Type getType() {

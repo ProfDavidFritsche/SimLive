@@ -511,20 +511,20 @@ public class Tri extends PlaneElement {
 	}
 
 	@Override
-	public boolean deepEquals(Object obj) {
-		if (!(obj instanceof Tri)) return false;
+	public Result deepEquals(Object obj, Result result) {
+		if (!(obj instanceof Tri)) return Result.RECALC;
 		Tri element = (Tri) obj;
-		if (this.getType() != element.getType()) return false;
-		if (!Arrays.equals(this.elementNodes, element.elementNodes)) return false;
+		if (this.getType() != element.getType()) return Result.RECALC;
+		if (!Arrays.equals(this.elementNodes, element.elementNodes)) return Result.RECALC;
 		if (this.material != null && element.material != null)
-			if (!this.material.deepEquals(element.material)) return false;
-		if (this.thickness != element.thickness) return false;
+			result = this.material.deepEquals(element.material, result);
+		if (this.thickness != element.thickness) return Result.RECALC;
 		//if (this.state != element.state) return false;
-		if (!Arrays.equals(this.R0.getRowPackedCopy(), element.R0.getRowPackedCopy())) return false;
-		if (this.id != element.id) return false;
-		if (this.stiffnessDamping != element.stiffnessDamping) return false;
-		if (this.massDamping != element.massDamping) return false;
-		return true;
+		if (!Arrays.equals(this.R0.getRowPackedCopy(), element.R0.getRowPackedCopy())) return Result.RECALC;
+		if (this.id != element.id) return Result.RECALC;
+		if (this.stiffnessDamping != element.stiffnessDamping) return Result.RECALC;
+		if (this.massDamping != element.massDamping) return Result.RECALC;
+		return result;
 	}
 
 	public double[] getShapeFunctionValues(double r, double s) {

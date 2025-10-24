@@ -24,12 +24,12 @@ public class SubTree implements DeepEqualsInterface {
 		return subTree;
 	}
 
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		SubTree subTree = (SubTree) obj;
-		if (nrVertices != subTree.nrVertices) return false;
-		if (nrFacets != subTree.nrFacets) return false;
-		if (!SimLive.deepEquals(subTrees, subTree.subTrees)) return false;
-		return true;
+		if (nrVertices != subTree.nrVertices) return Result.RECALC;
+		if (nrFacets != subTree.nrFacets) return Result.RECALC;
+		result = SimLive.deepEquals(subTrees, subTree.subTrees, result);
+		return result;
 	}
 
 }

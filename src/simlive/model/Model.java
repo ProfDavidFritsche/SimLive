@@ -205,23 +205,23 @@ public class Model implements DeepEqualsInterface {
 		return model;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Model model = (Model) obj;
-		if (!SimLive.deepEquals(nodes, model.getNodes())) return false;
-		if (!SimLive.deepEquals(elements, model.getElements())) return false;
-		if (!SimLive.deepEquals(materials, model.getMaterials())) return false;
-		if (!SimLive.deepEquals(sections, model.getSections())) return false;
-		if (!SimLive.deepEquals(steps, model.getSteps())) return false;
-		if (!SimLive.deepEquals(sets, model.getSets())) return false;
-		if (!SimLive.deepEquals(parts3d, model.getParts3d())) return false;
-		if (!SimLive.deepEquals(part3dColors, model.getPart3dColors())) return false;
-		if (!SimLive.deepEquals(supports, model.getSupports())) return false;
-		if (!SimLive.deepEquals(connectors, model.getConnectors())) return false;
-		if (!SimLive.deepEquals(connectors3d, model.getConnectors3d())) return false;
-		if (!SimLive.deepEquals(contactPairs, model.getContactPairs())) return false;
-		if (!SimLive.deepEquals(loads, model.getLoads())) return false;
-		if (!SimLive.deepEquals(distributedLoads, model.getDistributedLoads())) return false;
-		return true;
+		result = SimLive.deepEquals(nodes, model.getNodes(), result);
+		result = SimLive.deepEquals(elements, model.getElements(), result);
+		result = SimLive.deepEquals(materials, model.getMaterials(), result);
+		result = SimLive.deepEquals(sections, model.getSections(), result);
+		result = SimLive.deepEquals(steps, model.getSteps(), result);
+		result = SimLive.deepEquals(sets, model.getSets(), result);
+		result = SimLive.deepEquals(parts3d, model.getParts3d(), result);
+		result = SimLive.deepEquals(part3dColors, model.getPart3dColors(), result);
+		result = SimLive.deepEquals(supports, model.getSupports(), result);
+		result = SimLive.deepEquals(connectors, model.getConnectors(), result);
+		result = SimLive.deepEquals(connectors3d, model.getConnectors3d(), result);
+		result = SimLive.deepEquals(contactPairs, model.getContactPairs(), result);
+		result = SimLive.deepEquals(loads, model.getLoads(), result);
+		result = SimLive.deepEquals(distributedLoads, model.getDistributedLoads(), result);
+		return result;
 	}
 	
 	public void reorderNodes() {
@@ -713,20 +713,20 @@ public class Model implements DeepEqualsInterface {
 	private Model reduceModel(Model model) {
 		if (SimLive.modelPos > -1) {
 			Model oldModel = expandModel(SimLive.modelPos-1);
-			if (SimLive.deepEquals(oldModel.nodes, model.nodes)) model.nodes = null;
-			if (SimLive.deepEquals(oldModel.elements, model.elements)) model.elements = null;
-			if (SimLive.deepEquals(oldModel.materials, model.materials)) model.materials = null;
-			if (SimLive.deepEquals(oldModel.sections, model.sections)) model.sections = null;
-			if (SimLive.deepEquals(oldModel.steps, model.steps)) model.steps = null;
-			if (SimLive.deepEquals(oldModel.sets, model.sets)) model.sets = null;
-			if (SimLive.deepEquals(oldModel.parts3d, model.parts3d)) model.parts3d = null;
-			if (SimLive.deepEquals(oldModel.part3dColors, model.part3dColors)) model.part3dColors = null;
-			if (SimLive.deepEquals(oldModel.supports, model.supports)) model.supports = null;
-			if (SimLive.deepEquals(oldModel.connectors, model.connectors)) model.connectors = null;
-			if (SimLive.deepEquals(oldModel.connectors3d, model.connectors3d)) model.connectors3d = null;
-			if (SimLive.deepEquals(oldModel.contactPairs, model.contactPairs)) model.contactPairs = null;
-			if (SimLive.deepEquals(oldModel.loads, model.loads)) model.loads = null;
-			if (SimLive.deepEquals(oldModel.distributedLoads, model.distributedLoads)) model.distributedLoads = null;
+			if (SimLive.deepEquals(oldModel.nodes, model.nodes, Result.EQUAL) == Result.EQUAL) model.nodes = null;
+			if (SimLive.deepEquals(oldModel.elements, model.elements, Result.EQUAL) == Result.EQUAL) model.elements = null;
+			if (SimLive.deepEquals(oldModel.materials, model.materials, Result.EQUAL) == Result.EQUAL) model.materials = null;
+			if (SimLive.deepEquals(oldModel.sections, model.sections, Result.EQUAL) == Result.EQUAL) model.sections = null;
+			if (SimLive.deepEquals(oldModel.steps, model.steps, Result.EQUAL) == Result.EQUAL) model.steps = null;
+			if (SimLive.deepEquals(oldModel.sets, model.sets, Result.EQUAL) == Result.EQUAL) model.sets = null;
+			if (SimLive.deepEquals(oldModel.parts3d, model.parts3d, Result.EQUAL) == Result.EQUAL) model.parts3d = null;
+			if (SimLive.deepEquals(oldModel.part3dColors, model.part3dColors, Result.EQUAL) == Result.EQUAL) model.part3dColors = null;
+			if (SimLive.deepEquals(oldModel.supports, model.supports, Result.EQUAL) == Result.EQUAL) model.supports = null;
+			if (SimLive.deepEquals(oldModel.connectors, model.connectors, Result.EQUAL) == Result.EQUAL) model.connectors = null;
+			if (SimLive.deepEquals(oldModel.connectors3d, model.connectors3d, Result.EQUAL) == Result.EQUAL) model.connectors3d = null;
+			if (SimLive.deepEquals(oldModel.contactPairs, model.contactPairs, Result.EQUAL) == Result.EQUAL) model.contactPairs = null;
+			if (SimLive.deepEquals(oldModel.loads, model.loads, Result.EQUAL) == Result.EQUAL) model.loads = null;
+			if (SimLive.deepEquals(oldModel.distributedLoads, model.distributedLoads, Result.EQUAL) == Result.EQUAL) model.distributedLoads = null;
 		}
 		return model;
 	}
@@ -755,7 +755,7 @@ public class Model implements DeepEqualsInterface {
 	
 	private void storeModelHistory() {
 		if (SimLive.mode != Mode.NONE && (SimLive.modelHistory.isEmpty() ||
-				!expandModel(SimLive.modelPos).deepEquals(this))) {
+				expandModel(SimLive.modelPos).deepEquals(this, Result.EQUAL) != Result.EQUAL)) {
 			for (int i = SimLive.modelHistory.size()-1; i > SimLive.modelPos; i--) {
 				SimLive.modelHistory.remove(i);
 			}
@@ -1960,7 +1960,7 @@ public class Model implements DeepEqualsInterface {
 	
 	public Set getSetByElementsRecursive(ArrayList<Set> sets, ArrayList<Element> elements) {
 		for (int s = 0; s < sets.size(); s++) {
-			if (SimLive.deepEquals(sets.get(s).getElements(), elements)) {
+			if (SimLive.deepEquals(sets.get(s).getElements(), elements, Result.EQUAL) == Result.EQUAL) {
 				return sets.get(s);
 			}
 			Set subSet = getSetByElementsRecursive(sets.get(s).getSets(), elements);

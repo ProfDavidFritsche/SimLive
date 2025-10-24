@@ -28,11 +28,11 @@ public class TimeTable implements DeepEqualsInterface {
 		return timeTable;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		TimeTable timeTable = (TimeTable) obj;
-		if (!Arrays.equals(this.time, timeTable.time)) return false;
-		if (!Arrays.equals(this.factor, timeTable.factor)) return false;
-		return true;
+		if (!Arrays.equals(this.time, timeTable.time)) return Result.RECALC;
+		if (!Arrays.equals(this.factor, timeTable.factor)) return Result.RECALC;
+		return result;
 	}
 	
 	public int getNumberOfRows() {

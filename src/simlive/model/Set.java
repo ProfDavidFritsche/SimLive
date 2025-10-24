@@ -81,18 +81,18 @@ public class Set implements DeepEqualsInterface {
 		return set;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Set set = (Set) obj;
-		if (!SimLive.deepEquals(elements, set.elements)) return false;
-		if (!SimLive.deepEquals(nodes, set.nodes)) return false;
-		if (!SimLive.deepEquals(sets, set.sets)) return false;
-		if (this.type != set.type) return false;
-		if (this.id != set.id) return false;
+		result = SimLive.deepEquals(elements, set.elements, result);
+		result = SimLive.deepEquals(nodes, set.nodes, result);
+		result = SimLive.deepEquals(sets, set.sets, result);
+		if (this.type != set.type) return Result.RECALC;
+		if (this.id != set.id) return Result.RECALC;
 		if (this.spurGearValues != null && set.spurGearValues != null) {
-			if (!this.spurGearValues.deepEquals(set.spurGearValues)) return false;
+			result = this.spurGearValues.deepEquals(set.spurGearValues, result);
 		}
-		if (this.view != set.view) return false;
-		return true;
+		if (this.view != set.view && result != Result.RECALC) result = Result.CHANGE;
+		return result;
 	}
 
 	public Type getType() {

@@ -51,7 +51,7 @@ public abstract class LineElement extends Element {
 	
 	public Section findSection(ArrayList<Section> sections, Section section) {
 		for (int i = 0; i < sections.size(); i++) {
-			if (sections.get(i).deepEquals(section)) return sections.get(i);
+			if (sections.get(i).deepEquals(section, Result.EQUAL) == Result.EQUAL) return sections.get(i);
 		}
 		return null;
 	}

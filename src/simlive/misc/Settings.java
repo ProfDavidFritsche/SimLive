@@ -73,16 +73,16 @@ public class Settings implements DeepEqualsInterface {
 		return settings;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Settings settings = (Settings) obj;
 		/*here are only settings listed that invalidate the result if changed*/
-		if (constraintType != settings.constraintType) return false;
-		if (penaltyFactor != settings.penaltyFactor) return false;
-		if (isReorderNodes != settings.isReorderNodes) return false;
-		if (isLargeDisplacement != settings.isLargeDisplacement) return false;
-		if (isWriteMatrixView != settings.isWriteMatrixView) return false;
-		if (unitSystem != settings.unitSystem) return false;
-		return true;
+		if (constraintType != settings.constraintType) return Result.RECALC;
+		if (penaltyFactor != settings.penaltyFactor) return Result.RECALC;
+		if (isReorderNodes != settings.isReorderNodes) return Result.RECALC;
+		if (isLargeDisplacement != settings.isLargeDisplacement) return Result.RECALC;
+		if (isWriteMatrixView != settings.isWriteMatrixView) return Result.RECALC;
+		if (unitSystem != settings.unitSystem) return Result.RECALC;
+		return result;
 	}
 
 }

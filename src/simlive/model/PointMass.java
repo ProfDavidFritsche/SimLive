@@ -45,16 +45,16 @@ public class PointMass extends Element {
 	}
 
 	@Override
-	public boolean deepEquals(Object obj) {
-		if (!(obj instanceof PointMass)) return false;
+	public Result deepEquals(Object obj, Result result) {
+		if (!(obj instanceof PointMass)) return Result.RECALC;
 		PointMass element = (PointMass) obj;
-		if (this.getType() != element.getType()) return false;
-		if (!Arrays.equals(this.elementNodes, element.elementNodes)) return false;
-		if (this.mass != element.mass) return false;
-		if (this.id != element.id) return false;
-		if (this.stiffnessDamping != element.stiffnessDamping) return false;
-		if (this.massDamping != element.massDamping) return false;
-		return true;
+		if (this.getType() != element.getType()) return Result.RECALC;
+		if (!Arrays.equals(this.elementNodes, element.elementNodes)) return Result.RECALC;
+		if (this.mass != element.mass) return Result.RECALC;
+		if (this.id != element.id) return Result.RECALC;
+		if (this.stiffnessDamping != element.stiffnessDamping) return Result.RECALC;
+		if (this.massDamping != element.massDamping) return Result.RECALC;
+		return result;
 	}
 
 	@Override

@@ -35,12 +35,12 @@ public class Facet3d implements DeepEqualsInterface {
 		return facet;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Facet3d facet = (Facet3d) obj;
-		if (this.id != facet.id) return false;
-		if (!Arrays.equals(this.indices, facet.indices)) return false;
-		if (this.colorID != facet.colorID) return false;
-		return true;
+		if (this.id != facet.id) return Result.RECALC;
+		if (!Arrays.equals(this.indices, facet.indices)) return Result.RECALC;
+		if (this.colorID != facet.colorID) return Result.RECALC;
+		return result;
 	}
 
 }

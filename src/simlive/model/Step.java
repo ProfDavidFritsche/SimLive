@@ -39,16 +39,16 @@ public class Step implements DeepEqualsInterface {
 		return step;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Step step = (Step) obj;
-		if (this.type != step.type) return false;
-		if (this.duration != step.duration) return false;
-		if (this.nIncrements != step.nIncrements) return false;
-		if (this.maxIterations != step.maxIterations) return false;
-		if (this.gravity != step.gravity) return false;
-		if (this.gValue != step.gValue) return false;
-		if (this.name != step.name) return false;
-		return true;
+		if (this.type != step.type) return Result.RECALC;
+		if (this.duration != step.duration) return Result.RECALC;
+		if (this.nIncrements != step.nIncrements) return Result.RECALC;
+		if (this.maxIterations != step.maxIterations) return Result.RECALC;
+		if (this.gravity != step.gravity) return Result.RECALC;
+		if (this.gValue != step.gValue) return Result.RECALC;
+		if (this.name != step.name && result != Result.RECALC) result = Result.CHANGE;
+		return result;
 	}
 
 }

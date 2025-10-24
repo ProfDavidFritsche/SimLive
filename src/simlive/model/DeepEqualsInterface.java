@@ -1,5 +1,6 @@
 package simlive.model;
 
 public interface DeepEqualsInterface {
-	public boolean deepEquals(Object obj);
+	public enum Result {EQUAL, CHANGE, RECALC}
+	public Result deepEquals(Object obj, Result result);
 }

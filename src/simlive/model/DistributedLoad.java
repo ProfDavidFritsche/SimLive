@@ -46,19 +46,21 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 		return distributedLoad;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		DistributedLoad distributedLoad = (DistributedLoad) obj;
-		if (!SimLive.deepEquals(elementSets, distributedLoad.elementSets)) return false;
-		if (!Arrays.equals(this.startValues, distributedLoad.startValues)) return false;
-		if (!Arrays.equals(this.endValues, distributedLoad.endValues)) return false;
-		if (!Arrays.equals(this.axis, distributedLoad.axis)) return false;
-		if (this.angle != distributedLoad.angle) return false;
-		if (this.isLocalSysAligned != distributedLoad.isLocalSysAligned) return false;
-		if (this.referenceNode != null && distributedLoad.referenceNode != null &&
-			!this.referenceNode.deepEquals(distributedLoad.referenceNode)) return false;
-		if (!this.timeTable.deepEquals(distributedLoad.timeTable)) return false;
-		if (this.name != distributedLoad.name) return false;
-		return true;
+		result = SimLive.deepEquals(elementSets, distributedLoad.elementSets, result);
+		if (!Arrays.equals(this.startValues, distributedLoad.startValues)) return Result.RECALC;
+		if (!Arrays.equals(this.endValues, distributedLoad.endValues)) return Result.RECALC;
+		if (!Arrays.equals(this.axis, distributedLoad.axis)) return Result.RECALC;
+		if (this.angle != distributedLoad.angle) return Result.RECALC;
+		if (this.isLocalSysAligned != distributedLoad.isLocalSysAligned) return Result.RECALC;
+		if (this.referenceNode != null && distributedLoad.referenceNode != null) {
+			result = this.referenceNode.deepEquals(distributedLoad.referenceNode, result);
+		}
+		result = this.timeTable.deepEquals(distributedLoad.timeTable, result);
+		if (this.name != distributedLoad.name && result != Result.RECALC) result = Result.CHANGE;
+		if (this.isShifted != distributedLoad.isShifted && result != Result.RECALC) result = Result.CHANGE;
+		return result;
 	}
 	
 	public double getStartValue(int comp) {

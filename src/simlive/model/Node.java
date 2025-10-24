@@ -25,12 +25,12 @@ public class Node implements DeepEqualsInterface {
 		return node;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Node node = (Node) obj;
-		if (!Arrays.equals(this.coords, node.coords)) return false;
-		if (this.isRotationalDOF != node.isRotationalDOF) return false;
-		if (this.id != node.id) return false;
-		return true;
+		if (!Arrays.equals(this.coords, node.coords)) return Result.RECALC;
+		if (this.isRotationalDOF != node.isRotationalDOF) return Result.RECALC;
+		if (this.id != node.id) return Result.RECALC;
+		return result;
 	}
 
 	public double[] getCoords() {

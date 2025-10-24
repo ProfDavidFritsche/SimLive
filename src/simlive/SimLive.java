@@ -34,6 +34,7 @@ import simlive.misc.XML;
 import simlive.model.AbstractConnector;
 import simlive.model.AbstractLoad;
 import simlive.model.DeepEqualsInterface;
+import simlive.model.DeepEqualsInterface.Result;
 import simlive.model.DistributedLoad;
 import simlive.model.Facet3d;
 import simlive.model.Material;
@@ -2670,22 +2671,22 @@ public class SimLive {
 		return Arrays.copyOf(array, array.length-1);
 	}
 	
-	public static boolean deepEquals(ArrayList<?> list1, ArrayList<?> list2) {
-		if (list1.size() != list2.size()) return false;
+	public static Result deepEquals(ArrayList<?> list1, ArrayList<?> list2, Result result) {
+		if (list1.size() != list2.size()) return Result.RECALC;
 		for (int i = 0; i < list1.size(); i++) {
-			if (!list1.get(i).getClass().equals(list2.get(i).getClass())) return false;
+			if (!list1.get(i).getClass().equals(list2.get(i).getClass())) return Result.RECALC;
 			DeepEqualsInterface o1 = (DeepEqualsInterface) list1.get(i);
 			DeepEqualsInterface o2 = (DeepEqualsInterface) list2.get(i);
-			if (!o1.deepEquals(o2)) return false;
+			result = o1.deepEquals(o2, result);
 		}
-		return true;
+		return result;
 	}
 	
 	private void checkModelChange() {
 		if (mode != Mode.RESULTS) {
 			if (post != null) {
-				if (!post.getSolution().getRefModel().deepEquals(model) ||
-					!post.getSolution().getRefSettings().deepEquals(settings)) {
+				if (post.getSolution().getRefModel().deepEquals(model, Result.EQUAL) == Result.RECALC ||
+						post.getSolution().getRefSettings().deepEquals(settings, Result.EQUAL) == Result.RECALC) {
 					SimLive.shell.getDisplay().syncExec(new Runnable() {
 						public void run() {
 							resetPost();

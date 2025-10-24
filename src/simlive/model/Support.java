@@ -39,15 +39,16 @@ public class Support implements DeepEqualsInterface {
 		return support;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Support support = (Support) obj;
-		if (!SimLive.deepEquals(this.nodes, support.nodes)) return false;
-		if (!Arrays.equals(this.axis, support.axis)) return false;
-		if (this.angle != support.angle) return false;
-		if (!Arrays.equals(this.isFixedDisp, support.isFixedDisp)) return false;
-		if (!Arrays.equals(this.isFixedRot, support.isFixedRot)) return false;
-		if (this.name != support.name) return false;
-		return true;
+		result = SimLive.deepEquals(this.nodes, support.nodes, result);
+		if (!Arrays.equals(this.axis, support.axis)) return Result.RECALC;
+		if (this.angle != support.angle) return Result.RECALC;
+		if (!Arrays.equals(this.isFixedDisp, support.isFixedDisp)) return Result.RECALC;
+		if (!Arrays.equals(this.isFixedRot, support.isFixedRot)) return Result.RECALC;
+		if (this.name != support.name && result != Result.RECALC) result = Result.CHANGE;
+		if (this.isShifted != support.isShifted && result != Result.RECALC) result = Result.CHANGE;
+		return result;
 	}
 	
 	public ArrayList<Node> getNodes() {

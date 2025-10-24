@@ -29,7 +29,7 @@ public abstract class Element implements DeepEqualsInterface {
 
 	public abstract Element clone(Model model);
 	
-	public abstract boolean deepEquals(Object obj);
+	public abstract Result deepEquals(Object obj, Result result);
 	
 	public abstract boolean isLineElement();
 	
@@ -51,7 +51,7 @@ public abstract class Element implements DeepEqualsInterface {
 	
 	public Material findMaterial(ArrayList<Material> materials, Material material) {
 		for (int i = 0; i < materials.size(); i++) {
-			if (materials.get(i).deepEquals(material)) return materials.get(i);
+			if (materials.get(i).deepEquals(material, Result.EQUAL) == Result.EQUAL) return materials.get(i);
 		}
 		return null;
 	}

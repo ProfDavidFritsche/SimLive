@@ -60,19 +60,19 @@ public class Part3d implements DeepEqualsInterface {
 		return part3d;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		Part3d part3d = (Part3d) obj;
 		for (int i = 0; i < vertices.length; i++) {
-			if (!this.vertices[i].deepEquals(part3d.vertices[i])) return false;
+			result = this.vertices[i].deepEquals(part3d.vertices[i], result);
 		}
 		for (int i = 0; i < facets.length; i++) {
-			if (!this.facets[i].deepEquals(part3d.facets[i])) return false;
+			result = this.facets[i].deepEquals(part3d.facets[i], result);
 		}
-		if (!this.subTree.deepEquals(part3d.subTree)) return false;
-		if (this.id != part3d.id) return false;
+		result = this.subTree.deepEquals(part3d.subTree, result);
+		if (this.id != part3d.id) return Result.RECALC;
 		//do check to have it in model history
-		if (this.render != part3d.render) return false;
-		if (this.doubleSided != part3d.doubleSided) return false;
+		if (this.render != part3d.render && result != Result.RECALC) result = Result.CHANGE;
+		if (this.doubleSided != part3d.doubleSided && result != Result.RECALC) result = Result.CHANGE;
 		//do not check following because it was not copied
 		/*for (int i = 0; i < connect.length; i++) {
 			if (!Arrays.equals(this.connect[i], part3d.connect[i])) return false;
@@ -84,7 +84,7 @@ public class Part3d implements DeepEqualsInterface {
 		/*for (int i = 0; i < normals.length; i++) {
 			if (!Arrays.equals(this.normals[i], part3d.normals[i])) return false;
 		}*/
-		return true;
+		return result;
 	}
 
 	public SubTree getSubTree() {

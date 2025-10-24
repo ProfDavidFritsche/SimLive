@@ -200,23 +200,23 @@ public class ContactPair implements DeepEqualsInterface {
 		return contactPair;
 	}
 	
-	public boolean deepEquals(Object obj) {
+	public Result deepEquals(Object obj, Result result) {
 		ContactPair contactPair = (ContactPair) obj;
-		if (!SimLive.deepEquals(this.slaveNodes, contactPair.slaveNodes)) return false;
+		result = SimLive.deepEquals(this.slaveNodes, contactPair.slaveNodes, result);
 		if (type == Type.DEFORMABLE_DEFORMABLE) {
-			if (!SimLive.deepEquals(this.masterSets, contactPair.masterSets)) return false;
+			result = SimLive.deepEquals(this.masterSets, contactPair.masterSets, result);
 		}
-		if (!SimLive.deepEquals(this.rigidElements, contactPair.rigidElements)) return false;
-		if (!SimLive.deepEquals(this.rigidNodes, contactPair.rigidNodes)) return false;
-		if (this.switchContactSide != contactPair.switchContactSide) return false;
-		if (this.isMaxPenetration != contactPair.isMaxPenetration) return false;
-		if (this.maxPenetration != contactPair.maxPenetration) return false;
-		if (this.frictionCoefficient != contactPair.frictionCoefficient) return false;
-		if (this.forwardTol != contactPair.forwardTol) return false;
-		if (this.noSeparation != contactPair.noSeparation) return false;
-		if (this.type != contactPair.type) return false;
-		if (this.name != contactPair.name) return false;
-		return true;
+		result = SimLive.deepEquals(this.rigidElements, contactPair.rigidElements, result);
+		result = SimLive.deepEquals(this.rigidNodes, contactPair.rigidNodes, result);
+		if (this.switchContactSide != contactPair.switchContactSide) return Result.RECALC;
+		if (this.isMaxPenetration != contactPair.isMaxPenetration) return Result.RECALC;
+		if (this.maxPenetration != contactPair.maxPenetration) return Result.RECALC;
+		if (this.frictionCoefficient != contactPair.frictionCoefficient) return Result.RECALC;
+		if (this.forwardTol != contactPair.forwardTol) return Result.RECALC;
+		if (this.noSeparation != contactPair.noSeparation) return Result.RECALC;
+		if (this.type != contactPair.type) return Result.RECALC;
+		if (this.name != contactPair.name && result != Result.RECALC) result = Result.CHANGE;
+		return result;
 	}
 	
 	private void updateForwardTol() {
