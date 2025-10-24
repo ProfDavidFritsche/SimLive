@@ -160,13 +160,15 @@ public class Part3d implements DeepEqualsInterface {
 		facetNormal[0] = diff0[1]*diff1[2]-diff0[2]*diff1[1];
 		facetNormal[1] = diff0[2]*diff1[0]-diff0[0]*diff1[2];
 		facetNormal[2] = diff0[0]*diff1[1]-diff0[1]*diff1[0];
+		double length = Math.sqrt(facetNormal[0]*facetNormal[0]+facetNormal[1]*facetNormal[1]+facetNormal[2]*facetNormal[2]);
+		facetNormal[0] /= length;
+		facetNormal[1] /= length;
+		facetNormal[2] /= length;
 		return facetNormal;
 	}
 	
-	private double dotProductNormalized(double[] vec0, double[] vec1) {
-		double l0_sqr = vec0[0]*vec0[0]+vec0[1]*vec0[1]+vec0[2]*vec0[2];
-		double l1_sqr = vec1[0]*vec1[0]+vec1[1]*vec1[1]+vec1[2]*vec1[2];
-		return (vec0[0]*vec1[0]+vec0[1]*vec1[1]+vec0[2]*vec1[2])/Math.sqrt(l0_sqr*l1_sqr);
+	private double dotProduct(double[] vec0, double[] vec1) {
+		return vec0[0]*vec1[0]+vec0[1]*vec1[1]+vec0[2]*vec1[2];
 	}
 	
 	private void initTopology() {
@@ -205,25 +207,22 @@ public class Part3d implements DeepEqualsInterface {
 		stream.forEach(facet -> {
 			facetNormals[facet.getID()] = calculateFacetNormal(facet.getID());
 		});
-		stream = Stream.of(facets).parallel();
-		stream.forEach(facet -> {
-    		int[] indices = facet.getIndices();
-    		double[] facetNormal0 = facetNormals[facet.getID()];
+		for (int f = 0; f < facets.length; f++) {
+    		int[] indices = facets[f].getIndices();
+    		double[] facetNormal0 = facetNormals[f];
 	    	for (int i = 0; i < 3; i++) {
 		    	for (int j = 0; j < connect[indices[i]].length/2; j++) {
 		    		int f1 = connect[indices[i]][j*2];
 		    		double[] facetNormal1 = facetNormals[f1];
-		    		if (dotProductNormalized(facetNormal0, facetNormal1) > 0.85) {
+		    		if (dotProduct(facetNormal0, facetNormal1) > 0.85) {
 		    			int k = connect[indices[i]][j*2+1];
-		    			synchronized(this){
-			    			normals0[f1*3+k][0] += facetNormal0[0];
-			    			normals0[f1*3+k][1] += facetNormal0[1];
-			    			normals0[f1*3+k][2] += facetNormal0[2];
-		    			}
+		    			normals0[f1*3+k][0] += facetNormal0[0];
+			    		normals0[f1*3+k][1] += facetNormal0[1];
+			    		normals0[f1*3+k][2] += facetNormal0[2];
 		    		}
 		    	}
     		}
-    	});
+    	}
 		normals = normals0;
 	}
 	
