@@ -1665,6 +1665,13 @@ public class View extends GLCanvas {
 			});
 		}
 		items = popup.getItems();
+		for (int i = 0; i < items.length; i++) {
+        	if (items[i].getMenu() != null) {
+	        	MenuItem[] subItems = items[i].getMenu().getItems();
+	        	items = Arrays.copyOf(items, items.length+subItems.length);
+	        	System.arraycopy(subItems, 0, items, items.length-subItems.length, subItems.length);
+        	}
+        }
         for (int i = 0; i < items.length; i++) {
             items[i].addSelectionListener(new SelectionAdapter() {
 				@Override
