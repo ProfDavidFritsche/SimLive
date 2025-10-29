@@ -2348,9 +2348,10 @@ public class SimLive {
 		tabFolderModel.setSelection(mode == Mode.SOLUTION ? 1 : 0);
 		tabFolderModel.notifyListeners(SWT.Selection, new Event());
 		if (mode != Mode.SOLUTION) {
-			if (modelTree.getSelection() != null) {
-				modelTree.notifyListeners(SWT.Selection, new Event());
+			if (modelTree.getSelectionCount() == 0) {
+				modelTree.setSelection(modelTree.getItem(mode.ordinal()-1));
 			}
+			modelTree.notifyListeners(SWT.Selection, new Event());
 		}
 	}
 	
