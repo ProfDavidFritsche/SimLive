@@ -2355,6 +2355,16 @@ public class SimLive {
 		}
 	}
 	
+	private void resetToPartsMode() {
+		modelTree.setSelection(modelTree.getItem(0));
+		modelTree.notifyListeners(SWT.Selection, new Event());
+		tabFolderModel.setSelection(0);
+		tabFolderModel.notifyListeners(SWT.Selection, new Event());
+		for (int i = 0; i < modelTree.getItemCount(); i++) {
+			modelTree.getItems()[i].setExpanded(false);
+		}
+	}
+	
 	public static void setDisplayPartsLabel() {
 		Image img = null;
 		String text = null;
@@ -2788,12 +2798,7 @@ public class SimLive {
 		boxSelect = BoxSelect.NODES;
 		select = Select.DEFAULT;
 		resetState();
-		mode = Mode.PARTS;
-		modelTree.setSelection(modelTree.getItem(0));
-		for (int i = 0; i < modelTree.getItemCount(); i++) {
-			modelTree.getItems()[i].setExpanded(false);
-		}
-		reselectTabAndTree();
+		resetToPartsMode();
 		setModelDimension();
 		setResultLabel(null, false, false, false);
 		
