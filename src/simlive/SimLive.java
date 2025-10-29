@@ -249,6 +249,7 @@ public class SimLive {
 	
 	CTabFolder tabFolderModel;
 	public static Tree modelTree;
+	private ToolItem tltmUnits;
 	private ToolItem tltmUndo;
 	private ToolItem tltmRedo;
 	private ToolItem tltmMeasureDistance;
@@ -537,6 +538,7 @@ public class SimLive {
 				});
 				new MenuItem(menu, SWT.SEPARATOR);
 				MenuItem menuItem_importControl = new MenuItem(menu, SWT.NONE);
+				menuItem_importControl.setEnabled(mode != Mode.RESULTS);
 				menuItem_importControl.setText("Import Control...");
 				menuItem_importControl.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -561,7 +563,7 @@ public class SimLive {
 								messageBox.setText("Info");
 						        messageBox.setMessage("Import successful. Script file written.");
 						        messageBox.open();
-						        resetToPartsMode();
+						        reselectTabAndTree();
 							}
 						}
 					}
@@ -738,7 +740,7 @@ public class SimLive {
 		});
 		tltmView.setText("View");
 		
-		ToolItem tltmUnits = new ToolItem(toolBar, SWT.DROP_DOWN);
+		tltmUnits = new ToolItem(toolBar, SWT.DROP_DOWN);
 		tltmUnits.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -751,8 +753,7 @@ public class SimLive {
 					public void widgetSelected(SelectionEvent e) {
 						Units.convertUnitsOfModel(model.settings.unitSystem, Units.UnitSystem.t_mm_s_N);
 						model.settings.unitSystem = Units.UnitSystem.t_mm_s_N;
-						resetState();
-						resetToPartsMode();
+						reselectTabAndTree();
 						view.redraw();
 					}
 				});
@@ -764,8 +765,7 @@ public class SimLive {
 					public void widgetSelected(SelectionEvent e) {
 						Units.convertUnitsOfModel(model.settings.unitSystem, Units.UnitSystem.t_m_s_kN);
 						model.settings.unitSystem = Units.UnitSystem.t_m_s_kN;
-						resetState();
-						resetToPartsMode();
+						reselectTabAndTree();
 						view.redraw();
 					}
 				});
@@ -777,8 +777,7 @@ public class SimLive {
 					public void widgetSelected(SelectionEvent e) {
 						Units.convertUnitsOfModel(model.settings.unitSystem, Units.UnitSystem.kg_m_s_N);
 						model.settings.unitSystem = Units.UnitSystem.kg_m_s_N;
-						resetState();
-						resetToPartsMode();
+						reselectTabAndTree();
 						view.redraw();
 					}
 				});
@@ -1307,10 +1306,16 @@ public class SimLive {
 		tabFolderModel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
+				int index = tabFolderModel.getSelectionIndex();
+				if (mode != Mode.RESULTS && index == 2 && (post == null || !isModelAndResultConsistent())) {
+					reselectTabAndTree();
+					SimLive.messageBox(true, "No results available.\n"
+			        		+ "Solve model first.");
+					return;
+				}
 				for (int i = 0; i < tabFolderModel.getItemCount(); i++) {
 					tabFolderModel.getItem(i).setFont(shell.getDisplay().getSystemFont());
 				}
-				int index = tabFolderModel.getSelectionIndex();
 				tabFolderModel.getItem(index).setFont(FONT_BOLD);
 				switch(index) {
 					case 0:
@@ -1325,21 +1330,13 @@ public class SimLive {
 						break;
 					
 					case 2:
-						checkModelChange();
-						if (SimLive.post != null) {
-							mode = Mode.RESULTS;
-							resetState();
-							dialogArea = new ResultsDialog(composite_2, SWT.NONE, post, model.settings);
-							composite_2.layout();					
-							SimLive.post.updateMinMaxLabels();
-							updateMatrixView();
-							((CTabFolder) view.getParent()).getItem(0).setText("Results View");
-						}
-						else {
-							SimLive.messageBox(true, "No results available.\n"
-					        		+ "Solve model first.");
-					        resetToPartsMode();
-						}
+						mode = Mode.RESULTS;
+						resetState();
+						dialogArea = new ResultsDialog(composite_2, SWT.NONE, post, model.settings);
+						composite_2.layout();					
+						SimLive.post.updateMinMaxLabels();
+						updateMatrixView();
+						((CTabFolder) view.getParent()).getItem(0).setText("Results View");
 						break;
 				}
 			}
@@ -2347,13 +2344,13 @@ public class SimLive {
 		view.redraw();
 	}
 	
-	private void resetToPartsMode() {
-		modelTree.setSelection(modelTree.getItem(0));
-		modelTree.notifyListeners(SWT.Selection, new Event());
-		tabFolderModel.setSelection(0);
+	private void reselectTabAndTree() {
+		tabFolderModel.setSelection(mode == Mode.SOLUTION ? 1 : 0);
 		tabFolderModel.notifyListeners(SWT.Selection, new Event());
-		for (int i = 0; i < modelTree.getItemCount(); i++) {
-			modelTree.getItems()[i].setExpanded(false);
+		if (mode != Mode.SOLUTION) {
+			if (modelTree.getSelection() != null) {
+				modelTree.notifyListeners(SWT.Selection, new Event());
+			}
 		}
 	}
 	
@@ -2681,36 +2678,33 @@ public class SimLive {
 		return result;
 	}
 	
-	private void checkModelChange() {
-		if (mode != Mode.RESULTS) {
-			if (post != null) {
-				if (post.getSolution().getRefModel().deepEquals(model, Result.EQUAL) == Result.RECALC ||
-						post.getSolution().getRefSettings().deepEquals(model.settings, Result.EQUAL) == Result.RECALC) {
-					SimLive.shell.getDisplay().syncExec(new Runnable() {
-						public void run() {
-							resetPost();
-						}
-					});
-				}
-			}
-		}
+	private static boolean isModelAndResultConsistent() {
+		return post.getSolution().getRefModel().deepEquals(model, Result.EQUAL) != Result.RECALC;
 	}
 	
 	private void regularChecks() {
 		if (mode != Mode.RESULTS && !shell.isDisposed() && shell.getChildren()[0].isEnabled()) {
-			if (post != null && (checkModel == null || !checkModel.isAlive())) {
+			if (checkModel == null || !checkModel.isAlive()) {
 				checkModel = new Thread(new Runnable() {
 					public void run() {
-						checkModelChange();
+						if (post != null && !isModelAndResultConsistent()) {
+							SimLive.shell.getDisplay().syncExec(new Runnable() {
+								public void run() {
+									resetPost();
+								}
+							});
+						}
 					}
 				});
 				checkModel.start();
 			}
 		}
-		
 		if (!tltmUndo.isDisposed() && !tltmRedo.isDisposed()) {
 			tltmUndo.setEnabled(modelPos > 0 && mode != Mode.RESULTS);
 			tltmRedo.setEnabled(modelPos < modelHistory.size()-1 && mode != Mode.RESULTS);
+		}
+		if (!tltmUnits.isDisposed()) {
+			tltmUnits.setEnabled(mode != Mode.RESULTS);
 		}
 		if (!tltmOrientations.isDisposed() && !tltmSections.isDisposed() && !tltmNodes.isDisposed() &&
 				!tltmEdges.isDisposed() && !tltmGrid.isDisposed()) {
@@ -2739,7 +2733,7 @@ public class SimLive {
 		}
 		model = model.expandModel(modelPos).clone();
 		//resetState();
-		resetToPartsMode();
+		reselectTabAndTree();
 		view.redraw();
 	}
 	
@@ -2773,8 +2767,7 @@ public class SimLive {
 			shell.setText(APPLICATION_NAME+" "+VERSION_NAME);
 		}
 		else {
-			if (!XML.readFileAndGenerateModel(fileName) ||
-			    !XML.readFileAndGenerateSettings(fileName)) {
+			if (!XML.readFileAndGenerateModel(fileName)) {
 				return false;
 			}
 			
@@ -2794,7 +2787,12 @@ public class SimLive {
 		boxSelect = BoxSelect.NODES;
 		select = Select.DEFAULT;
 		resetState();
-		resetToPartsMode();
+		mode = Mode.PARTS;
+		modelTree.setSelection(modelTree.getItem(0));
+		for (int i = 0; i < modelTree.getItemCount(); i++) {
+			modelTree.getItems()[i].setExpanded(false);
+		}
+		reselectTabAndTree();
 		setModelDimension();
 		setResultLabel(null, false, false, false);
 		

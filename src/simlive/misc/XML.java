@@ -886,35 +886,8 @@ public class XML {
 				SimLive.model.getSteps().add(step);
 			}
 			
-			SimLive.model.updateModel();
-			
-			return true;
-
-		}
-		catch (NullPointerException npex) {
-			System.out.println(npex.getMessage());
-		}
-		catch (NumberFormatException nfex) {
-			System.out.println(nfex.getMessage());
-		}
-		catch (IOException io) {
-			System.out.println(io.getMessage());
-		}
-		catch (JDOMException jdomex) {
-			System.out.println(jdomex.getMessage());
-		}
-		return false;
-	}
-	
-	public static boolean readFileAndGenerateSettings(String fileName) {
-		SAXBuilder builder = new SAXBuilder();
-		File xmlFile = new File(fileName);
-
-		try {
-
-			Document document = (Document) builder.build(xmlFile);
-			org.jdom.Element XMLroot = document.getRootElement();
-			org.jdom.Element XMLsettings = XMLroot.getChild("settings");
+			/* settings */
+			org.jdom.Element XMLsettings = XMLmodel.getChild("settings");
 			SimLive.model.settings.newPartType = Element.Type.valueOf(getStringAttribute(XMLsettings, "newPartType"));
 			SimLive.model.settings.module = getDoubleAttribute(XMLsettings, "module");
 			SimLive.model.settings.pressureAngle = getDoubleAttribute(XMLsettings, "pressureAngle");
@@ -938,6 +911,8 @@ public class XML {
 			SimLive.model.settings.isShowSupports = getBooleanAttribute(XMLsettings, "isShowSupports");
 			SimLive.model.settings.isShowLoads = getBooleanAttribute(XMLsettings, "isShowLoads");
 			//Sim2d.settings.isShowReactions = getBooleanAttribute(XMLsettings, "isShowReactions");
+			
+			SimLive.model.updateModel();
 			
 			return true;
 
@@ -1444,6 +1419,35 @@ public class XML {
 			}
 			XMLmodel.addContent(XMLsteps);
 			
+			/* settings */
+			org.jdom.Element XMLsettings = new org.jdom.Element("settings");
+			
+			setStringAttribute(XMLsettings, "newPartType", settings.newPartType.toString());
+			setDoubleAttribute(XMLsettings, "module", settings.module);
+			setDoubleAttribute(XMLsettings, "pressureAngle", settings.pressureAngle);
+			//setBooleanAttribute(XMLsettings, "isShiftForceVectors", settings.isShiftForceVectors);
+			setStringAttribute(XMLsettings, "constraintType", settings.constraintType.toString());
+			setDoubleAttribute(XMLsettings, "penaltyFactor", settings.penaltyFactor);
+			setBooleanAttribute(XMLsettings, "isReorderNodes", settings.isReorderNodes);
+			setBooleanAttribute(XMLsettings, "isLargeDisplacement", settings.isLargeDisplacement);
+			setBooleanAttribute(XMLsettings, "isWriteMatrixView", settings.isWriteMatrixView);
+			setStringAttribute(XMLsettings, "unitSystem", settings.unitSystem.toString());
+			setDoubleAttribute(XMLsettings, "meshSize", settings.meshSize);
+			setIntegerAttribute(XMLsettings, "meshCount", settings.meshCount);
+			
+			setBooleanAttribute(XMLsettings, "isShowAxes", settings.isShowAxes);
+			setBooleanAttribute(XMLsettings, "isShowGrid", settings.isShowGrid);
+			setBooleanAttribute(XMLsettings, "isShowScale", settings.isShowScale);
+			setBooleanAttribute(XMLsettings, "isShowOrientations", settings.isShowOrientations);
+			setBooleanAttribute(XMLsettings, "isShowNodes", settings.isShowNodes);
+			setBooleanAttribute(XMLsettings, "isShowEdges", settings.isShowEdges);
+			setBooleanAttribute(XMLsettings, "isShowSections", settings.isShowSections);
+			setBooleanAttribute(XMLsettings, "isShowSupports", settings.isShowSupports);
+			setBooleanAttribute(XMLsettings, "isShowLoads", settings.isShowLoads);
+			//setBooleanAttribute(XMLsettings, "isShowReactions", settings.isShowReactions);
+			
+			XMLmodel.addContent(XMLsettings);
+			
 			doc.getRootElement().addContent(XMLmodel);
 			
 			/* solution */
@@ -1485,35 +1489,6 @@ public class XML {
 				
 				doc.getRootElement().addContent(XMLsolution);
 			}
-			
-			/* settings */
-			org.jdom.Element XMLsettings = new org.jdom.Element("settings");
-			
-			setStringAttribute(XMLsettings, "newPartType", settings.newPartType.toString());
-			setDoubleAttribute(XMLsettings, "module", settings.module);
-			setDoubleAttribute(XMLsettings, "pressureAngle", settings.pressureAngle);
-			//setBooleanAttribute(XMLsettings, "isShiftForceVectors", settings.isShiftForceVectors);
-			setStringAttribute(XMLsettings, "constraintType", settings.constraintType.toString());
-			setDoubleAttribute(XMLsettings, "penaltyFactor", settings.penaltyFactor);
-			setBooleanAttribute(XMLsettings, "isReorderNodes", settings.isReorderNodes);
-			setBooleanAttribute(XMLsettings, "isLargeDisplacement", settings.isLargeDisplacement);
-			setBooleanAttribute(XMLsettings, "isWriteMatrixView", settings.isWriteMatrixView);
-			setStringAttribute(XMLsettings, "unitSystem", settings.unitSystem.toString());
-			setDoubleAttribute(XMLsettings, "meshSize", settings.meshSize);
-			setIntegerAttribute(XMLsettings, "meshCount", settings.meshCount);
-			
-			setBooleanAttribute(XMLsettings, "isShowAxes", settings.isShowAxes);
-			setBooleanAttribute(XMLsettings, "isShowGrid", settings.isShowGrid);
-			setBooleanAttribute(XMLsettings, "isShowScale", settings.isShowScale);
-			setBooleanAttribute(XMLsettings, "isShowOrientations", settings.isShowOrientations);
-			setBooleanAttribute(XMLsettings, "isShowNodes", settings.isShowNodes);
-			setBooleanAttribute(XMLsettings, "isShowEdges", settings.isShowEdges);
-			setBooleanAttribute(XMLsettings, "isShowSections", settings.isShowSections);
-			setBooleanAttribute(XMLsettings, "isShowSupports", settings.isShowSupports);
-			setBooleanAttribute(XMLsettings, "isShowLoads", settings.isShowLoads);
-			//setBooleanAttribute(XMLsettings, "isShowReactions", settings.isShowReactions);
-			
-			doc.getRootElement().addContent(XMLsettings);
 			
 			// new XMLOutputter().output(doc, System.out);
 			XMLOutputter xmlOutput = new XMLOutputter();

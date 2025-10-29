@@ -67,6 +67,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				settings.constraintType = ConstraintMethod.Type.values()[combo.getSelectionIndex()];
+				SimLive.model.updateModel();
 				composite.dispose();
 				composite = getComposite(SolutionDialog.this, model, settings);
 				composite.moveBelow(combo);
@@ -110,6 +111,7 @@ public class SolutionDialog extends Composite {
 				public void widgetDefaultSelected(SelectionEvent arg0) {
 					double value = SimLive.getInputDouble(text_1);
 					settings.penaltyFactor = value;
+					SimLive.model.updateModel();
 				}
 			});
 			text_1.addFocusListener(new FocusAdapter() {
@@ -141,6 +143,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				settings.isReorderNodes = btnReorderNodes.getSelection();
+				SimLive.model.updateModel();
 			}
 		});
 		btnReorderNodes.setText("Reorder Nodes");
@@ -153,6 +156,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				settings.isLargeDisplacement = btnLargeDisplacement.getSelection();
+				SimLive.model.updateModel();
 			}
 		});
 		btnLargeDisplacement.setText("Large Displacement");
@@ -165,6 +169,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				settings.isWriteMatrixView = btnWriteMatrixView.getSelection();
+				SimLive.model.updateModel();
 			}
 		});
 		btnWriteMatrixView.setText("Write Matrix View");
@@ -297,8 +302,10 @@ public class SolutionDialog extends Composite {
 				for (int i = 0; i < Solution.warnings.size(); i++) {
 					str += "WARNING: "+Solution.warnings.get(i)+"\n";
 				}
-				styledText.setText(str);
-				styledText.setTopIndex(styledText.getLineCount()-1);
+				if (!styledText.isDisposed()) {
+					styledText.setText(str);
+					styledText.setTopIndex(styledText.getLineCount()-1);
+				}				
 			}
 		});
 	}

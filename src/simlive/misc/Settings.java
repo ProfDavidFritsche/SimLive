@@ -75,13 +75,28 @@ public class Settings implements DeepEqualsInterface {
 	
 	public Result deepEquals(Object obj, Result result) {
 		Settings settings = (Settings) obj;
-		/*here are only settings listed that invalidate the result if changed*/
 		if (constraintType != settings.constraintType) return Result.RECALC;
 		if (penaltyFactor != settings.penaltyFactor) return Result.RECALC;
 		if (isReorderNodes != settings.isReorderNodes) return Result.RECALC;
 		if (isLargeDisplacement != settings.isLargeDisplacement) return Result.RECALC;
 		if (isWriteMatrixView != settings.isWriteMatrixView) return Result.RECALC;
 		if (unitSystem != settings.unitSystem) return Result.RECALC;
+		if (result != Result.RECALC) {
+			if (newPartType != settings.newPartType) result = Result.CHANGE;
+			if (module != settings.module) result = Result.CHANGE;
+			if (pressureAngle != settings.pressureAngle) result = Result.CHANGE;
+			if (meshSize != settings.meshSize) result = Result.CHANGE;
+			if (meshCount != settings.meshCount) result = Result.CHANGE;
+			if (isShowAxes != settings.isShowAxes) result = Result.CHANGE;
+			if (isShowGrid != settings.isShowGrid) result = Result.CHANGE;
+			if (isShowScale != settings.isShowScale) result = Result.CHANGE;
+			if (isShowOrientations != settings.isShowOrientations) result = Result.CHANGE;
+			if (isShowNodes != settings.isShowNodes) result = Result.CHANGE;
+			if (isShowEdges != settings.isShowEdges) result = Result.CHANGE;
+			if (isShowSections != settings.isShowSections) result = Result.CHANGE;
+			if (isShowSupports != settings.isShowSupports) result = Result.CHANGE;
+			if (isShowLoads != settings.isShowLoads) result = Result.CHANGE;
+		}
 		return result;
 	}
 
