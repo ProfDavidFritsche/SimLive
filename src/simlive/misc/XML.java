@@ -939,7 +939,7 @@ public class XML {
 		try {
 
 			SimLive.model.finalUpdateModel();
-			Solution solution = new Solution(SimLive.model, SimLive.model.settings);
+			Solution solution = new Solution(SimLive.model);
 			
 			Document document = (Document) builder.build(xmlFile);
 			org.jdom.Element XMLroot = document.getRootElement();

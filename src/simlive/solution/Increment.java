@@ -66,7 +66,7 @@ public class Increment {
 		
 		Matrix[] K_elem = new Matrix[elements.size()];
 		IntStream.range(0, elements.size()).parallel().forEach(e -> {
-			if (solution.getRefSettings().isLargeDisplacement) {
+			if (solution.getRefModel().settings.isLargeDisplacement) {
 				K_elem[e] = elements.get(e).getElementStiffnessNL(nodes, u_global);
 			}
 			else {
@@ -100,7 +100,7 @@ public class Increment {
 		Matrix[] K_elem = new Matrix[elements.size()];
 		
 		for (int elem = 0; elem < elements.size(); elem++) {
-			if (solution.getRefSettings().isLargeDisplacement) {
+			if (solution.getRefModel().settings.isLargeDisplacement) {
 				K_elem[elem] = elements.get(elem).getElementStiffnessNL(nodes, u_global);
 			}
 			else {
@@ -117,7 +117,7 @@ public class Increment {
 		
 		Matrix[] f_elem = new Matrix[elements.size()];
 		IntStream.range(0, elements.size()).parallel().forEach(e -> {
-			if (solution.getRefSettings().isLargeDisplacement) {
+			if (solution.getRefModel().settings.isLargeDisplacement) {
 				f_elem[e] = elements.get(e).getElementForceNL(nodes, u_global, false);
 			}
 			else {
@@ -150,7 +150,7 @@ public class Increment {
 		
 		Matrix[] K_elem = new Matrix[dStiffElems.size()];
 		IntStream.range(0, dStiffElems.size()).parallel().forEach(e -> {
-			if (solution.getRefSettings().isLargeDisplacement) {
+			if (solution.getRefModel().settings.isLargeDisplacement) {
 				K_elem[e] = dStiffElems.get(e).getElementStiffnessNL(nodes, u_global);
 			}
 			else {
@@ -1224,7 +1224,7 @@ public class Increment {
 	public Matrix updateSolution(Matrix u_global, Matrix delta_u_global) {
 		Matrix u_global_new = u_global.plus(delta_u_global);
 		//intrinsic update of rotations
-		if (solution.getRefSettings().isLargeDisplacement) {
+		if (solution.getRefModel().settings.isLargeDisplacement) {
 			ArrayList<Node> nodes = solution.getRefModel().getNodes();
 			for (int n = 0; n < nodes.size(); n++) {
 				if (nodes.get(n).isRotationalDOF()) {
@@ -1288,7 +1288,7 @@ public class Increment {
 			if (elements.get(elem).getType() != Element.Type.SPRING) {
 				Matrix M_elem = elements.get(elem).M_elem;
 				Matrix K_elem = null;
-				if (solution.getRefSettings().isLargeDisplacement) {
+				if (solution.getRefModel().settings.isLargeDisplacement) {
 					K_elem = elements.get(elem).getElementStiffnessNL(nodes, u_global);
 				}
 				else {
@@ -1694,7 +1694,7 @@ public class Increment {
 					int dof = solution.getDofOfNodeID(nodeID);
 					Matrix nodeRot = u_global.getMatrix(dof+3, dof+5, 0, 0).times(scaling);
 					for (int i = 0; i < 3; i++) {
-						rot[i][j] = solution.getRefSettings().isLargeDisplacement ? nodeRot.get(i, 0) : Math.atan(nodeRot.get(i, 0));
+						rot[i][j] = solution.getRefModel().settings.isLargeDisplacement ? nodeRot.get(i, 0) : Math.atan(nodeRot.get(i, 0));
 					}
 				}
 				for (int i = 0; i < 3; i++) {

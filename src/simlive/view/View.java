@@ -2937,7 +2937,7 @@ public class View extends GLCanvas {
 					Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
 					int dof = SimLive.post.getSolution().getDofOfNodeID(i);
 					Matrix nodeRot = u_global.getMatrix(dof+3, dof+5, 0, 0).times(SimLive.post.getScaling());
-					if (!SimLive.post.getSolution().getRefSettings().isLargeDisplacement) {
+					if (!SimLive.post.getSolution().getRefModel().settings.isLargeDisplacement) {
 						for (int n = 0; n < 3; n++) {
 							nodeRot.set(n, 0, Math.atan(nodeRot.get(n, 0)));
 						}

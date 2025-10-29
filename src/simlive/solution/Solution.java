@@ -7,7 +7,6 @@ import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 import simlive.SimLive;
 import simlive.dialog.SolutionDialog;
-import simlive.misc.Settings;
 import simlive.model.Beam;
 import simlive.model.Connector;
 import simlive.model.ContactPair;
@@ -35,7 +34,6 @@ public class Solution {
 	public static ArrayList<String> errors = new ArrayList<String>();
 	public static ArrayList<String> warnings = new ArrayList<String>();
 	protected Model refModel;
-	private Settings refSettings;
 	private int[] dofOfNodeID;
 	public static String[] results = {"Solution Stopped with Errors",
 			"Solution Finished with Warnings", "Solution Finished Successfully",
@@ -47,20 +45,19 @@ public class Solution {
 	private boolean[] suppressedDof = null; //solve2d
 	
 	
-	public Solution(Model model, Settings settings) {
+	public Solution(Model model) {
 		this.refModel = model.clone();
-		this.refSettings = settings.clone();
-		switch (settings.constraintType) {
+		switch (refModel.settings.constraintType) {
 			case LAGRANGE_MULTIPLIERS:
 				this.constraintMethod = new LagrangeMultipliers();
 				break;
 			case PENALTY_METHOD:
-				this.constraintMethod = new PenaltyMethod(refSettings.penaltyFactor);
+				this.constraintMethod = new PenaltyMethod(refModel.settings.penaltyFactor);
 				break;
 			default:
 				break;
 		}
-		this.isWriteMatrixView = settings.isWriteMatrixView;
+		this.isWriteMatrixView = refModel.settings.isWriteMatrixView;
 		
 		for (int s = 0; s < refModel.getSteps().size(); s++) {
 			Step step = refModel.getSteps().get(s);
@@ -176,7 +173,7 @@ public class Solution {
 					if (steps.size() > 1) {
 						errors.add("Modal analysis only possible as single step.");
 					}
-					if (refSettings.isLargeDisplacement) {
+					if (refModel.settings.isLargeDisplacement) {
 						errors.add("Modal analysis with large displacement is not possible.");
 					}
 					break;
@@ -362,7 +359,7 @@ public class Solution {
 		
 		int maxIterations = 1;
 		if (!refModel.getContactPairs().isEmpty() ||
-				refSettings.isLargeDisplacement) maxIterations = step.maxIterations;
+				refModel.settings.isLargeDisplacement) maxIterations = step.maxIterations;
 		
 		final double timeStep = step.duration/step.nIncrements;
 		
@@ -580,7 +577,7 @@ public class Solution {
 				}
 				
 				// modification of a_constr for finite rotations
-				if (refSettings.isLargeDisplacement) {
+				if (refModel.settings.isLargeDisplacement) {
 					for (int n = 0; n < refModel.getNodes().size(); n++) if (refModel.getNodes().get(n).isRotationalDOF()) {
 						int dof = dofOfNodeID[n];
 						Matrix PsiDotDot = a_constr.getMatrix(dof+3, dof+5, 0, 0);
@@ -904,10 +901,6 @@ public class Solution {
 		return refModel;
 	}
 	
-	public Settings getRefSettings() {
-		return refSettings;
-	}
-
 	public int getNumberOfDofs() {
 		return nDofs;
 	}

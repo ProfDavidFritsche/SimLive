@@ -378,7 +378,7 @@ public class Post {
 	}
 	
 	private double getAutoScaling() {
-		if (solution.getRefSettings().isLargeDisplacement) {
+		if (solution.getRefModel().settings.isLargeDisplacement) {
 			return 1.0;
 		}
 		
@@ -896,7 +896,7 @@ public class Post {
 			for (int elem = 0; elem < elements.size(); elem++) {
 				if (elements.get(elem).isLineElement()) {
 					Matrix elementForces = null;
-					if (solution.getRefSettings().isLargeDisplacement) {
+					if (solution.getRefModel().settings.isLargeDisplacement) {
 						elementForces = elements.get(elem).getElementForceNL(nodes, u_global, true);
 					}
 					else {
@@ -976,7 +976,7 @@ public class Post {
 					double length = ((LineElement) elements.get(elem)).getLength();
 					Matrix u_elem = elements.get(elem).globalToLocalVector(u_global);
 					
-					if (solution.getRefSettings().isLargeDisplacement) {
+					if (solution.getRefModel().settings.isLargeDisplacement) {
 						double lengthNew = ((Spring) elements.get(elem)).getCurrentLength(solution.getRefModel().getNodes(), u_elem);
 						deflections[i][elem*2] = lengthNew-length;
 						deflections[i][elem*2+1] = lengthNew-length;		

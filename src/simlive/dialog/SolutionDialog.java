@@ -10,7 +10,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 
 import simlive.SimLive;
-import simlive.misc.Settings;
 import simlive.model.Model;
 import simlive.solution.ConstraintMethod;
 import simlive.solution.Increment;
@@ -44,8 +43,7 @@ public class SolutionDialog extends Composite {
 	 * @param parent
 	 * @param style
 	 */
-	public SolutionDialog(final Composite parent, int style, final Model model,
-			final Settings settings) {
+	public SolutionDialog(final Composite parent, int style, final Model model) {
 		super(parent, style);
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		GridLayout gridLayout = new GridLayout(4, true);
@@ -66,10 +64,10 @@ public class SolutionDialog extends Composite {
 		combo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				settings.constraintType = ConstraintMethod.Type.values()[combo.getSelectionIndex()];
+				model.settings.constraintType = ConstraintMethod.Type.values()[combo.getSelectionIndex()];
 				SimLive.model.updateModel();
 				composite.dispose();
-				composite = getComposite(SolutionDialog.this, model, settings);
+				composite = getComposite(SolutionDialog.this, model);
 				composite.moveBelow(combo);
 				parent.layout();
 				layout();
@@ -77,9 +75,9 @@ public class SolutionDialog extends Composite {
 		});
 		combo.setItems(new String[] {"Lagrange Multipliers", "Penalty Method"});
 		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-		combo.select(settings.constraintType.ordinal());
+		combo.select(model.settings.constraintType.ordinal());
 		
-		composite = getComposite(this, model, settings);
+		composite = getComposite(this, model);
 		
 		Label lblSolverLog = new Label(this, SWT.NONE);
 		lblSolverLog.setBackground(SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
@@ -93,14 +91,14 @@ public class SolutionDialog extends Composite {
 		fillLogComplete();
 	}
 	
-	private Composite getComposite(final Composite parent, final Model model, final Settings settings) {		
+	private Composite getComposite(final Composite parent, final Model model) {		
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 		GridLayout gridLayout = new GridLayout(4, true);
 		SimLive.formatGridLayoutForComposite(gridLayout);
 		composite.setLayout(gridLayout);
 		
-		if (settings.constraintType == ConstraintMethod.Type.PENALTY_METHOD) {
+		if (model.settings.constraintType == ConstraintMethod.Type.PENALTY_METHOD) {
 			Label lblFactor = new Label(composite, SWT.NONE);
 			lblFactor.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 			lblFactor.setText("Factor:");
@@ -110,7 +108,7 @@ public class SolutionDialog extends Composite {
 				@Override
 				public void widgetDefaultSelected(SelectionEvent arg0) {
 					double value = SimLive.getInputDouble(text_1);
-					settings.penaltyFactor = value;
+					model.settings.penaltyFactor = value;
 					SimLive.model.updateModel();
 				}
 			});
@@ -126,7 +124,7 @@ public class SolutionDialog extends Composite {
 				}
 			});
 			text_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-			text_1.setText(SimLive.double2String(settings.penaltyFactor));
+			text_1.setText(SimLive.double2String(model.settings.penaltyFactor));
 			new Label(composite, SWT.NONE);
 		}
 		
@@ -142,12 +140,12 @@ public class SolutionDialog extends Composite {
 		btnReorderNodes.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				settings.isReorderNodes = btnReorderNodes.getSelection();
+				model.settings.isReorderNodes = btnReorderNodes.getSelection();
 				SimLive.model.updateModel();
 			}
 		});
 		btnReorderNodes.setText("Reorder Nodes");
-		btnReorderNodes.setSelection(settings.isReorderNodes);
+		btnReorderNodes.setSelection(model.settings.isReorderNodes);
 		new Label(composite, SWT.NONE);
 		
 		final Button btnLargeDisplacement = new Button(composite, SWT.CHECK);
@@ -155,12 +153,12 @@ public class SolutionDialog extends Composite {
 		btnLargeDisplacement.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				settings.isLargeDisplacement = btnLargeDisplacement.getSelection();
+				model.settings.isLargeDisplacement = btnLargeDisplacement.getSelection();
 				SimLive.model.updateModel();
 			}
 		});
 		btnLargeDisplacement.setText("Large Displacement");
-		btnLargeDisplacement.setSelection(settings.isLargeDisplacement);
+		btnLargeDisplacement.setSelection(model.settings.isLargeDisplacement);
 		new Label(composite, SWT.NONE);
 		
 		final Button btnWriteMatrixView = new Button(composite, SWT.CHECK);
@@ -168,12 +166,12 @@ public class SolutionDialog extends Composite {
 		btnWriteMatrixView.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				settings.isWriteMatrixView = btnWriteMatrixView.getSelection();
+				model.settings.isWriteMatrixView = btnWriteMatrixView.getSelection();
 				SimLive.model.updateModel();
 			}
 		});
 		btnWriteMatrixView.setText("Write Matrix View");
-		btnWriteMatrixView.setSelection(settings.isWriteMatrixView);
+		btnWriteMatrixView.setSelection(model.settings.isWriteMatrixView);
 		
 		Label lblSolution = new Label(composite, SWT.NONE);
 		lblSolution.setBackground(SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
@@ -214,7 +212,7 @@ public class SolutionDialog extends Composite {
 							
 							Solution.resetLog();
 
-							if (settings.isReorderNodes) {
+							if (model.settings.isReorderNodes) {
 								SimLive.shell.getDisplay().asyncExec(new Runnable() {
 									public void run() {
 										SimLive.setResultLabel(resultComposite, false, true, false);
@@ -236,7 +234,7 @@ public class SolutionDialog extends Composite {
 								}
 							});
 							
-							solution = new Solution(model, settings);
+							solution = new Solution(model);
 							
 							if (solution.checkModel()) {
 								solution.calculate(SolutionDialog.this);

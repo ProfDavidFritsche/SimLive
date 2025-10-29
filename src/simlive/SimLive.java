@@ -405,7 +405,7 @@ public class SimLive {
             		freezeGUI(false);
             		Composite parent = dialogArea.getParent();
             		disposeDialogAreas();
-            		dialogArea = new SolutionDialog(parent, SWT.NONE, model, model.settings);
+            		dialogArea = new SolutionDialog(parent, SWT.NONE, model);
 					parent.layout();
             		
             		try {
@@ -1325,7 +1325,7 @@ public class SimLive {
 					case 1:
 						mode = Mode.SOLUTION;
 						resetState();
-						dialogArea = new SolutionDialog(composite_1, SWT.NONE, model, model.settings);
+						dialogArea = new SolutionDialog(composite_1, SWT.NONE, model);
 						composite_1.layout();
 						break;
 					
