@@ -2683,17 +2683,17 @@ public class SimLive {
 	}
 	
 	private void regularChecks() {
-		if (mode != Mode.RESULTS && !shell.isDisposed() && shell.getChildren()[0].isEnabled()) {
+		if (mode != Mode.RESULTS && post != null && !shell.isDisposed() && shell.getChildren()[0].isEnabled()) {
 			if (checkModel == null || !checkModel.isAlive()) {
 				checkModel = new Thread(new Runnable() {
 					public void run() {
-						if (post != null && !isModelAndResultConsistent()) {
-							SimLive.shell.getDisplay().syncExec(new Runnable() {
-								public void run() {
+						SimLive.shell.getDisplay().syncExec(new Runnable() {
+							public void run() {
+								if (!isModelAndResultConsistent()) {
 									resetPost();
 								}
-							});
-						}
+							}
+						});
 					}
 				});
 				checkModel.start();
