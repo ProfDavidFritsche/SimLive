@@ -912,33 +912,31 @@ public class XML {
 
 		try {
 
-			SimLive.settings = new Settings();
-			
 			Document document = (Document) builder.build(xmlFile);
 			org.jdom.Element XMLroot = document.getRootElement();
 			org.jdom.Element XMLsettings = XMLroot.getChild("settings");
-			SimLive.settings.newPartType = Element.Type.valueOf(getStringAttribute(XMLsettings, "newPartType"));
-			SimLive.settings.module = getDoubleAttribute(XMLsettings, "module");
-			SimLive.settings.pressureAngle = getDoubleAttribute(XMLsettings, "pressureAngle");
+			SimLive.model.settings.newPartType = Element.Type.valueOf(getStringAttribute(XMLsettings, "newPartType"));
+			SimLive.model.settings.module = getDoubleAttribute(XMLsettings, "module");
+			SimLive.model.settings.pressureAngle = getDoubleAttribute(XMLsettings, "pressureAngle");
 			//Sim2d.settings.isShiftForceVectors = getBooleanAttribute(XMLsettings, "isShiftForceVectors");
-			SimLive.settings.constraintType = ConstraintMethod.Type.valueOf(getStringAttribute(XMLsettings, "constraintType"));
-			SimLive.settings.penaltyFactor = getDoubleAttribute(XMLsettings, "penaltyFactor");
-			SimLive.settings.isReorderNodes = getBooleanAttribute(XMLsettings, "isReorderNodes");
-			SimLive.settings.isLargeDisplacement = getBooleanAttribute(XMLsettings, "isLargeDisplacement");
-			SimLive.settings.isWriteMatrixView = getBooleanAttribute(XMLsettings, "isWriteMatrixView");
-			SimLive.settings.unitSystem = Units.UnitSystem.valueOf(getStringAttribute(XMLsettings, "unitSystem"));
-			SimLive.settings.meshSize = getDoubleAttribute(XMLsettings, "meshSize");
-			SimLive.settings.meshCount = getIntegerAttribute(XMLsettings, "meshCount");
+			SimLive.model.settings.constraintType = ConstraintMethod.Type.valueOf(getStringAttribute(XMLsettings, "constraintType"));
+			SimLive.model.settings.penaltyFactor = getDoubleAttribute(XMLsettings, "penaltyFactor");
+			SimLive.model.settings.isReorderNodes = getBooleanAttribute(XMLsettings, "isReorderNodes");
+			SimLive.model.settings.isLargeDisplacement = getBooleanAttribute(XMLsettings, "isLargeDisplacement");
+			SimLive.model.settings.isWriteMatrixView = getBooleanAttribute(XMLsettings, "isWriteMatrixView");
+			SimLive.model.settings.unitSystem = Units.UnitSystem.valueOf(getStringAttribute(XMLsettings, "unitSystem"));
+			SimLive.model.settings.meshSize = getDoubleAttribute(XMLsettings, "meshSize");
+			SimLive.model.settings.meshCount = getIntegerAttribute(XMLsettings, "meshCount");
 			
-			SimLive.settings.isShowAxes = getBooleanAttribute(XMLsettings, "isShowAxes");
-			SimLive.settings.isShowGrid = getBooleanAttribute(XMLsettings, "isShowGrid");
-			SimLive.settings.isShowScale = getBooleanAttribute(XMLsettings, "isShowScale");
-			SimLive.settings.isShowOrientations = getBooleanAttribute(XMLsettings, "isShowOrientations");
-			SimLive.settings.isShowNodes = getBooleanAttribute(XMLsettings, "isShowNodes");
-			SimLive.settings.isShowEdges = getBooleanAttribute(XMLsettings, "isShowEdges");
-			SimLive.settings.isShowSections = getBooleanAttribute(XMLsettings, "isShowSections");
-			SimLive.settings.isShowSupports = getBooleanAttribute(XMLsettings, "isShowSupports");
-			SimLive.settings.isShowLoads = getBooleanAttribute(XMLsettings, "isShowLoads");
+			SimLive.model.settings.isShowAxes = getBooleanAttribute(XMLsettings, "isShowAxes");
+			SimLive.model.settings.isShowGrid = getBooleanAttribute(XMLsettings, "isShowGrid");
+			SimLive.model.settings.isShowScale = getBooleanAttribute(XMLsettings, "isShowScale");
+			SimLive.model.settings.isShowOrientations = getBooleanAttribute(XMLsettings, "isShowOrientations");
+			SimLive.model.settings.isShowNodes = getBooleanAttribute(XMLsettings, "isShowNodes");
+			SimLive.model.settings.isShowEdges = getBooleanAttribute(XMLsettings, "isShowEdges");
+			SimLive.model.settings.isShowSections = getBooleanAttribute(XMLsettings, "isShowSections");
+			SimLive.model.settings.isShowSupports = getBooleanAttribute(XMLsettings, "isShowSupports");
+			SimLive.model.settings.isShowLoads = getBooleanAttribute(XMLsettings, "isShowLoads");
 			//Sim2d.settings.isShowReactions = getBooleanAttribute(XMLsettings, "isShowReactions");
 			
 			return true;
@@ -966,7 +964,7 @@ public class XML {
 		try {
 
 			SimLive.model.finalUpdateModel();
-			Solution solution = new Solution(SimLive.model, SimLive.settings);
+			Solution solution = new Solution(SimLive.model, SimLive.model.settings);
 			
 			Document document = (Document) builder.build(xmlFile);
 			org.jdom.Element XMLroot = document.getRootElement();

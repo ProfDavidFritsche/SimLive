@@ -29,7 +29,7 @@ public class Units {
 	public static enum UnitSystem {t_mm_s_N, t_m_s_kN, kg_m_s_N}
 	
 	public static String getMassUnit() {
-		switch (SimLive.settings.unitSystem) {
+		switch (SimLive.model.settings.unitSystem) {
 			case t_mm_s_N: return "t";
 			case t_m_s_kN: return "t";
 			case kg_m_s_N: return "kg";
@@ -38,7 +38,7 @@ public class Units {
 	}
 	
 	public static String getLengthUnit() {
-		switch (SimLive.settings.unitSystem) {
+		switch (SimLive.model.settings.unitSystem) {
 			case t_mm_s_N: return "mm";
 			case t_m_s_kN: return "m";
 			case kg_m_s_N: return "m";
@@ -47,7 +47,7 @@ public class Units {
 	}
 	
 	public static String getTimeUnit() {
-		switch (SimLive.settings.unitSystem) {
+		switch (SimLive.model.settings.unitSystem) {
 			case t_mm_s_N: return "s";
 			case t_m_s_kN: return "s";
 			case kg_m_s_N: return "s";
@@ -56,7 +56,7 @@ public class Units {
 	}
 	
 	public static String getFrequencyUnit() {
-		switch (SimLive.settings.unitSystem) {
+		switch (SimLive.model.settings.unitSystem) {
 			case t_mm_s_N: return "Hz";
 			case t_m_s_kN: return "Hz";
 			case kg_m_s_N: return "Hz";
@@ -65,7 +65,7 @@ public class Units {
 	}
 	
 	public static String getForceUnit() {
-		switch (SimLive.settings.unitSystem) {
+		switch (SimLive.model.settings.unitSystem) {
 			case t_mm_s_N: return "N";
 			case t_m_s_kN: return "kN";
 			case kg_m_s_N: return "N";
@@ -195,13 +195,13 @@ public class Units {
 			move[2] *= lengthFactor;
 			
 			/* temporary change SimLive.settings.unitSystem */
-			UnitSystem temp = SimLive.settings.unitSystem;
-			SimLive.settings.unitSystem = newUnits;
+			UnitSystem temp = SimLive.model.settings.unitSystem;
+			SimLive.model.settings.unitSystem = newUnits;
 			
 			measurement.setEndPoint(endPoint, measurement.getLabel().length > 1);
 			
 			/* reset SimLive.settings.unitSystem */
-			SimLive.settings.unitSystem = temp;
+			SimLive.model.settings.unitSystem = temp;
 		}
 		
 		for (int n = 0; n < nodes.size(); n++) {
@@ -290,8 +290,8 @@ public class Units {
 			convertUnitsOfStep(oldUnits, newUnits, steps.get(s));
 		}
 		
-		SimLive.settings.module *= lengthFactor;
-		SimLive.settings.meshSize *= lengthFactor;
+		SimLive.model.settings.module *= lengthFactor;
+		SimLive.model.settings.meshSize *= lengthFactor;
 		SimLive.view.convertUnitsOfViewData(lengthFactor);
 	}
 

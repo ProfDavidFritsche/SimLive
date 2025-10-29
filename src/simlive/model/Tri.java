@@ -19,7 +19,7 @@ public class Tri extends PlaneElement {
 		this.elementNodes = element_node;
 		Tri tri = new Tri();
 		tri.setThickness(1.0);
-		Units.convertUnitsOfElement(Units.UnitSystem.t_mm_s_N, SimLive.settings.unitSystem, tri);
+		Units.convertUnitsOfElement(Units.UnitSystem.t_mm_s_N, SimLive.model.settings.unitSystem, tri);
 		this.thickness = tri.getThickness();
 		//this.state = PlaneElement.State.PLANE_STRESS;
 		ArrayList<Node> nodes = SimLive.model.getNodes();

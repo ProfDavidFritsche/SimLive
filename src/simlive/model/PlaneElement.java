@@ -174,7 +174,7 @@ public abstract class PlaneElement extends Element {
 		
 		Matrix u_elem = globalToLocalVector(u_global);
 		Matrix RrT = R0T;
-		if (SimLive.settings.isLargeDisplacement) {
+		if (SimLive.model.settings.isLargeDisplacement) {
 			RrT = getRr(nodes, u_elem).transpose();				
 		}
 		Matrix u_membrane = new Matrix(elementNodes.length*2, 1);

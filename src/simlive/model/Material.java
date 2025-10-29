@@ -17,7 +17,7 @@ public class Material implements DeepEqualsInterface {
 	public Material (boolean empty) {
 		if (!empty) {
 			Material material = getDefaultMaterials().get(0);
-			Units.convertUnitsOfMaterial(Units.UnitSystem.t_mm_s_N, SimLive.settings.unitSystem, material);
+			Units.convertUnitsOfMaterial(Units.UnitSystem.t_mm_s_N, SimLive.model.settings.unitSystem, material);
 			this.setDensity(material.getDensity());
 			this.setYoungsModulus(material.getYoungsModulus());
 			this.setPoissonsRatio(material.getPoissonsRatio());

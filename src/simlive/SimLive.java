@@ -142,7 +142,6 @@ public class SimLive {
 	public static Shell shell;
 	private static boolean shellClosed = false;
 	
-	public static Settings settings = null;
 	public static Model model = null;
 	public static ArrayList<Model> modelHistory;
 	public static final int MODEL_HISTORY_MAX = 50;
@@ -405,7 +404,7 @@ public class SimLive {
             		freezeGUI(false);
             		Composite parent = dialogArea.getParent();
             		disposeDialogAreas();
-            		dialogArea = new SolutionDialog(parent, SWT.NONE, model, settings);
+            		dialogArea = new SolutionDialog(parent, SWT.NONE, model, model.settings);
 					parent.layout();
             		
             		try {
@@ -471,7 +470,7 @@ public class SimLive {
 						fileDialog.setFilterExtensions(filter);						
 						if (fileDialog.open() != null) {
 							Model oldModel = model;
-							Settings oldSettings = settings;
+							Settings oldSettings = model.settings;
 							Mode oldMode = mode;
 							mode = Mode.NONE;
 							freezeGUI(true);
@@ -482,7 +481,7 @@ public class SimLive {
 							}
 							else {
 								model = oldModel;
-						        settings = oldSettings;
+								model.settings = oldSettings;
 						        mode = oldMode;
 						        
 								MessageBox messageBox = new MessageBox(shell, SWT.ERROR);
@@ -509,7 +508,7 @@ public class SimLive {
 						}
 						if (overwrite) {
 							freezeGUI(true);
-							XML.writeFile(XML.getFilePath(), model, settings);
+							XML.writeFile(XML.getFilePath(), model, model.settings);
 							freezeGUI(false);
 						}
 					}
@@ -527,7 +526,7 @@ public class SimLive {
 							freezeGUI(true);
 							XML.writeFile(fileDialog.getFilterPath()+
 									System.getProperty("file.separator")+
-									fileDialog.getFileName(), model, settings);
+									fileDialog.getFileName(), model, model.settings);
 							XML.setFilePath(fileDialog.getFilterPath()+
 									System.getProperty("file.separator")+
 									fileDialog.getFileName());
@@ -746,12 +745,12 @@ public class SimLive {
 				Menu menu = new Menu(shell);
 				final MenuItem menuItem_t_mm_s_N = new MenuItem(menu, SWT.RADIO);
 				menuItem_t_mm_s_N.setText("t, mm, s, N");
-				menuItem_t_mm_s_N.setSelection(settings.unitSystem == Units.UnitSystem.t_mm_s_N);				
+				menuItem_t_mm_s_N.setSelection(model.settings.unitSystem == Units.UnitSystem.t_mm_s_N);				
 				menuItem_t_mm_s_N.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						Units.convertUnitsOfModel(settings.unitSystem, Units.UnitSystem.t_mm_s_N);
-						settings.unitSystem = Units.UnitSystem.t_mm_s_N;
+						Units.convertUnitsOfModel(model.settings.unitSystem, Units.UnitSystem.t_mm_s_N);
+						model.settings.unitSystem = Units.UnitSystem.t_mm_s_N;
 						resetState();
 						resetToPartsMode();
 						view.redraw();
@@ -759,12 +758,12 @@ public class SimLive {
 				});
 				final MenuItem menuItem_t_m_s_kN = new MenuItem(menu, SWT.RADIO);
 				menuItem_t_m_s_kN.setText("t, m, s, kN");
-				menuItem_t_m_s_kN.setSelection(settings.unitSystem == Units.UnitSystem.t_m_s_kN);
+				menuItem_t_m_s_kN.setSelection(model.settings.unitSystem == Units.UnitSystem.t_m_s_kN);
 				menuItem_t_m_s_kN.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						Units.convertUnitsOfModel(settings.unitSystem, Units.UnitSystem.t_m_s_kN);
-						settings.unitSystem = Units.UnitSystem.t_m_s_kN;
+						Units.convertUnitsOfModel(model.settings.unitSystem, Units.UnitSystem.t_m_s_kN);
+						model.settings.unitSystem = Units.UnitSystem.t_m_s_kN;
 						resetState();
 						resetToPartsMode();
 						view.redraw();
@@ -772,12 +771,12 @@ public class SimLive {
 				});
 				final MenuItem menuItem_kg_m_s_N = new MenuItem(menu, SWT.RADIO);
 				menuItem_kg_m_s_N.setText("kg, m, s, N");
-				menuItem_kg_m_s_N.setSelection(settings.unitSystem == Units.UnitSystem.kg_m_s_N);
+				menuItem_kg_m_s_N.setSelection(model.settings.unitSystem == Units.UnitSystem.kg_m_s_N);
 				menuItem_kg_m_s_N.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						Units.convertUnitsOfModel(settings.unitSystem, Units.UnitSystem.kg_m_s_N);
-						settings.unitSystem = Units.UnitSystem.kg_m_s_N;
+						Units.convertUnitsOfModel(model.settings.unitSystem, Units.UnitSystem.kg_m_s_N);
+						model.settings.unitSystem = Units.UnitSystem.kg_m_s_N;
 						resetState();
 						resetToPartsMode();
 						view.redraw();
@@ -906,7 +905,7 @@ public class SimLive {
 		tltmOrientations.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				settings.isShowOrientations = tltmOrientations.getSelection();
+				model.settings.isShowOrientations = tltmOrientations.getSelection();
 				view.redraw();
 			}
 		});
@@ -916,7 +915,7 @@ public class SimLive {
 		tltmNodes.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				settings.isShowNodes = tltmNodes.getSelection();
+				model.settings.isShowNodes = tltmNodes.getSelection();
 				view.redraw();
 			}
 		});
@@ -926,7 +925,7 @@ public class SimLive {
 		tltmEdges.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				settings.isShowEdges = tltmEdges.getSelection();
+				model.settings.isShowEdges = tltmEdges.getSelection();
 				view.redraw();
 			}
 		});
@@ -936,7 +935,7 @@ public class SimLive {
 		tltmSections.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				settings.isShowSections = tltmSections.getSelection();
+				model.settings.isShowSections = tltmSections.getSelection();
 				view.redraw();
 			}
 		});
@@ -946,7 +945,7 @@ public class SimLive {
 		tltmGrid.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				settings.isShowGrid = tltmGrid.getSelection();
+				model.settings.isShowGrid = tltmGrid.getSelection();
 				view.redraw();
 			}
 		});
@@ -965,61 +964,61 @@ public class SimLive {
 				Menu menu_objects = new Menu(menuItem_objects);
 				final MenuItem menuItem_orientations = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_orientations.setText("Orientations");
-				menuItem_orientations.setSelection(settings.isShowOrientations);
+				menuItem_orientations.setSelection(model.settings.isShowOrientations);
 				menuItem_orientations.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowOrientations = menuItem_orientations.getSelection();
+						model.settings.isShowOrientations = menuItem_orientations.getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_nodes = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_nodes.setText("Nodes");
-				menuItem_nodes.setSelection(settings.isShowNodes);				
+				menuItem_nodes.setSelection(model.settings.isShowNodes);				
 				menuItem_nodes.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowNodes = ((MenuItem) e.getSource()).getSelection();
+						model.settings.isShowNodes = ((MenuItem) e.getSource()).getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_edges = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_edges.setText("Edges");
-				menuItem_edges.setSelection(settings.isShowEdges);
+				menuItem_edges.setSelection(model.settings.isShowEdges);
 				menuItem_edges.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowEdges = ((MenuItem) e.getSource()).getSelection();
+						model.settings.isShowEdges = ((MenuItem) e.getSource()).getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_sections = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_sections.setText("Sections");
-				menuItem_sections.setSelection(settings.isShowSections);
+				menuItem_sections.setSelection(model.settings.isShowSections);
 				menuItem_sections.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowSections = menuItem_sections.getSelection();
+						model.settings.isShowSections = menuItem_sections.getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_supports = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_supports.setText("Supports");
-				menuItem_supports.setSelection(settings.isShowSupports);
+				menuItem_supports.setSelection(model.settings.isShowSupports);
 				menuItem_supports.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowSupports = ((MenuItem) e.getSource()).getSelection();
+						model.settings.isShowSupports = ((MenuItem) e.getSource()).getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_loads = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_loads.setText("Loads");
-				menuItem_loads.setSelection(settings.isShowLoads);
+				menuItem_loads.setSelection(model.settings.isShowLoads);
 				menuItem_loads.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowLoads = ((MenuItem) e.getSource()).getSelection();
+						model.settings.isShowLoads = ((MenuItem) e.getSource()).getSelection();
 						view.redraw();
 					}
 				});
@@ -1041,31 +1040,31 @@ public class SimLive {
 				Menu menu_coordSys = new Menu(menu);
 				final MenuItem menuItem_grid = new MenuItem(menu_coordSys, SWT.CHECK);
 				menuItem_grid.setText("Grid");
-				menuItem_grid.setSelection(settings.isShowGrid);
+				menuItem_grid.setSelection(model.settings.isShowGrid);
 				menuItem_grid.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowGrid = menuItem_grid.getSelection();
+						model.settings.isShowGrid = menuItem_grid.getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_axes = new MenuItem(menu_coordSys, SWT.CHECK);
 				menuItem_axes.setText("Axes");
-				menuItem_axes.setSelection(settings.isShowAxes);
+				menuItem_axes.setSelection(model.settings.isShowAxes);
 				menuItem_axes.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowAxes = menuItem_axes.getSelection();
+						model.settings.isShowAxes = menuItem_axes.getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_scale = new MenuItem(menu_coordSys, SWT.CHECK);
 				menuItem_scale.setText("Scale");
-				menuItem_scale.setSelection(settings.isShowScale);
+				menuItem_scale.setSelection(model.settings.isShowScale);
 				menuItem_scale.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						settings.isShowScale = menuItem_scale.getSelection();
+						model.settings.isShowScale = menuItem_scale.getSelection();
 						view.redraw();
 					}
 				});
@@ -1094,7 +1093,7 @@ public class SimLive {
 						for (int l = 0; l < model.getDistributedLoads().size(); l++) {
 							model.getDistributedLoads().get(l).isShifted = false;
 						}
-						settings.resetDisplayOptions();
+						model.settings.resetDisplayOptions();
 						view.redraw();
 					}
 				});
@@ -1275,7 +1274,7 @@ public class SimLive {
 						//
 						toggleNonZeroEntries = false;
 						table.setFont(shell.getDisplay().getSystemFont());
-						if (settings.isWriteMatrixView && post != null) {
+						if (model.settings.isWriteMatrixView && post != null) {
 							post.getPostIncrement().updateTable(table, tree);
 						}
 					}
@@ -1321,7 +1320,7 @@ public class SimLive {
 					case 1:
 						mode = Mode.SOLUTION;
 						resetState();
-						dialogArea = new SolutionDialog(composite_1, SWT.NONE, model, settings);
+						dialogArea = new SolutionDialog(composite_1, SWT.NONE, model, model.settings);
 						composite_1.layout();
 						break;
 					
@@ -1330,7 +1329,7 @@ public class SimLive {
 						if (SimLive.post != null) {
 							mode = Mode.RESULTS;
 							resetState();
-							dialogArea = new ResultsDialog(composite_2, SWT.NONE, post, settings);
+							dialogArea = new ResultsDialog(composite_2, SWT.NONE, post, model.settings);
 							composite_2.layout();					
 							SimLive.post.updateMinMaxLabels();
 							updateMatrixView();
@@ -1499,10 +1498,10 @@ public class SimLive {
 								SimLive.dialogArea = new NodeDialog(SimLive.compositeLeft, SWT.NONE, view.getSelectedNodes().get(0));
 							}
 							if (!view.getSelectedSets().isEmpty()) {
-								SimLive.dialogArea = new PartDialog(SimLive.compositeLeft, SWT.NONE, view.getSelectedSets(), SimLive.settings);
+								SimLive.dialogArea = new PartDialog(SimLive.compositeLeft, SWT.NONE, view.getSelectedSets(), model.settings);
 							}
 							if (!view.getSelectedParts3d().isEmpty()) {
-								SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft, SWT.NONE, view.getSelectedParts3d(), SimLive.settings);
+								SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft, SWT.NONE, view.getSelectedParts3d(), model.settings);
 							}
 							break;
 						
@@ -1589,7 +1588,7 @@ public class SimLive {
 						case 8:
 							mode = Mode.GRID;
 							resetState();
-							dialogArea = new GridDialog(compositeLeft, SWT.NONE, settings);
+							dialogArea = new GridDialog(compositeLeft, SWT.NONE, model.settings);
 							compositeLeft.layout();
 							break;
 					}
@@ -2464,7 +2463,7 @@ public class SimLive {
 	}
 
 	public static void updateMatrixView() {
-		if (settings.isWriteMatrixView) {			
+		if (model.settings.isWriteMatrixView) {			
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					if (post != null) {
@@ -2477,7 +2476,7 @@ public class SimLive {
 	}
 	
 	private static void initMatrixView() {
-		if (settings.isWriteMatrixView) {			
+		if (model.settings.isWriteMatrixView) {			
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					if (post != null) {
@@ -2686,7 +2685,7 @@ public class SimLive {
 		if (mode != Mode.RESULTS) {
 			if (post != null) {
 				if (post.getSolution().getRefModel().deepEquals(model, Result.EQUAL) == Result.RECALC ||
-						post.getSolution().getRefSettings().deepEquals(settings, Result.EQUAL) == Result.RECALC) {
+						post.getSolution().getRefSettings().deepEquals(model.settings, Result.EQUAL) == Result.RECALC) {
 					SimLive.shell.getDisplay().syncExec(new Runnable() {
 						public void run() {
 							resetPost();
@@ -2715,11 +2714,11 @@ public class SimLive {
 		}
 		if (!tltmOrientations.isDisposed() && !tltmSections.isDisposed() && !tltmNodes.isDisposed() &&
 				!tltmEdges.isDisposed() && !tltmGrid.isDisposed()) {
-			tltmOrientations.setSelection(settings.isShowOrientations);
-			tltmSections.setSelection(settings.isShowSections);
-			tltmNodes.setSelection(settings.isShowNodes);
-			tltmEdges.setSelection(settings.isShowEdges);
-			tltmGrid.setSelection(settings.isShowGrid);
+			tltmOrientations.setSelection(model.settings.isShowOrientations);
+			tltmSections.setSelection(model.settings.isShowSections);
+			tltmNodes.setSelection(model.settings.isShowNodes);
+			tltmEdges.setSelection(model.settings.isShowEdges);
+			tltmGrid.setSelection(model.settings.isShowGrid);
 		}
 		if (!tltmMeasureDistance.isDisposed() &&
 				!tltmMeasureAngle.isDisposed() && !tltmCreateLabels.isDisposed()) {
@@ -2754,8 +2753,7 @@ public class SimLive {
 			Solution.resetLog();
 			
 			model = new Model();
-			settings = new Settings();
-			view.initializeZoomAndOrigin(settings.meshSize);
+			view.initializeZoomAndOrigin(model.settings.meshSize);
 			
 			view.initViewForNewFile();
 			

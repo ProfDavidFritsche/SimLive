@@ -751,10 +751,10 @@ public class View extends GLCanvas {
 									SimLive.dialogArea = new NodeDialog(SimLive.compositeLeft, SWT.NONE, selectedNodes.get(0));
 								}
 								if (!selectedSets.isEmpty()) {
-									SimLive.dialogArea = new PartDialog(SimLive.compositeLeft, SWT.NONE, selectedSets, SimLive.settings);
+									SimLive.dialogArea = new PartDialog(SimLive.compositeLeft, SWT.NONE, selectedSets, SimLive.model.settings);
 								}
 								if (!selectedParts3d.isEmpty()) {
-									SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft, SWT.NONE, selectedParts3d, SimLive.settings);
+									SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft, SWT.NONE, selectedParts3d, SimLive.model.settings);
 								}
 							}
 							else if (SimLive.mode == Mode.SUPPORTS) {
@@ -866,12 +866,12 @@ public class View extends GLCanvas {
 									if (!selectedSets.isEmpty()) {
 										SimLive.disposeDialogAreas();							
 										SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-											SWT.NONE, selectedSets, SimLive.settings);
+											SWT.NONE, selectedSets, SimLive.model.settings);
 									}
 									if (!selectedParts3d.isEmpty()) {
 										SimLive.disposeDialogAreas();							
 										SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
-											SWT.NONE, selectedParts3d, SimLive.settings);
+											SWT.NONE, selectedParts3d, SimLive.model.settings);
 									}
 								}
 								else {
@@ -885,26 +885,26 @@ public class View extends GLCanvas {
 									if (selectedNodes.size() == 1) {
 										SimLive.disposeDialogAreas();
 				
-										if (SimLive.settings.newPartType == Element.Type.CIRCULAR) {
+										if (SimLive.model.settings.newPartType == Element.Type.CIRCULAR) {
 											/* add new node as center of circle */
 											SimLive.dialogArea = new CircularAreaDialog(SimLive.compositeLeft, SWT.NONE, newNode);
 										}
-										else if (SimLive.settings.newPartType == Element.Type.SPUR_GEAR) {
+										else if (SimLive.model.settings.newPartType == Element.Type.SPUR_GEAR) {
 											/* add new node as center of spur gear */
 											SimLive.dialogArea = new SpurGearDialog(SimLive.compositeLeft, SWT.NONE, newNode);
 										}
-										else if (SimLive.settings.newPartType == Element.Type.TRIANGULAR) {
+										else if (SimLive.model.settings.newPartType == Element.Type.TRIANGULAR) {
 											/* add new node as edge of triangle */
 											SimLive.dialogArea = new TriangularAreaDialog(SimLive.compositeLeft, SWT.NONE, newNode);
 										}
-										else if (SimLive.settings.newPartType == Element.Type.RECTANGULAR) {
+										else if (SimLive.model.settings.newPartType == Element.Type.RECTANGULAR) {
 											/* add new node as edge of rectangle */
 											SimLive.dialogArea = new RectangularAreaDialog(SimLive.compositeLeft, SWT.NONE, newNode);
 										}
 									}
 								}
 								
-								if (SimLive.settings.newPartType == Element.Type.CIRCULAR &&
+								if (SimLive.model.settings.newPartType == Element.Type.CIRCULAR &&
 									selectedNodes.size() == 2) /* add new circular area */ {					
 									if (selectedNodes.get(0).getID() > Model.maxUsedNodeID) {
 										double[] center = selectedNodes.get(0).getCoords();
@@ -919,7 +919,7 @@ public class View extends GLCanvas {
 									}
 								}
 								
-								if (SimLive.settings.newPartType == Element.Type.RECTANGULAR &&
+								if (SimLive.model.settings.newPartType == Element.Type.RECTANGULAR &&
 									selectedNodes.size() == 2) /* add new rectangular area */ {					
 									if (selectedNodes.get(0).getID() > Model.maxUsedNodeID) {
 										double[] edge = selectedNodes.get(0).getCoords();
@@ -934,7 +934,7 @@ public class View extends GLCanvas {
 									}
 								}
 								
-								if (SimLive.settings.newPartType == Element.Type.TRIANGULAR &&
+								if (SimLive.model.settings.newPartType == Element.Type.TRIANGULAR &&
 									 selectedNodes.size() == 2) /* add new triangular area */ {					
 									if (selectedNodes.get(0).getID() > Model.maxUsedNodeID) {
 										double[] edge = selectedNodes.get(0).getCoords();
@@ -950,7 +950,7 @@ public class View extends GLCanvas {
 									}
 								}
 								
-								if (SimLive.settings.newPartType == Element.Type.SPUR_GEAR &&
+								if (SimLive.model.settings.newPartType == Element.Type.SPUR_GEAR &&
 									 selectedNodes.size() == 2) /* add new spur gear */ {					
 									if (selectedNodes.get(0).getID() > Model.maxUsedNodeID) {
 										double[] center = selectedNodes.get(0).getCoords();
@@ -970,13 +970,13 @@ public class View extends GLCanvas {
 									}
 								}
 								
-								if (SimLive.settings.newPartType == Element.Type.POINT_MASS) {
+								if (SimLive.model.settings.newPartType == Element.Type.POINT_MASS) {
 									if (selectedNodes.size() == 0 && Snap.node != null) /* add new element */ {
 										
 										int[] element_node = new int[]{Snap.node.getID()};
 										
 										Element newElement = null;
-										if (SimLive.settings.newPartType == Element.Type.POINT_MASS) {
+										if (SimLive.model.settings.newPartType == Element.Type.POINT_MASS) {
 											newElement = new PointMass(element_node);
 										}
 										SimLive.model.getSets().add(new Set(newElement, Set.Type.BASIC));
@@ -991,9 +991,9 @@ public class View extends GLCanvas {
 									}
 								}
 								
-								if (SimLive.settings.newPartType == Element.Type.ROD ||
-									SimLive.settings.newPartType == Element.Type.SPRING ||
-									SimLive.settings.newPartType == Element.Type.BEAM) {
+								if (SimLive.model.settings.newPartType == Element.Type.ROD ||
+									SimLive.model.settings.newPartType == Element.Type.SPRING ||
+									SimLive.model.settings.newPartType == Element.Type.BEAM) {
 									
 									if (selectedNodes.size() == 2) /* add new element */ {					
 										
@@ -1010,13 +1010,13 @@ public class View extends GLCanvas {
 										}
 										else {
 											Element newElement = null;
-											if (SimLive.settings.newPartType == Element.Type.ROD) {
+											if (SimLive.model.settings.newPartType == Element.Type.ROD) {
 												newElement = new Rod(element_node);
 											}
-											if (SimLive.settings.newPartType == Element.Type.SPRING) {
+											if (SimLive.model.settings.newPartType == Element.Type.SPRING) {
 												newElement = new Spring(element_node);
 											}
-											if (SimLive.settings.newPartType == Element.Type.BEAM) {
+											if (SimLive.model.settings.newPartType == Element.Type.BEAM) {
 												newElement = new Beam(element_node);
 											}
 											SimLive.model.getSets().add(new Set(newElement, Set.Type.BASIC));
@@ -1028,7 +1028,7 @@ public class View extends GLCanvas {
 									}
 								}
 								
-								if (SimLive.settings.newPartType == Element.Type.TRI) {
+								if (SimLive.model.settings.newPartType == Element.Type.TRI) {
 									if (selectedNodes.size() == 3) /* add new element */ {					
 											
 										int[] element_node = new int[3];
@@ -1054,7 +1054,7 @@ public class View extends GLCanvas {
 									}
 								}
 									
-								if (SimLive.settings.newPartType == Element.Type.QUAD) {
+								if (SimLive.model.settings.newPartType == Element.Type.QUAD) {
 									if (selectedNodes.size() == 4) /* add new element */ {					
 											
 										int[] element_node = new int[4];
@@ -1452,25 +1452,25 @@ public class View extends GLCanvas {
 	            newItem1.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						SimLive.settings.newPartType = Element.Type.values()[j];
+						SimLive.model.settings.newPartType = Element.Type.values()[j];
 						if (selectedNodes.size() == 1 && selectedNodes.get(0).getID() > Model.maxUsedNodeID) {
 							SimLive.disposeDialogAreas();
-							if (SimLive.settings.newPartType == Element.Type.CIRCULAR) {
+							if (SimLive.model.settings.newPartType == Element.Type.CIRCULAR) {
 								SimLive.dialogArea = new CircularAreaDialog(SimLive.compositeLeft, SWT.NONE, selectedNodes.get(0));
 							}
-							else if (SimLive.settings.newPartType == Element.Type.SPUR_GEAR) {
+							else if (SimLive.model.settings.newPartType == Element.Type.SPUR_GEAR) {
 								SimLive.dialogArea = new SpurGearDialog(SimLive.compositeLeft, SWT.NONE, selectedNodes.get(0));
 							}
-							else if (SimLive.settings.newPartType == Element.Type.TRIANGULAR) {
+							else if (SimLive.model.settings.newPartType == Element.Type.TRIANGULAR) {
 								SimLive.dialogArea = new TriangularAreaDialog(SimLive.compositeLeft, SWT.NONE, selectedNodes.get(0));
 							}
-							else if (SimLive.settings.newPartType == Element.Type.RECTANGULAR) {
+							else if (SimLive.model.settings.newPartType == Element.Type.RECTANGULAR) {
 								SimLive.dialogArea = new RectangularAreaDialog(SimLive.compositeLeft, SWT.NONE, selectedNodes.get(0));
 							}
 						}
 					}
 				});
-	            newItem1.setSelection(SimLive.settings.newPartType == Element.Type.values()[j]);
+	            newItem1.setSelection(SimLive.model.settings.newPartType == Element.Type.values()[j]);
 	            newItem1.setText(str[j]);				            
             }
             createNewParts.setMenu(menu1);
@@ -1680,12 +1680,12 @@ public class View extends GLCanvas {
 					double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;					
 					if (!selectedSets.isEmpty()) {
 						SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-								SWT.NONE, selectedSets, SimLive.settings);
+								SWT.NONE, selectedSets, SimLive.model.settings);
 						if (copyPart) ((PartDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
 					}
 					if (!selectedParts3d.isEmpty()) {
 						SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
-								SWT.NONE, selectedParts3d, SimLive.settings);
+								SWT.NONE, selectedParts3d, SimLive.model.settings);
 						if (copyPart) ((Part3dDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
 					}
 					copyPart = false;
@@ -1702,13 +1702,13 @@ public class View extends GLCanvas {
 			double[] center = new double[]{dist/2, viewport[3]-dist/2};
 			double[] modelCoords = screenToModelCoordinates(center[0], center[1]);
 			if (side == Side.X || side == Side.MINUS_X) {
-				modelCoords[0] += SimLive.settings.meshSize;
+				modelCoords[0] += SimLive.model.settings.meshSize;
 			}
 			if (side == Side.Y || side == Side.MINUS_Y) {
-				modelCoords[1] += SimLive.settings.meshSize;
+				modelCoords[1] += SimLive.model.settings.meshSize;
 			}
 			if (side == Side.Z || side == Side.MINUS_Z) {
-				modelCoords[2] += SimLive.settings.meshSize;
+				modelCoords[2] += SimLive.model.settings.meshSize;
 			}
 			double[] screenAxis = modelToScreenCoordinates(modelCoords);
 			screenAxis[0] -= center[0];
@@ -1746,7 +1746,7 @@ public class View extends GLCanvas {
 			double dist = Math.sqrt((cameraRefPos[0]-rotPoint[0])*(cameraRefPos[0]-rotPoint[0])+
     				(cameraRefPos[1]-rotPoint[1])*(cameraRefPos[1]-rotPoint[1])+
     				(cameraRefPos[2]-rotPoint[2])*(cameraRefPos[2]-rotPoint[2]));
-			double nearClip = SimLive.settings.meshSize/100.0;
+			double nearClip = SimLive.model.settings.meshSize/100.0;
 			Matrix dir = R0.getMatrix(0, 2, 2, 2);
 			if (dist - (SimLive.ZOOM_FACTOR - 1.0)*dist > nearClip) {
 				cameraRefPos[0] = cameraRefPos[0] - (SimLive.ZOOM_FACTOR - 1.0)*dir.get(0, 0)*dist;
@@ -1866,7 +1866,7 @@ public class View extends GLCanvas {
 			GL2 gl2 = SimLive.glcontext.getGL().getGL2();
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
-			double farClip = SimLive.settings.meshSize*100.0;
+			double farClip = SimLive.model.settings.meshSize*100.0;
 			gl2.glOrtho(-1.0/zoom, 1.0/zoom, -aspectRatio/zoom, aspectRatio/zoom, -farClip, farClip); //TODO
 			gl2.glMatrixMode(GL2.GL_MODELVIEW);
 			fitToViewOrtho();
@@ -2031,11 +2031,11 @@ public class View extends GLCanvas {
 			selectedSets.clear();
 			selectedParts3d.clear();
 			if (isControlKeyPressed || (SimLive.mode == Mode.PARTS &&
-					(SimLive.settings.newPartType == Element.Type.ROD ||
-					 SimLive.settings.newPartType == Element.Type.SPRING ||
-					 SimLive.settings.newPartType == Element.Type.BEAM ||
-					 SimLive.settings.newPartType == Element.Type.TRI ||
-					 SimLive.settings.newPartType == Element.Type.QUAD ||
+					(SimLive.model.settings.newPartType == Element.Type.ROD ||
+					 SimLive.model.settings.newPartType == Element.Type.SPRING ||
+					 SimLive.model.settings.newPartType == Element.Type.BEAM ||
+					 SimLive.model.settings.newPartType == Element.Type.TRI ||
+					 SimLive.model.settings.newPartType == Element.Type.QUAD ||
 					 SimLive.dialogArea instanceof GeometricAreaDialog))) {
 				if (selectedNodes.contains(Snap.node)) {
 					selectedNodes.remove(Snap.node);
@@ -3108,7 +3108,7 @@ public class View extends GLCanvas {
 		GLUquadric inside = glu.gluNewQuadric();
 		glu.gluQuadricOrientation(inside, GLU.GLU_INSIDE);		
 		initView(gl2, width, height);
-		if (SimLive.settings.isShowAxes) {
+		if (SimLive.model.settings.isShowAxes) {
 			renderToImageBuffer(gl2, glu, width, height, outside, inside);
 		}
 		drawBackground(gl2);
@@ -3312,7 +3312,7 @@ public class View extends GLCanvas {
 			gl2.glEnable(GL2.GL_DEPTH_TEST);
 		}*/
 		
-		if (SimLive.settings.isShowGrid) {
+		if (SimLive.model.settings.isShowGrid) {
     		gl2.glDisable(GL2.GL_LIGHTING);
     		drawGrid(gl2, width, height);
 			gl2.glEnable(GL2.GL_LIGHTING);
@@ -3338,7 +3338,7 @@ public class View extends GLCanvas {
 		
 		gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	    /* nodes */
-		if (SimLive.settings.isShowNodes) {
+		if (SimLive.model.settings.isShowNodes) {
 			double nodeRadius = SimLive.NODE_RADIUS/width/zoom;
 			for (int s = 0; s < SimLive.model.getSets().size(); s++) {
 		    	Set set = SimLive.model.getSets().get(s);
@@ -3362,7 +3362,7 @@ public class View extends GLCanvas {
 		
 		gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 		/* orientations */
-		if (SimLive.settings.isShowOrientations) {
+		if (SimLive.model.settings.isShowOrientations) {
 			double arrowSize = SimLive.ORIENTATION_SIZE/width/zoom;
 			for (int s = 0; s < SimLive.model.getSets().size(); s++) {
 		    	Set set = SimLive.model.getSets().get(s);
@@ -3553,8 +3553,8 @@ public class View extends GLCanvas {
 		
 		/* new tri or quad element */
 		if (SimLive.mode == Mode.PARTS) {
-			if ((selectedNodes.size() == 2 && SimLive.settings.newPartType == Element.Type.TRI) ||
-				(selectedNodes.size() == 3 && SimLive.settings.newPartType == Element.Type.QUAD)) {
+			if ((selectedNodes.size() == 2 && SimLive.model.settings.newPartType == Element.Type.TRI) ||
+				(selectedNodes.size() == 3 && SimLive.model.settings.newPartType == Element.Type.QUAD)) {
 				Node newNode = null;
 				if (Snap.node != null) {
 					newNode = Snap.node;
@@ -3606,13 +3606,13 @@ public class View extends GLCanvas {
 			
 			Element element = null;
 			if (selectedNodes.size() == 1) {
-				if (SimLive.settings.newPartType == Element.Type.ROD)
+				if (SimLive.model.settings.newPartType == Element.Type.ROD)
 					element = new Rod(new int[]{selectedNodes.get(0).getID(), newNode.getID()});
-				if (SimLive.settings.newPartType == Element.Type.BEAM)
+				if (SimLive.model.settings.newPartType == Element.Type.BEAM)
 					element = new Beam(new int[]{selectedNodes.get(0).getID(), newNode.getID()});
-				if (SimLive.settings.newPartType == Element.Type.SPRING)
+				if (SimLive.model.settings.newPartType == Element.Type.SPRING)
 					element = new Spring(new int[]{selectedNodes.get(0).getID(), newNode.getID()});
-				if (SimLive.settings.newPartType == Element.Type.POINT_MASS &&
+				if (SimLive.model.settings.newPartType == Element.Type.POINT_MASS &&
 						selectedNodes.get(0) == newNode)
 					element = new PointMass(new int[]{newNode.getID()});
 			}
@@ -3641,7 +3641,7 @@ public class View extends GLCanvas {
 				gl2.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 				gl2.glEnable(GL2.GL_BLEND);
 				
-				if (SimLive.settings.newPartType == Element.Type.CIRCULAR) {
+				if (SimLive.model.settings.newPartType == Element.Type.CIRCULAR) {
 					double radius = Math.sqrt((p[0]-coords[0])*(p[0]-coords[0])+(p[1]-coords[1])*(p[1]-coords[1]));
 					gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
 					gl2.glPushMatrix();
@@ -3651,11 +3651,11 @@ public class View extends GLCanvas {
 					glu.gluDisk(outside, 0, radius, 50, 1);
 		    		gl2.glPopMatrix();
 				}
-				if (SimLive.settings.newPartType == Element.Type.SPUR_GEAR) {
+				if (SimLive.model.settings.newPartType == Element.Type.SPUR_GEAR) {
 					double[] values = ((SpurGearDialog) SimLive.dialogArea).getValues();
 					drawSpurGear(gl2, glu, outside, coords, values[0], values[1], values[2], values[3], values[4] == 1.0);
 				}
-				if (SimLive.settings.newPartType == Element.Type.RECTANGULAR) {
+				if (SimLive.model.settings.newPartType == Element.Type.RECTANGULAR) {
 					gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
 					gl2.glBegin(GL2.GL_LINE_STRIP);
 			    	gl2.glVertex2d(coords[0], coords[1]);
@@ -3672,7 +3672,7 @@ public class View extends GLCanvas {
 			    	gl2.glVertex2d(coords[0], p[1]);
 					gl2.glEnd();
 				}
-				if (SimLive.settings.newPartType == Element.Type.TRIANGULAR) {
+				if (SimLive.model.settings.newPartType == Element.Type.TRIANGULAR) {
 					double offset = SimLive.dialogArea instanceof TriangularAreaDialog ? ((TriangularAreaDialog) SimLive.dialogArea).getOffset() : 0;
 					gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
 					gl2.glBegin(GL2.GL_LINE_STRIP);
@@ -3823,7 +3823,7 @@ public class View extends GLCanvas {
     	gl2.glEnable(GL2.GL_LIGHTING);
     	
 		gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-		if (SimLive.settings.isShowAxes) {
+		if (SimLive.model.settings.isShowAxes) {
 			drawCoordinateSystem(gl2, glu, width, height, outside, inside, false);
 		}
     	
@@ -3838,9 +3838,9 @@ public class View extends GLCanvas {
 	    gl2.glDisable(GL2.GL_LIGHTING);
 	    
 	    /* scale */
-	    if (SimLive.settings.isShowScale)
+	    if (SimLive.model.settings.isShowScale)
 		{
-	    	double w = SimLive.settings.meshSize*zoom*width/2.0;
+	    	double w = SimLive.model.settings.meshSize*zoom*width/2.0;
 	    	double h = SimLive.fontHeight/2.0;
 	    	double x1 = width/2-w/2.0;
 			double y1 = height-h;
@@ -3860,7 +3860,7 @@ public class View extends GLCanvas {
 	    	gl2.glVertex2d(x1, y1);
 	    	gl2.glEnd();
 	    	
-	    	String string = SimLive.double2String(SimLive.settings.meshSize)+" "+Units.getLengthUnit();
+	    	String string = SimLive.double2String(SimLive.model.settings.meshSize)+" "+Units.getLengthUnit();
 	    	rendererBold.beginRendering((int) width, (int) height);
 	    	rendererBold.setColor(0.0f, 0.0f, 0.0f, 1.0f);
 		    double wStr = rendererBold.getBounds(string).getWidth();
@@ -4261,7 +4261,7 @@ public class View extends GLCanvas {
 						Element element = set.getElements().get(e);
 						if (element.isPlaneElement()) {
 							renderPlaneElement(gl2, element, projection, modelview, uniColor, selected);
-							if (SimLive.settings.isShowOrientations) {
+							if (SimLive.model.settings.isShowOrientations) {
 								renderPlaneElementOrientation(gl2, glu, element, arrowSize, uniColor, inside, outside, null);
 							}
 						}
@@ -4405,13 +4405,13 @@ public class View extends GLCanvas {
     		double[] p2 = new double[]{coords[i][0]+bottom[i][0], coords[i][1]+bottom[i][1], coords[i][2]+bottom[i][2]};
     		double[] p3 = new double[]{coords[j][0]+bottom[j][0], coords[j][1]+bottom[j][1], coords[j][2]+bottom[j][2]};
 			
-			if (SimLive.settings.isShowEdges || outline) {
+			if (SimLive.model.settings.isShowEdges || outline) {
 				gl2.glBegin(GL2.GL_LINES);
 				gl2.glVertex3dv(p0, 0);
 				gl2.glVertex3dv(p1, 0);
 				gl2.glVertex3dv(p2, 0);
 				gl2.glVertex3dv(p3, 0);
-				if (SimLive.settings.isShowEdges || isCornerNode[elemNodes[i]]) {
+				if (SimLive.model.settings.isShowEdges || isCornerNode[elemNodes[i]]) {
 					gl2.glVertex3dv(p0, 0);
 					gl2.glVertex3dv(p2, 0);
 				}
@@ -4667,7 +4667,7 @@ public class View extends GLCanvas {
 					}
 					gl2.glEnable(GL2.GL_LIGHTING);
 					
-					if (SimLive.settings.isShowOrientations) {
+					if (SimLive.model.settings.isShowOrientations) {
 						renderPlaneElementOrientation(gl2, glu, element, arrowSize, uniColor, inside, outside, contactPair);
 					}
 				}
@@ -4981,9 +4981,9 @@ public class View extends GLCanvas {
 		double[] endN = null;
 		double deltaL = length/(double) lineDivisions;
 		SectionShape.Type sectionShapeType = section.getSectionShape().getType();
-		boolean cylindric = !SimLive.settings.isShowSections || sectionShapeType == SectionShape.Type.CIRCLE ||
+		boolean cylindric = !SimLive.model.settings.isShowSections || sectionShapeType == SectionShape.Type.CIRCLE ||
 				sectionShapeType == SectionShape.Type.HOLLOW_CIRCLE ||sectionShapeType == SectionShape.Type.DIRECT_INPUT;
-		boolean hollow = SimLive.settings.isShowSections && sectionShapeType == SectionShape.Type.HOLLOW_CIRCLE ||
+		boolean hollow = SimLive.model.settings.isShowSections && sectionShapeType == SectionShape.Type.HOLLOW_CIRCLE ||
 				sectionShapeType == SectionShape.Type.HOLLOW_RECTANGLE;
 		for (int i = 0; i < lineDivisions+1; i++) {
 			gl2.glPushMatrix();
@@ -4991,8 +4991,8 @@ public class View extends GLCanvas {
 			t = (i+1)/(double) lineDivisions;
 			boolean start, end;
 			if (existing) {
-				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || SimLive.settings.isShowEdges);
-				end = i == lineDivisions && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || SimLive.settings.isShowEdges);
+				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || SimLive.model.settings.isShowEdges);
+				end = i == lineDivisions && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || SimLive.model.settings.isShowEdges);
 			}
 			else {
 				start = i == 0;
@@ -5041,8 +5041,8 @@ public class View extends GLCanvas {
 			t = i/(double) lineDivisions;
 			boolean start, end;
 			if (existing) {
-				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || SimLive.settings.isShowEdges);
-				end = i == lineDivisions-1 && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || SimLive.settings.isShowEdges);
+				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || SimLive.model.settings.isShowEdges);
+				end = i == lineDivisions-1 && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || SimLive.model.settings.isShowEdges);
 			}
 			else {
 				start = i == 0;
@@ -5486,8 +5486,8 @@ public class View extends GLCanvas {
 	private void setProjection(GL2 gl2, float width, float height) {
 		float aspectRatio = height / width;
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
-		double nearClip = SimLive.settings.meshSize/100.0;
-		double farClip = SimLive.settings.meshSize*100.0;
+		double nearClip = SimLive.model.settings.meshSize/100.0;
+		double farClip = SimLive.model.settings.meshSize*100.0;
 		if (perspective) {
 			GLU glu = new GLU();
 			glu.gluPerspective(fovy*180/Math.PI, width/height, nearClip, farClip);
@@ -5536,11 +5536,11 @@ public class View extends GLCanvas {
 			gl2.glVertex3d(x1, y1, 0);
 		    gl2.glVertex3d(x2, y2, 0);
 		}*/		
-		double nSteps = SimLive.settings.meshCount;
-		double xMin = -nSteps/2.0*SimLive.settings.meshSize;
-		double xMax = nSteps/2.0*SimLive.settings.meshSize;
-		double yMin = -nSteps/2.0*SimLive.settings.meshSize;
-		double yMax = nSteps/2.0*SimLive.settings.meshSize;
+		double nSteps = SimLive.model.settings.meshCount;
+		double xMin = -nSteps/2.0*SimLive.model.settings.meshSize;
+		double xMax = nSteps/2.0*SimLive.model.settings.meshSize;
+		double yMin = -nSteps/2.0*SimLive.model.settings.meshSize;
+		double yMax = nSteps/2.0*SimLive.model.settings.meshSize;
 		for (double x = xMin; x <= xMax; x+=(xMax-xMin)/nSteps) {
 			gl2.glVertex3d(x, yMin, 0);
 		    gl2.glVertex3d(x, yMax, 0);
@@ -5648,7 +5648,7 @@ public class View extends GLCanvas {
 		double aspectRatio = height / width;
 		double scale = 0;
 		if (perspective) {
-			double nearClip = SimLive.settings.meshSize/100.0;
+			double nearClip = SimLive.model.settings.meshSize/100.0;
 			double depth = 2.0*nearClip; //larger than distance to nearClip
 			double top = depth*Math.tan(fovy/2);
 			double right = top/aspectRatio;
@@ -5728,7 +5728,7 @@ public class View extends GLCanvas {
 	private void renderSupport(GL2 gl2, Support support, double arrowSize,
 			GLU glu, GLUquadric outside, GLUquadric inside, ArrayList<Object> objects) {
 		boolean selected = SimLive.mode == SimLive.Mode.SUPPORTS && objects.contains(support);
-		if (SimLive.settings.isShowSupports || selected) {
+		if (SimLive.model.settings.isShowSupports || selected) {
 	    	if (selected) {
 	    		gl2.glColor3fv(SimLive.COLOR_SELECTION, 0);
 	    	}
@@ -6038,7 +6038,7 @@ public class View extends GLCanvas {
 			double arrowSize, GLUquadric outside, GLUquadric inside, ArrayList<Object> objects) {
 		if (load.getTimeTable().isFactorDefinedAtTime(time)) {
 			boolean selected = SimLive.mode == SimLive.Mode.LOADS && objects.contains(load);
-			if (SimLive.settings.isShowLoads || selected) {
+			if (SimLive.model.settings.isShowLoads || selected) {
 		    	if (selected) {
 		    		gl2.glColor3fv(SimLive.COLOR_SELECTION, 0);
 		    	}
@@ -6053,7 +6053,7 @@ public class View extends GLCanvas {
 		    		int id = SimLive.post.getSolution().getDofOfNodeID(load.referenceNode.getID());
 		    		Matrix rot = u_global.getMatrix(id+3, id+5, 0, 0);
 		    		double factor = 0;
-		    		if (SimLive.settings.isLargeDisplacement) {
+		    		if (SimLive.model.settings.isLargeDisplacement) {
 		    			factor = scaling;
 		    		}
 		    		else {
@@ -6226,7 +6226,7 @@ public class View extends GLCanvas {
 			double arrowSize, GLUquadric outside, GLUquadric inside, ArrayList<Object> objects) {
 		if (distributedLoad.getTimeTable().isFactorDefinedAtTime(time)) {
 			boolean selected = SimLive.mode == SimLive.Mode.LOADS && objects.contains(distributedLoad);
-			if (SimLive.settings.isShowLoads || selected) {
+			if (SimLive.model.settings.isShowLoads || selected) {
 		    	if (selected) {
 		    		gl2.glColor3fv(SimLive.COLOR_SELECTION, 0);
 		    	}
@@ -6265,7 +6265,7 @@ public class View extends GLCanvas {
 				    		int id = SimLive.post.getSolution().getDofOfNodeID(distributedLoad.referenceNode.getID());
 				    		Matrix rot = u_global.getMatrix(id+3, id+5, 0, 0);
 				    		double factor = 0;
-				    		if (SimLive.settings.isLargeDisplacement) {
+				    		if (SimLive.model.settings.isLargeDisplacement) {
 				    			factor = scaling;
 				    		}
 				    		else {

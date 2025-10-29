@@ -942,7 +942,7 @@ public class PartDialog extends Composite {
 	}
 	
 	public boolean isMergeable() {
-		double tolerance = SimLive.settings.meshSize/1000.0;
+		double tolerance = SimLive.model.settings.meshSize/1000.0;
 		for (int n0 = 0; n0 < nodes0.size(); n0++) {
 			double[] p0 = nodes0.get(n0).getCoords();
 			for (int n1 = n0+1; n1 < nodes0.size(); n1++) {

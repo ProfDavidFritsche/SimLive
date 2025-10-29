@@ -688,7 +688,7 @@ public class Beam extends LineElement {
 			Matrix a0 = x_elem.getMatrix(3, 5, 0, 0);
 			Matrix a1 = x_elem.getMatrix(9, 11, 0, 0);
 			if (val == 0) {
-				if (!SimLive.settings.isLargeDisplacement) {
+				if (!SimLive.model.settings.isLargeDisplacement) {
 					for (int i = 0; i < 3; i++) {
 						a0.set(i, 0, Math.atan(a0.get(i, 0)));
 						a1.set(i, 0, Math.atan(a1.get(i, 0)));

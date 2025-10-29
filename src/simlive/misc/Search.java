@@ -68,7 +68,7 @@ public abstract class Search {
 		//nodeAtPointInSet(point, Sim2d.view.getSelectedNodesAsSet());
 		
 		//unused nodes
-		if (SimLive.settings.newPartType != Element.Type.SPUR_GEAR) {
+		if (SimLive.model.settings.newPartType != Element.Type.SPUR_GEAR) {
 			for (int n = Model.maxUsedNodeID+1; n < SimLive.model.getNodes().size(); n++) {
 				Node node = SimLive.model.getNodes().get(n);
 				nodeAtPoint(point, node, isMouseDragged, moveNode);
@@ -79,15 +79,15 @@ public abstract class Search {
 	}
 	
 	public static void getCoordsAtGridLine(int[] point, final double snapTol) {
-		double gridSize = SimLive.settings.meshSize;
+		double gridSize = SimLive.model.settings.meshSize;
 		long i = Math.round(Snap.coords2d[0]/gridSize);
 		long j = Math.round(Snap.coords2d[1]/gridSize);
 		double[] coordsGridPoint = new double[2];
 		coordsGridPoint[0] = i*gridSize;
 		coordsGridPoint[1] = j*gridSize;
-		if (SimLive.settings.isShowGrid && Math.abs(View.R0.get(2, 2)) > SimLive.ZERO_TOL &&
-				i <= SimLive.settings.meshCount/2 && i >= -SimLive.settings.meshCount/2 &&
-				j <= SimLive.settings.meshCount/2 && j >= -SimLive.settings.meshCount/2) {
+		if (SimLive.model.settings.isShowGrid && Math.abs(View.R0.get(2, 2)) > SimLive.ZERO_TOL &&
+				i <= SimLive.model.settings.meshCount/2 && i >= -SimLive.model.settings.meshCount/2 &&
+				j <= SimLive.model.settings.meshCount/2 && j >= -SimLive.model.settings.meshCount/2) {
 			
 			double[] grid = View.modelToScreenCoordinates(new double[]{
 					coordsGridPoint[0], coordsGridPoint[1], 0});

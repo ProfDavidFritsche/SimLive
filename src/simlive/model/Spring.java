@@ -20,7 +20,7 @@ public class Spring extends LineElement {
 		super(element_node);
 		Spring spring = new Spring();
 		spring.setStiffness(10.0);
-		Units.convertUnitsOfElement(Units.UnitSystem.t_mm_s_N, SimLive.settings.unitSystem, spring);
+		Units.convertUnitsOfElement(Units.UnitSystem.t_mm_s_N, SimLive.model.settings.unitSystem, spring);
 		this.stiffness = spring.getStiffness();
 	}
 	

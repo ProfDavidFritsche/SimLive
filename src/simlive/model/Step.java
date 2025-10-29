@@ -23,7 +23,7 @@ public class Step implements DeepEqualsInterface {
 		maxIterations = 100;
 		gravity = GRAVITY.NO_GRAVITY;
 		gValue = -9.81;
-		Units.convertUnitsOfStep(Units.UnitSystem.kg_m_s_N, SimLive.settings.unitSystem, this);
+		Units.convertUnitsOfStep(Units.UnitSystem.kg_m_s_N, SimLive.model.settings.unitSystem, this);
 		this.name = SimLive.model.getDefaultName("Step");
 	}
 

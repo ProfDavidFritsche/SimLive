@@ -10,11 +10,13 @@ import Jama.Matrix;
 import simlive.SimLive;
 import simlive.SimLive.Mode;
 import simlive.misc.GeomUtility;
+import simlive.misc.Settings;
 import simlive.view.Label;
 import simlive.view.View;
 
 public class Model implements DeepEqualsInterface {
 
+	public Settings settings;
 	private ArrayList<Node> nodes;
 	private ArrayList<Element> elements;
 	private ArrayList<Material> materials;
@@ -33,6 +35,7 @@ public class Model implements DeepEqualsInterface {
 	public static int maxUsedNodeID = -1;
 	
 	public Model() {
+		settings = new Settings();
 		nodes = new ArrayList<Node>();
 		elements = new ArrayList<Element>();
 		materials = new ArrayList<Material>();
@@ -170,6 +173,7 @@ public class Model implements DeepEqualsInterface {
 	}
 	
 	public void clearAll() {
+		settings = new Settings();
 		nodes.clear();
 		elements.clear();
 		materials.clear();
@@ -188,6 +192,7 @@ public class Model implements DeepEqualsInterface {
 	
 	public Model clone() {
 		Model model = new Model();
+		model.settings = this.settings.clone();
 		for (int i = 0; i < materials.size(); i++) 	 	  model.materials.add(materials.get(i).clone());
 		for (int i = 0; i < sections.size(); i++) 	 	  model.sections.add(sections.get(i).clone());
 		for (int i = 0; i < nodes.size(); i++) 		 	  model.nodes.add(nodes.get(i).clone());
@@ -207,6 +212,7 @@ public class Model implements DeepEqualsInterface {
 	
 	public Result deepEquals(Object obj, Result result) {
 		Model model = (Model) obj;
+		result = model.settings.deepEquals(this.settings, result);
 		result = SimLive.deepEquals(nodes, model.getNodes(), result);
 		result = SimLive.deepEquals(elements, model.getElements(), result);
 		result = SimLive.deepEquals(materials, model.getMaterials(), result);
@@ -713,6 +719,7 @@ public class Model implements DeepEqualsInterface {
 	private Model reduceModel(Model model) {
 		if (SimLive.modelPos > -1) {
 			Model oldModel = expandModel(SimLive.modelPos-1);
+			if (oldModel.settings.deepEquals(model.settings, Result.EQUAL) == Result.EQUAL) model.settings = null;
 			if (SimLive.deepEquals(oldModel.nodes, model.nodes, Result.EQUAL) == Result.EQUAL) model.nodes = null;
 			if (SimLive.deepEquals(oldModel.elements, model.elements, Result.EQUAL) == Result.EQUAL) model.elements = null;
 			if (SimLive.deepEquals(oldModel.materials, model.materials, Result.EQUAL) == Result.EQUAL) model.materials = null;
@@ -735,6 +742,7 @@ public class Model implements DeepEqualsInterface {
 		Model model = SimLive.modelHistory.get(0).clone();
 		for (int i = 1; i <= modelPos; i++) {
 			Model modify = SimLive.modelHistory.get(i);
+			if (modify.settings != null) model.settings = modify.settings;
 			if (modify.nodes != null) model.nodes = modify.nodes;
 			if (modify.elements != null) model.elements = modify.elements;
 			if (modify.materials != null) model.materials = modify.materials;
@@ -1207,7 +1215,7 @@ public class Model implements DeepEqualsInterface {
 	}*/
 	
 	public void mergeCoincidentNodes(ArrayList<Element> elementSet) {
-		double tolerance = SimLive.settings.meshSize/1000.0;
+		double tolerance = settings.meshSize/1000.0;
 		for (int e0 = 0; e0 < elementSet.size(); e0++) {
 			int[] nodes0 = elementSet.get(e0).getElementNodes();
 			for (int i = 0; i < nodes0.length; i++) {

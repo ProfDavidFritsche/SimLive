@@ -18,7 +18,7 @@ public class Quad extends PlaneElement {
 		this.elementNodes = element_node;
 		Quad quad = new Quad();
 		quad.setThickness(1.0);
-		Units.convertUnitsOfElement(Units.UnitSystem.t_mm_s_N, SimLive.settings.unitSystem, quad);
+		Units.convertUnitsOfElement(Units.UnitSystem.t_mm_s_N, SimLive.model.settings.unitSystem, quad);
 		this.thickness = quad.getThickness();
 		//this.state = PlaneElement.State.PLANE_STRESS;
 		ArrayList<Node> nodes = SimLive.model.getNodes();

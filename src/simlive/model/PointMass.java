@@ -21,7 +21,7 @@ public class PointMass extends Element {
 		this.elementNodes = element_node;
 		PointMass pointMass = new PointMass();
 		pointMass.setMass(0.001);
-		Units.convertUnitsOfElement(Units.UnitSystem.t_mm_s_N, SimLive.settings.unitSystem, pointMass);
+		Units.convertUnitsOfElement(Units.UnitSystem.t_mm_s_N, SimLive.model.settings.unitSystem, pointMass);
 		this.mass = pointMass.getMass();
 	}
 	
