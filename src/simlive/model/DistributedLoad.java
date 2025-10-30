@@ -19,7 +19,7 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 		elementSets = new ArrayList<Set>();
 		startValues = new double[3];
 		endValues = new double[3];
-		axis = new double[3];
+		axis = Model.twoDimensional ? new double[]{0, 0, 1} : new double[3];
 		angle = 0.0;
 		isLocalSysAligned = false;
 		timeTable = new TimeTable();

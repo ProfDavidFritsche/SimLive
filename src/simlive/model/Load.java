@@ -22,7 +22,7 @@ public class Load extends AbstractLoad implements DeepEqualsInterface {
 	
 	public Load () {
 		nodes = new ArrayList<Node>();
-		axis = new double[3];
+		axis = Model.twoDimensional ? new double[]{0, 0, 1} : new double[3];
 		angle = 0.0;
 		type = Type.FORCE;
 		isDisp = new boolean[3];
