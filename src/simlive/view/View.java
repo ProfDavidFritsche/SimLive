@@ -5976,7 +5976,7 @@ public class View extends GLCanvas {
 					for (int n = 0; n < element_nodes0.length; n++) {
 						rot[0][n] = u_elem.get(3+6*n, 0);
 						rot[1][n] = u_elem.get(4+6*n, 0);
-						rot[2][n] = u_elem.get(5+6*n, 0);							
+						rot[2][n] = u_elem.get(5+6*n, 0);
 					}
 					double rotX, rotY, rotZ;
 					if (e0.getType() == Element.Type.BEAM) {
@@ -5991,7 +5991,18 @@ public class View extends GLCanvas {
 						rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
 						rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
 					}
-					Matrix Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
+					Matrix rot0 = new Matrix(new double[]{rotX, rotY, rotZ}, 3);
+					double factor = 0;
+		    		if (SimLive.model.settings.isLargeDisplacement) {
+		    			factor = SimLive.post.getScaling();
+		    		}
+		    		else {
+		    			factor = rot0.normF();
+		    			if (factor > 0) {
+			    			factor = Math.atan(SimLive.post.getScaling()*factor)/factor;
+			    		}
+		    		}
+		    		Matrix Rg = Beam.rotationMatrixFromAngles(rot0.times(factor));
 					R = Rg.times(R);
 				}
 				gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
