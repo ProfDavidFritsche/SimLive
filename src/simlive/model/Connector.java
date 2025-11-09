@@ -146,7 +146,8 @@ public class Connector extends AbstractConnector implements DeepEqualsInterface 
 			element0 = temp[0];
 			element1 = temp[1];
 			if (this.type == Type.REVOLUTE &&
-				(element0.getType() != Element.Type.BEAM || element1.getType() != Element.Type.BEAM)) {
+				((element0.getType() != Element.Type.BEAM && !element0.isPlaneElement()) ||
+				 (element1.getType() != Element.Type.BEAM && !element1.isPlaneElement()))) {
 				this.type = Type.SPHERICAL;
 			}
 			if (this.type == Type.FIXED &&

@@ -205,8 +205,10 @@ public class ConnectorDialog extends StoreDialog {
 	}
 	
 	private void setCombo(Connector connector) {
-		if (connector.getElement0() != null && connector.getElement0().getType() == Element.Type.BEAM &&
-			connector.getElement1() != null && connector.getElement1().getType() == Element.Type.BEAM) {
+		if (connector.getElement0() != null &&
+			(connector.getElement0().getType() == Element.Type.BEAM || connector.getElement0().isPlaneElement()) &&
+			connector.getElement1() != null &&
+			(connector.getElement1().getType() == Element.Type.BEAM || connector.getElement1().isPlaneElement())) {
 			combo.setItems(new String[] {"Spherical", "Fixed", "Revolute"});
 		}
 		else if (connector.getElement0() != null &&

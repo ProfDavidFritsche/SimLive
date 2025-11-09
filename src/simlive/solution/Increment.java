@@ -330,7 +330,10 @@ public class Increment {
 			
 			Matrix axis = null;
 			if (connectors.get(c).getType() == Connector.Type.REVOLUTE) {
-				axis = ((Beam) e0).getR0().getMatrix(0, 2, 2, 2);
+				if (e0.getType() == Element.Type.BEAM)
+					axis = ((Beam) e0).getR0().getMatrix(0, 2, 2, 2);
+				else
+					axis = ((PlaneElement) e0).getR0().getMatrix(0, 2, 2, 2);
 			}
 			
 			{
@@ -357,54 +360,92 @@ public class Increment {
 					G_row1.set(0, dof_e0[1]+1, shapeFunctionValues0[3]);
 					G_row2.set(0, dof_e0[0]+2, shapeFunctionValues0[0]);
 					G_row2.set(0, dof_e0[1]+2, shapeFunctionValues0[3]);
-					
-					if (connector.getType() == Connector.Type.REVOLUTE) {
-						Matrix u_elem = ((Beam) e0).globalToLocalVector(u_global);
-						Matrix R1g = Beam.rotationMatrixFromAngles(u_elem.getMatrix(3, 5, 0, 0));
-						Matrix R2g = Beam.rotationMatrixFromAngles(u_elem.getMatrix(9, 11, 0, 0));
-						Matrix a0 = R1g.times(axis).times(shapeFunctionValues0[0]).plus(R2g.times(axis).times(shapeFunctionValues0[3]));
-						a0.timesEquals(1.0/a0.normF());
-						
-						u_elem = ((Beam) e1).globalToLocalVector(u_global);
-						R1g = Beam.rotationMatrixFromAngles(u_elem.getMatrix(3, 5, 0, 0));
-						R2g = Beam.rotationMatrixFromAngles(u_elem.getMatrix(9, 11, 0, 0));
-						Matrix a1 = R1g.times(axis).times(shapeFunctionValues1[0]).plus(R2g.times(axis).times(shapeFunctionValues1[3]));
-						a1.timesEquals(1.0/a1.normF());
-						double length = ((Beam) e1).getCurrentLength(solution.refModel.getNodes(), u_elem);
-						Matrix r1 = ((Beam) e1).getr1(solution.refModel.getNodes(), u_elem, length);
-						Matrix c1 = a1.crossProduct(r1);
-						Matrix b1 = c1.crossProduct(a1);
-						
-						Matrix b0 = b1.crossProduct(a0);
-						Matrix c0 = c1.crossProduct(a0);
-						
-						G_row3.set(0, dof_e0[0]+3, b0.get(0, 0)*shapeFunctionValues0[0]);
-						G_row3.set(0, dof_e0[0]+4, b0.get(1, 0)*shapeFunctionValues0[0]);
-						G_row3.set(0, dof_e0[0]+5, b0.get(2, 0)*shapeFunctionValues0[0]);
-						G_row3.set(0, dof_e0[1]+3, b0.get(0, 0)*shapeFunctionValues0[3]);
-						G_row3.set(0, dof_e0[1]+4, b0.get(1, 0)*shapeFunctionValues0[3]);
-						G_row3.set(0, dof_e0[1]+5, b0.get(2, 0)*shapeFunctionValues0[3]);
-						G_row3.set(0, dof_e1[0]+3, -b0.get(0, 0)*shapeFunctionValues1[0]);
-						G_row3.set(0, dof_e1[0]+4, -b0.get(1, 0)*shapeFunctionValues1[0]);
-						G_row3.set(0, dof_e1[0]+5, -b0.get(2, 0)*shapeFunctionValues1[0]);
-						G_row3.set(0, dof_e1[1]+3, -b0.get(0, 0)*shapeFunctionValues1[3]);
-						G_row3.set(0, dof_e1[1]+4, -b0.get(1, 0)*shapeFunctionValues1[3]);
-						G_row3.set(0, dof_e1[1]+5, -b0.get(2, 0)*shapeFunctionValues1[3]);
-						
-						G_row4.set(0, dof_e0[0]+3, c0.get(0, 0)*shapeFunctionValues0[0]);
-						G_row4.set(0, dof_e0[0]+4, c0.get(1, 0)*shapeFunctionValues0[0]);
-						G_row4.set(0, dof_e0[0]+5, c0.get(2, 0)*shapeFunctionValues0[0]);
-						G_row4.set(0, dof_e0[1]+3, c0.get(0, 0)*shapeFunctionValues0[3]);
-						G_row4.set(0, dof_e0[1]+4, c0.get(1, 0)*shapeFunctionValues0[3]);
-						G_row4.set(0, dof_e0[1]+5, c0.get(2, 0)*shapeFunctionValues0[3]);
-						G_row4.set(0, dof_e1[0]+3, -c0.get(0, 0)*shapeFunctionValues1[0]);
-						G_row4.set(0, dof_e1[0]+4, -c0.get(1, 0)*shapeFunctionValues1[0]);
-						G_row4.set(0, dof_e1[0]+5, -c0.get(2, 0)*shapeFunctionValues1[0]);
-						G_row4.set(0, dof_e1[1]+3, -c0.get(0, 0)*shapeFunctionValues1[3]);
-						G_row4.set(0, dof_e1[1]+4, -c0.get(1, 0)*shapeFunctionValues1[3]);
-						G_row4.set(0, dof_e1[1]+5, -c0.get(2, 0)*shapeFunctionValues1[3]);					
-					}
 				}
+				
+				if (connector.getType() == Connector.Type.REVOLUTE) {
+					Matrix u_elem = e0.globalToLocalVector(u_global);
+					double[][] rot = new double[3][element_nodes0.length];
+					for (int n = 0; n < element_nodes0.length; n++) {
+						rot[0][n] = u_elem.get(3+6*n, 0);
+						rot[1][n] = u_elem.get(4+6*n, 0);
+						rot[2][n] = u_elem.get(5+6*n, 0);							
+					}
+					double rotX, rotY, rotZ;
+					if (e0.getType() == Element.Type.BEAM) {
+						rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
+						rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
+						rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
+					}
+					else {
+						rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
+						rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
+						rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
+					}
+					Matrix Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
+					Matrix a0 = Rg.times(axis);
+					a0.timesEquals(1.0/a0.normF());
+					
+					u_elem = e1.globalToLocalVector(u_global);
+					rot = new double[3][element_nodes1.length];
+					for (int n = 0; n < element_nodes1.length; n++) {
+						rot[0][n] = u_elem.get(3+6*n, 0);
+						rot[1][n] = u_elem.get(4+6*n, 0);
+						rot[2][n] = u_elem.get(5+6*n, 0);							
+					}
+					if (e1.getType() == Element.Type.BEAM) {
+						rotX = shapeFunctionValues1[0]*rot[0][0]+shapeFunctionValues1[3]*rot[0][1];
+						rotY = shapeFunctionValues1[0]*rot[1][0]+shapeFunctionValues1[3]*rot[1][1];
+						rotZ = shapeFunctionValues1[0]*rot[2][0]+shapeFunctionValues1[3]*rot[2][1];
+					}
+					else {
+						rotX = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[0]);
+						rotY = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[1]);
+						rotZ = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[2]);
+					}
+					Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
+					Matrix a1 = Rg.times(axis);
+					a1.timesEquals(1.0/a1.normF());
+					Matrix r1 = null;
+					if (e1.getType() == Element.Type.BEAM) {
+						double length = ((Beam) e1).getCurrentLength(solution.refModel.getNodes(), u_elem);
+						r1 = ((Beam) e1).getr1(solution.refModel.getNodes(), u_elem, length);
+					}
+					else {
+						r1 = ((PlaneElement) e1).getRr(solution.refModel.getNodes(), u_elem).getMatrix(0, 2, 0, 0);
+					}
+					Matrix c1 = a1.crossProduct(r1);
+					Matrix b1 = c1.crossProduct(a1);
+					
+					Matrix b0 = b1.crossProduct(a0);
+					Matrix c0 = c1.crossProduct(a0);
+					
+					G_row3.set(0, dof_e0[0]+3, b0.get(0, 0)*shapeFunctionValues0[0]);
+					G_row3.set(0, dof_e0[0]+4, b0.get(1, 0)*shapeFunctionValues0[0]);
+					G_row3.set(0, dof_e0[0]+5, b0.get(2, 0)*shapeFunctionValues0[0]);
+					G_row3.set(0, dof_e0[1]+3, b0.get(0, 0)*shapeFunctionValues0[3]);
+					G_row3.set(0, dof_e0[1]+4, b0.get(1, 0)*shapeFunctionValues0[3]);
+					G_row3.set(0, dof_e0[1]+5, b0.get(2, 0)*shapeFunctionValues0[3]);
+					G_row3.set(0, dof_e1[0]+3, -b0.get(0, 0)*shapeFunctionValues1[0]);
+					G_row3.set(0, dof_e1[0]+4, -b0.get(1, 0)*shapeFunctionValues1[0]);
+					G_row3.set(0, dof_e1[0]+5, -b0.get(2, 0)*shapeFunctionValues1[0]);
+					G_row3.set(0, dof_e1[1]+3, -b0.get(0, 0)*shapeFunctionValues1[3]);
+					G_row3.set(0, dof_e1[1]+4, -b0.get(1, 0)*shapeFunctionValues1[3]);
+					G_row3.set(0, dof_e1[1]+5, -b0.get(2, 0)*shapeFunctionValues1[3]);
+					
+					G_row4.set(0, dof_e0[0]+3, c0.get(0, 0)*shapeFunctionValues0[0]);
+					G_row4.set(0, dof_e0[0]+4, c0.get(1, 0)*shapeFunctionValues0[0]);
+					G_row4.set(0, dof_e0[0]+5, c0.get(2, 0)*shapeFunctionValues0[0]);
+					G_row4.set(0, dof_e0[1]+3, c0.get(0, 0)*shapeFunctionValues0[3]);
+					G_row4.set(0, dof_e0[1]+4, c0.get(1, 0)*shapeFunctionValues0[3]);
+					G_row4.set(0, dof_e0[1]+5, c0.get(2, 0)*shapeFunctionValues0[3]);
+					G_row4.set(0, dof_e1[0]+3, -c0.get(0, 0)*shapeFunctionValues1[0]);
+					G_row4.set(0, dof_e1[0]+4, -c0.get(1, 0)*shapeFunctionValues1[0]);
+					G_row4.set(0, dof_e1[0]+5, -c0.get(2, 0)*shapeFunctionValues1[0]);
+					G_row4.set(0, dof_e1[1]+3, -c0.get(0, 0)*shapeFunctionValues1[3]);
+					G_row4.set(0, dof_e1[1]+4, -c0.get(1, 0)*shapeFunctionValues1[3]);
+					G_row4.set(0, dof_e1[1]+5, -c0.get(2, 0)*shapeFunctionValues1[3]);					
+				}
+				
 				if (e1.getType() == Element.Type.BEAM) {
 					G_row0.set(0, dof_e1[0], -shapeFunctionValues1[0]);
 					G_row0.set(0, dof_e1[1], -shapeFunctionValues1[3]);
@@ -510,26 +551,77 @@ public class Increment {
 					double t = connectors.get(c).getT0();
 					shapeFunctionValues0 = ((LineElement) e0).getShapeFunctionValues(t);
 				}
+				else {
+					double[] r = connectors.get(c).getR0();
+					shapeFunctionValues0 = ((PlaneElement) e0).getShapeFunctionValues(r[0], r[1]);
+				}
 				if (e1.isLineElement()) {
 					double t = connectors.get(c).getT1();
 					shapeFunctionValues1 = ((LineElement) e1).getShapeFunctionValues(t);
 				}
+				else {
+					double[] r = connectors.get(c).getR1();
+					shapeFunctionValues1 = ((PlaneElement) e1).getShapeFunctionValues(r[0], r[1]);
+				}
 				
-				Matrix axis = ((Beam) e0).getR0().getMatrix(0, 2, 2, 2);
+				Matrix axis = null;
+				if (e0.getType() == Element.Type.BEAM)
+					axis = ((Beam) e0).getR0().getMatrix(0, 2, 2, 2);
+				else
+					axis = ((PlaneElement) e0).getR0().getMatrix(0, 2, 2, 2);
 				
-				Matrix u_elem = ((Beam) e0).globalToLocalVector(u_global);
-				Matrix R1g = Beam.rotationMatrixFromAngles(u_elem.getMatrix(3, 5, 0, 0));
-				Matrix R2g = Beam.rotationMatrixFromAngles(u_elem.getMatrix(9, 11, 0, 0));
-				Matrix a0 = R1g.times(axis).times(shapeFunctionValues0[0]).plus(R2g.times(axis).times(shapeFunctionValues0[3]));
+				int[] element_nodes0 = e0.getElementNodes();
+				Matrix u_elem = e0.globalToLocalVector(u_global);
+				double[][] rot = new double[3][element_nodes0.length];
+				for (int n = 0; n < element_nodes0.length; n++) {
+					rot[0][n] = u_elem.get(3+6*n, 0);
+					rot[1][n] = u_elem.get(4+6*n, 0);
+					rot[2][n] = u_elem.get(5+6*n, 0);							
+				}
+				double rotX, rotY, rotZ;
+				if (e0.getType() == Element.Type.BEAM) {
+					rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
+					rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
+					rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
+				}
+				else {
+					rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
+					rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
+					rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
+				}
+				Matrix Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
+				Matrix a0 = Rg.times(axis);
 				a0.timesEquals(1.0/a0.normF());
 				
-				u_elem = ((Beam) e1).globalToLocalVector(u_global);
-				R1g = Beam.rotationMatrixFromAngles(u_elem.getMatrix(3, 5, 0, 0));
-				R2g = Beam.rotationMatrixFromAngles(u_elem.getMatrix(9, 11, 0, 0));
-				Matrix a1 = R1g.times(axis).times(shapeFunctionValues1[0]).plus(R2g.times(axis).times(shapeFunctionValues1[3]));
+				int[] element_nodes1 = e1.getElementNodes();
+				u_elem = e1.globalToLocalVector(u_global);
+				rot = new double[3][element_nodes1.length];
+				for (int n = 0; n < element_nodes1.length; n++) {
+					rot[0][n] = u_elem.get(3+6*n, 0);
+					rot[1][n] = u_elem.get(4+6*n, 0);
+					rot[2][n] = u_elem.get(5+6*n, 0);							
+				}
+				if (e1.getType() == Element.Type.BEAM) {
+					rotX = shapeFunctionValues1[0]*rot[0][0]+shapeFunctionValues1[3]*rot[0][1];
+					rotY = shapeFunctionValues1[0]*rot[1][0]+shapeFunctionValues1[3]*rot[1][1];
+					rotZ = shapeFunctionValues1[0]*rot[2][0]+shapeFunctionValues1[3]*rot[2][1];
+				}
+				else {
+					rotX = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[0]);
+					rotY = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[1]);
+					rotZ = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[2]);
+				}
+				Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
+				Matrix a1 = Rg.times(axis);
 				a1.timesEquals(1.0/a1.normF());
-				double length = ((Beam) e1).getCurrentLength(solution.refModel.getNodes(), u_elem);
-				Matrix r1 = ((Beam) e1).getr1(solution.refModel.getNodes(), u_elem, length);
+				Matrix r1 = null;
+				if (e1.getType() == Element.Type.BEAM) {
+					double length = ((Beam) e1).getCurrentLength(solution.refModel.getNodes(), u_elem);
+					r1 = ((Beam) e1).getr1(solution.refModel.getNodes(), u_elem, length);
+				}
+				else {
+					r1 = ((PlaneElement) e1).getRr(solution.refModel.getNodes(), u_elem).getMatrix(0, 2, 0, 0);
+				}
 				Matrix c1 = a1.crossProduct(r1);
 				Matrix b1 = c1.crossProduct(a1);
 				

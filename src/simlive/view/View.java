@@ -5963,16 +5963,38 @@ public class View extends GLCanvas {
 				drawSphereOutline(gl2, 2.5*lineElementRadius, coords);
 			}
 			if (connector.getType() == Connector.Type.REVOLUTE) {
-				Matrix R = ((LineElement) connector.getElement0()).getR0();
+				Matrix R = null;
+				if (connector.getElement0().isLineElement())
+					R = ((LineElement) connector.getElement0()).getR0();
+				else
+					R = ((PlaneElement) connector.getElement0()).getR0();
 				if (SimLive.mode == Mode.RESULTS) {
-					Beam beam = (Beam) SimLive.post.getSolution().getRefModel().getElements().get(connector.getElement0().getID());
-					double[] shapeFunctionValues0 = beam.getShapeFunctionValues(connector.getT0());
-					Matrix u_elem = beam.globalToLocalVector(SimLive.post.getPostIncrement().get_u_global()).times(SimLive.post.getScaling());
-					Matrix Rg = Beam.rotationMatrixFromAngles(u_elem.getMatrix(3, 5, 0, 0).times(shapeFunctionValues0[0]).plus(
-							u_elem.getMatrix(9, 11, 0, 0).times(shapeFunctionValues0[3])));
+					Element e0 = SimLive.post.getSolution().getRefModel().getElements().get(connector.getElement0().getID());
+					int[] element_nodes0 = e0.getElementNodes();
+					Matrix u_elem = e0.globalToLocalVector(SimLive.post.getPostIncrement().get_u_global());
+					double[][] rot = new double[3][element_nodes0.length];
+					for (int n = 0; n < element_nodes0.length; n++) {
+						rot[0][n] = u_elem.get(3+6*n, 0);
+						rot[1][n] = u_elem.get(4+6*n, 0);
+						rot[2][n] = u_elem.get(5+6*n, 0);							
+					}
+					double rotX, rotY, rotZ;
+					if (e0.getType() == Element.Type.BEAM) {
+						double[] shapeFunctionValues0 = ((Beam) e0).getShapeFunctionValues(connector.getT0());
+						rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
+						rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
+						rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
+					}
+					else {
+						double[] shapeFunctionValues0 = ((PlaneElement) e0).getShapeFunctionValues(connector.getR0()[0], connector.getR0()[1]);
+						rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
+						rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
+						rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
+					}
+					Matrix Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
 					R = Rg.times(R);
 				}
-		    	gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
+				gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
 				gl2.glTranslated(0, 0, -2.5*lineElementRadius);
 				gl2.glPushMatrix();
 				gl2.glRotated(-90, 0, 1, 0);
