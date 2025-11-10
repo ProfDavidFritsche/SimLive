@@ -5889,49 +5889,66 @@ public class View extends GLCanvas {
 			gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
 			gl2.glDisable(GL2.GL_LIGHTING);
 			
-			if (connector.getType() == Connector.Type.FIXED) {
-				Matrix R = null;
-				if (connector.getElement0().isPlaneElement()) {
-					R = ((PlaneElement) connector.getElement0()).getR0();
+			Matrix R = null;
+			if (connector.getElement0().isLineElement())
+				R = ((LineElement) connector.getElement0()).getR0();
+			else
+				R = ((PlaneElement) connector.getElement0()).getR0();
+			if (SimLive.mode == Mode.RESULTS) {
+				Element e0 = SimLive.post.getSolution().getRefModel().getElements().get(connector.getElement0().getID());
+				int[] element_nodes0 = e0.getElementNodes();
+				Matrix u_elem = e0.globalToLocalVector(SimLive.post.getPostIncrement().get_u_global());
+				double[][] rot = new double[3][element_nodes0.length];
+				for (int n = 0; n < element_nodes0.length; n++) {
+					rot[0][n] = u_elem.get(3+6*n, 0);
+					rot[1][n] = u_elem.get(4+6*n, 0);
+					rot[2][n] = u_elem.get(5+6*n, 0);
+				}
+				double rotX, rotY, rotZ;
+				if (e0.getType() == Element.Type.BEAM) {
+					double[] shapeFunctionValues0 = ((Beam) e0).getShapeFunctionValues(connector.getT0());
+					rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
+					rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
+					rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
 				}
 				else {
-					R = ((LineElement) connector.getElement0()).getR0();
+					double[] shapeFunctionValues0 = ((PlaneElement) e0).getShapeFunctionValues(connector.getR0()[0], connector.getR0()[1]);
+					rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
+					rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
+					rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
 				}
-				if (SimLive.mode == Mode.RESULTS) {
-					Matrix Rg = null;
-					if (connector.getElement0().isPlaneElement()) {
-						PlaneElement element = (PlaneElement) SimLive.post.getSolution().getRefModel().getElements().get(connector.getElement0().getID());
-						double[] shapeFunctionValues0 = element.getShapeFunctionValues(connector.getR0()[0], connector.getR0()[1]);
-						Matrix u_elem = element.globalToLocalVector(SimLive.post.getPostIncrement().get_u_global()).times(SimLive.post.getScaling());
-						double rx = 0, ry = 0, rz = 0;
-						if (element.getType() == Element.Type.QUAD) {
-							rx = element.interpolateNodeValues(shapeFunctionValues0,
-									new double[]{u_elem.get(3, 0), u_elem.get(9, 0), u_elem.get(15, 0), u_elem.get(21, 0)});
-							ry = element.interpolateNodeValues(shapeFunctionValues0,
-									new double[]{u_elem.get(4, 0), u_elem.get(10, 0), u_elem.get(16, 0), u_elem.get(22, 0)});
-							rz = element.interpolateNodeValues(shapeFunctionValues0,
-									new double[]{u_elem.get(5, 0), u_elem.get(11, 0), u_elem.get(17, 0), u_elem.get(23, 0)});
-						}
-						if (element.getType() == Element.Type.TRI) {
-							rx = element.interpolateNodeValues(shapeFunctionValues0,
-									new double[]{u_elem.get(3, 0), u_elem.get(9, 0), u_elem.get(15, 0)});
-							ry = element.interpolateNodeValues(shapeFunctionValues0,
-									new double[]{u_elem.get(4, 0), u_elem.get(10, 0), u_elem.get(16, 0)});
-							rz = element.interpolateNodeValues(shapeFunctionValues0,
-									new double[]{u_elem.get(5, 0), u_elem.get(11, 0), u_elem.get(17, 0)});
-						}
-						Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rx, ry, rz}, 3));
-					}
-					else {
-						Beam beam = (Beam) SimLive.post.getSolution().getRefModel().getElements().get(connector.getElement0().getID());
-						double[] shapeFunctionValues0 = beam.getShapeFunctionValues(connector.getT0());
-						Matrix u_elem = beam.globalToLocalVector(SimLive.post.getPostIncrement().get_u_global()).times(SimLive.post.getScaling());
-						Rg = Beam.rotationMatrixFromAngles(u_elem.getMatrix(3, 5, 0, 0).times(shapeFunctionValues0[0]).plus(
-								u_elem.getMatrix(9, 11, 0, 0).times(shapeFunctionValues0[3])));
-					}
-					R = Rg.times(R);
+				Matrix rot0 = new Matrix(new double[]{rotX, rotY, rotZ}, 3);
+				double factor = 0;
+	    		if (SimLive.model.settings.isLargeDisplacement) {
+	    			factor = SimLive.post.getScaling();
+	    		}
+	    		else {
+	    			factor = rot0.normF();
+	    			if (factor > 0) {
+		    			factor = Math.atan(SimLive.post.getScaling()*factor)/factor;
+		    		}
+	    		}
+	    		Matrix Rg = Beam.rotationMatrixFromAngles(rot0.times(factor));
+				R = Rg.times(R);
+				
+				double[] d0 = new double[3];
+				Matrix n0 = new Matrix(SimLive.post.getSolution().getRefModel().getNodes().get(element_nodes0[0]).getCoords(), 3);
+				Matrix d = new Matrix(connector.getCoordinates(), 3).minus(n0);
+				if (e0.getType() == Element.Type.BEAM) {
+					Matrix r1 = ((Beam) e0).getR0().getMatrix(0, 2, 0, 0);
+					Matrix d1 = d.minus(r1.times(d.dotProduct(r1)));
+					d0 = Rg.times(d1).minus(d1).getColumnPackedCopy();
 				}
-		    	gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
+				if (e0.isPlaneElement()) {
+					Matrix r3 = ((PlaneElement) e0).getR0().getMatrix(0, 2, 2, 2);
+					Matrix d1 = r3.times(d.dotProduct(r3));
+					d0 = Rg.times(d1).minus(d1).getColumnPackedCopy();
+				}
+				gl2.glTranslated(d0[0], d0[1], d0[2]);
+			}
+			
+			if (connector.getType() == Connector.Type.FIXED) {
+				gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
 				double size = Math.sqrt(2)*2.5*lineElementRadius;
 				gl2.glBegin(GL2.GL_LINES);
 				gl2.glVertex3d(0, 0, size);
@@ -5963,48 +5980,6 @@ public class View extends GLCanvas {
 				drawSphereOutline(gl2, 2.5*lineElementRadius, coords);
 			}
 			if (connector.getType() == Connector.Type.REVOLUTE) {
-				Matrix R = null;
-				if (connector.getElement0().isLineElement())
-					R = ((LineElement) connector.getElement0()).getR0();
-				else
-					R = ((PlaneElement) connector.getElement0()).getR0();
-				if (SimLive.mode == Mode.RESULTS) {
-					Element e0 = SimLive.post.getSolution().getRefModel().getElements().get(connector.getElement0().getID());
-					int[] element_nodes0 = e0.getElementNodes();
-					Matrix u_elem = e0.globalToLocalVector(SimLive.post.getPostIncrement().get_u_global());
-					double[][] rot = new double[3][element_nodes0.length];
-					for (int n = 0; n < element_nodes0.length; n++) {
-						rot[0][n] = u_elem.get(3+6*n, 0);
-						rot[1][n] = u_elem.get(4+6*n, 0);
-						rot[2][n] = u_elem.get(5+6*n, 0);
-					}
-					double rotX, rotY, rotZ;
-					if (e0.getType() == Element.Type.BEAM) {
-						double[] shapeFunctionValues0 = ((Beam) e0).getShapeFunctionValues(connector.getT0());
-						rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
-						rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
-						rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
-					}
-					else {
-						double[] shapeFunctionValues0 = ((PlaneElement) e0).getShapeFunctionValues(connector.getR0()[0], connector.getR0()[1]);
-						rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
-						rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
-						rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
-					}
-					Matrix rot0 = new Matrix(new double[]{rotX, rotY, rotZ}, 3);
-					double factor = 0;
-		    		if (SimLive.model.settings.isLargeDisplacement) {
-		    			factor = SimLive.post.getScaling();
-		    		}
-		    		else {
-		    			factor = rot0.normF();
-		    			if (factor > 0) {
-			    			factor = Math.atan(SimLive.post.getScaling()*factor)/factor;
-			    		}
-		    		}
-		    		Matrix Rg = Beam.rotationMatrixFromAngles(rot0.times(factor));
-					R = Rg.times(R);
-				}
 				gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
 				gl2.glTranslated(0, 0, -2.5*lineElementRadius);
 				gl2.glPushMatrix();
