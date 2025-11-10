@@ -328,75 +328,6 @@ public class Increment {
 			Matrix G_row4 = new Matrix(1, nDofs);
 			Matrix G_row5 = new Matrix(1, nDofs);
 			
-			Matrix Rg0 = null;
-			if (e0.getType() == Element.Type.BEAM || e0.isPlaneElement()) {
-				Matrix u_elem = e0.globalToLocalVector(u_global);
-				double[][] rot = new double[3][element_nodes0.length];
-				for (int n = 0; n < element_nodes0.length; n++) {
-					rot[0][n] = u_elem.get(3+6*n, 0);
-					rot[1][n] = u_elem.get(4+6*n, 0);
-					rot[2][n] = u_elem.get(5+6*n, 0);							
-				}
-				double rotX, rotY, rotZ;
-				if (e0.getType() == Element.Type.BEAM) {
-					rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
-					rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
-					rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
-				}
-				else {
-					rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
-					rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
-					rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
-				}
-				Rg0 = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
-			}
-			Matrix Rg1 = null, u_elem = null;
-			if (e1.getType() == Element.Type.BEAM || e1.isPlaneElement()) {
-				u_elem = e1.globalToLocalVector(u_global);
-				double[][] rot = new double[3][element_nodes1.length];
-				for (int n = 0; n < element_nodes1.length; n++) {
-					rot[0][n] = u_elem.get(3+6*n, 0);
-					rot[1][n] = u_elem.get(4+6*n, 0);
-					rot[2][n] = u_elem.get(5+6*n, 0);							
-				}
-				double rotX, rotY, rotZ;
-				if (e1.getType() == Element.Type.BEAM) {
-					rotX = shapeFunctionValues1[0]*rot[0][0]+shapeFunctionValues1[3]*rot[0][1];
-					rotY = shapeFunctionValues1[0]*rot[1][0]+shapeFunctionValues1[3]*rot[1][1];
-					rotZ = shapeFunctionValues1[0]*rot[2][0]+shapeFunctionValues1[3]*rot[2][1];
-				}
-				else {
-					rotX = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[0]);
-					rotY = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[1]);
-					rotZ = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[2]);
-				}
-				Rg1 = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
-			}
-			
-			double[] d0 = new double[3];
-			Matrix coords = new Matrix(connectors.get(c).getCoordinates(), 3);
-			Matrix n0 = new Matrix(solution.getRefModel().getNodes().get(element_nodes0[0]).getCoords(), 3);
-			Matrix d = coords.minus(n0);
-			if (e0.getType() == Element.Type.BEAM) {
-				Matrix r1 = ((Beam) e0).getR0().getMatrix(0, 2, 0, 0);
-				d0 = Rg0.times(d.minus(r1.times(d.dotProduct(r1)))).getColumnPackedCopy();
-			}
-			if (e0.isPlaneElement()) {
-				Matrix r3 = ((PlaneElement) e0).getR0().getMatrix(0, 2, 2, 2);
-				d0 = Rg0.times(r3.times(d.dotProduct(r3))).getColumnPackedCopy();
-			}
-			double[] d1 = new double[3];
-			n0 = new Matrix(solution.getRefModel().getNodes().get(element_nodes1[0]).getCoords(), 3);
-			d = coords.minus(n0);
-			if (e1.getType() == Element.Type.BEAM) {
-				Matrix r1 = ((Beam) e1).getR0().getMatrix(0, 2, 0, 0);
-				d1 = Rg1.times(d.minus(r1.times(d.dotProduct(r1)))).getColumnPackedCopy();
-			}
-			if (e1.isPlaneElement()) {
-				Matrix r3 = ((PlaneElement) e1).getR0().getMatrix(0, 2, 2, 2);
-				d1 = Rg1.times(r3.times(d.dotProduct(r3))).getColumnPackedCopy();
-			}	
-			
 			Matrix axis = null;
 			if (connectors.get(c).getType() == Connector.Type.REVOLUTE) {
 				if (e0.getType() == Element.Type.BEAM)
@@ -412,13 +343,7 @@ public class Increment {
 					for (int n = 0; n < element_nodes0.length; n++) {
 						G_row0.set(0, dof_e0[n], shapeFunctionValues0[n]);
 						G_row1.set(0, dof_e0[n]+1, shapeFunctionValues0[n]);
-						G_row2.set(0, dof_e0[n]+2, shapeFunctionValues0[n]);					
-						G_row0.set(0, dof_e0[n]+4, shapeFunctionValues0[n]*d0[2]);
-						G_row0.set(0, dof_e0[n]+5, -shapeFunctionValues0[n]*d0[1]);
-						G_row1.set(0, dof_e0[n]+3, -shapeFunctionValues0[n]*d0[2]);
-						G_row1.set(0, dof_e0[n]+5, shapeFunctionValues0[n]*d0[0]);
-						G_row2.set(0, dof_e0[n]+3, shapeFunctionValues0[n]*d0[1]);
-						G_row2.set(0, dof_e0[n]+4, -shapeFunctionValues0[n]*d0[0]);
+						G_row2.set(0, dof_e0[n]+2, shapeFunctionValues0[n]);
 					}
 				}
 				if (e1.isPlaneElement()) {
@@ -426,12 +351,6 @@ public class Increment {
 						G_row0.set(0, dof_e1[n], -shapeFunctionValues1[n]);
 						G_row1.set(0, dof_e1[n]+1, -shapeFunctionValues1[n]);
 						G_row2.set(0, dof_e1[n]+2, -shapeFunctionValues1[n]);
-						G_row0.set(0, dof_e1[n]+4, -shapeFunctionValues1[n]*d1[2]);
-						G_row0.set(0, dof_e1[n]+5, shapeFunctionValues1[n]*d1[1]);
-						G_row1.set(0, dof_e1[n]+3, shapeFunctionValues1[n]*d1[2]);
-						G_row1.set(0, dof_e1[n]+5, -shapeFunctionValues1[n]*d1[0]);
-						G_row2.set(0, dof_e1[n]+3, -shapeFunctionValues1[n]*d1[1]);
-						G_row2.set(0, dof_e1[n]+4, shapeFunctionValues1[n]*d1[0]);
 					}
 				}
 				if (e0.getType() == Element.Type.BEAM) {
@@ -441,24 +360,50 @@ public class Increment {
 					G_row1.set(0, dof_e0[1]+1, shapeFunctionValues0[3]);
 					G_row2.set(0, dof_e0[0]+2, shapeFunctionValues0[0]);
 					G_row2.set(0, dof_e0[1]+2, shapeFunctionValues0[3]);
-					G_row0.set(0, dof_e0[0]+4, shapeFunctionValues0[0]*d0[2]);
-					G_row0.set(0, dof_e0[1]+4, shapeFunctionValues0[3]*d0[2]);
-					G_row0.set(0, dof_e0[0]+5, -shapeFunctionValues0[0]*d0[1]);
-					G_row0.set(0, dof_e0[1]+5, -shapeFunctionValues0[3]*d0[1]);
-					G_row1.set(0, dof_e0[0]+3, -shapeFunctionValues0[0]*d0[2]);
-					G_row1.set(0, dof_e0[1]+3, -shapeFunctionValues0[3]*d0[2]);
-					G_row1.set(0, dof_e0[0]+5, shapeFunctionValues0[0]*d0[0]);
-					G_row1.set(0, dof_e0[1]+5, shapeFunctionValues0[3]*d0[0]);
-					G_row2.set(0, dof_e0[0]+3, shapeFunctionValues0[0]*d0[1]);
-					G_row2.set(0, dof_e0[1]+3, shapeFunctionValues0[3]*d0[1]);
-					G_row2.set(0, dof_e0[0]+4, -shapeFunctionValues0[0]*d0[0]);
-					G_row2.set(0, dof_e0[1]+4, -shapeFunctionValues0[3]*d0[0]);
 				}
 				
 				if (connector.getType() == Connector.Type.REVOLUTE) {
-					Matrix a0 = Rg0.times(axis);
-					a0.timesEquals(1.0/a0.normF());					
-					Matrix a1 = Rg1.times(axis);
+					Matrix u_elem = e0.globalToLocalVector(u_global);
+					double[][] rot = new double[3][element_nodes0.length];
+					for (int n = 0; n < element_nodes0.length; n++) {
+						rot[0][n] = u_elem.get(3+6*n, 0);
+						rot[1][n] = u_elem.get(4+6*n, 0);
+						rot[2][n] = u_elem.get(5+6*n, 0);							
+					}
+					double rotX, rotY, rotZ;
+					if (e0.getType() == Element.Type.BEAM) {
+						rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
+						rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
+						rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
+					}
+					else {
+						rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
+						rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
+						rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
+					}
+					Matrix Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
+					Matrix a0 = Rg.times(axis);
+					a0.timesEquals(1.0/a0.normF());
+					
+					u_elem = e1.globalToLocalVector(u_global);
+					rot = new double[3][element_nodes1.length];
+					for (int n = 0; n < element_nodes1.length; n++) {
+						rot[0][n] = u_elem.get(3+6*n, 0);
+						rot[1][n] = u_elem.get(4+6*n, 0);
+						rot[2][n] = u_elem.get(5+6*n, 0);							
+					}
+					if (e1.getType() == Element.Type.BEAM) {
+						rotX = shapeFunctionValues1[0]*rot[0][0]+shapeFunctionValues1[3]*rot[0][1];
+						rotY = shapeFunctionValues1[0]*rot[1][0]+shapeFunctionValues1[3]*rot[1][1];
+						rotZ = shapeFunctionValues1[0]*rot[2][0]+shapeFunctionValues1[3]*rot[2][1];
+					}
+					else {
+						rotX = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[0]);
+						rotY = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[1]);
+						rotZ = ((PlaneElement) e1).interpolateNodeValues(shapeFunctionValues1, rot[2]);
+					}
+					Rg = Beam.rotationMatrixFromAngles(new Matrix(new double[]{rotX, rotY, rotZ}, 3));
+					Matrix a1 = Rg.times(axis);
 					a1.timesEquals(1.0/a1.normF());
 					Matrix r1 = null;
 					if (e1.getType() == Element.Type.BEAM) {
@@ -508,18 +453,6 @@ public class Increment {
 					G_row1.set(0, dof_e1[1]+1, -shapeFunctionValues1[3]);
 					G_row2.set(0, dof_e1[0]+2, -shapeFunctionValues1[0]);
 					G_row2.set(0, dof_e1[1]+2, -shapeFunctionValues1[3]);
-					G_row0.set(0, dof_e1[0]+4, -shapeFunctionValues0[0]*d1[2]);
-					G_row0.set(0, dof_e1[1]+4, -shapeFunctionValues0[3]*d1[2]);
-					G_row0.set(0, dof_e1[0]+5, shapeFunctionValues0[0]*d1[1]);
-					G_row0.set(0, dof_e1[1]+5, shapeFunctionValues0[3]*d1[1]);
-					G_row1.set(0, dof_e1[0]+3, shapeFunctionValues0[0]*d1[2]);
-					G_row1.set(0, dof_e1[1]+3, shapeFunctionValues0[3]*d1[2]);
-					G_row1.set(0, dof_e1[0]+5, -shapeFunctionValues0[0]*d1[0]);
-					G_row1.set(0, dof_e1[1]+5, -shapeFunctionValues0[3]*d1[0]);
-					G_row2.set(0, dof_e1[0]+3, -shapeFunctionValues0[0]*d1[1]);
-					G_row2.set(0, dof_e1[1]+3, -shapeFunctionValues0[3]*d1[1]);
-					G_row2.set(0, dof_e1[0]+4, shapeFunctionValues0[0]*d1[0]);
-					G_row2.set(0, dof_e1[1]+4, shapeFunctionValues0[3]*d1[0]);
 				}
 				
 				if (e0.getType() == Element.Type.ROD ||
