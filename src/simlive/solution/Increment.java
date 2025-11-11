@@ -419,31 +419,55 @@ public class Increment {
 					Matrix b0 = b1.crossProduct(a0);
 					Matrix c0 = c1.crossProduct(a0);
 					
-					G_row3.set(0, dof_e0[0]+3, b0.get(0, 0)*shapeFunctionValues0[0]);
-					G_row3.set(0, dof_e0[0]+4, b0.get(1, 0)*shapeFunctionValues0[0]);
-					G_row3.set(0, dof_e0[0]+5, b0.get(2, 0)*shapeFunctionValues0[0]);
-					G_row3.set(0, dof_e0[1]+3, b0.get(0, 0)*shapeFunctionValues0[3]);
-					G_row3.set(0, dof_e0[1]+4, b0.get(1, 0)*shapeFunctionValues0[3]);
-					G_row3.set(0, dof_e0[1]+5, b0.get(2, 0)*shapeFunctionValues0[3]);
-					G_row3.set(0, dof_e1[0]+3, -b0.get(0, 0)*shapeFunctionValues1[0]);
-					G_row3.set(0, dof_e1[0]+4, -b0.get(1, 0)*shapeFunctionValues1[0]);
-					G_row3.set(0, dof_e1[0]+5, -b0.get(2, 0)*shapeFunctionValues1[0]);
-					G_row3.set(0, dof_e1[1]+3, -b0.get(0, 0)*shapeFunctionValues1[3]);
-					G_row3.set(0, dof_e1[1]+4, -b0.get(1, 0)*shapeFunctionValues1[3]);
-					G_row3.set(0, dof_e1[1]+5, -b0.get(2, 0)*shapeFunctionValues1[3]);
+					if (e0.getType() == Element.Type.BEAM) {
+						G_row3.set(0, dof_e0[0]+3, b0.get(0, 0)*shapeFunctionValues0[0]);
+						G_row3.set(0, dof_e0[0]+4, b0.get(1, 0)*shapeFunctionValues0[0]);
+						G_row3.set(0, dof_e0[0]+5, b0.get(2, 0)*shapeFunctionValues0[0]);
+						G_row3.set(0, dof_e0[1]+3, b0.get(0, 0)*shapeFunctionValues0[3]);
+						G_row3.set(0, dof_e0[1]+4, b0.get(1, 0)*shapeFunctionValues0[3]);
+						G_row3.set(0, dof_e0[1]+5, b0.get(2, 0)*shapeFunctionValues0[3]);
+						G_row4.set(0, dof_e0[0]+3, c0.get(0, 0)*shapeFunctionValues0[0]);
+						G_row4.set(0, dof_e0[0]+4, c0.get(1, 0)*shapeFunctionValues0[0]);
+						G_row4.set(0, dof_e0[0]+5, c0.get(2, 0)*shapeFunctionValues0[0]);
+						G_row4.set(0, dof_e0[1]+3, c0.get(0, 0)*shapeFunctionValues0[3]);
+						G_row4.set(0, dof_e0[1]+4, c0.get(1, 0)*shapeFunctionValues0[3]);
+						G_row4.set(0, dof_e0[1]+5, c0.get(2, 0)*shapeFunctionValues0[3]);
+					}
+					else {
+						for (int n = 0; n < element_nodes0.length; n++) {
+							G_row3.set(0, dof_e0[n]+3, b0.get(0, 0)*shapeFunctionValues0[n]);
+							G_row3.set(0, dof_e0[n]+4, b0.get(1, 0)*shapeFunctionValues0[n]);
+							G_row3.set(0, dof_e0[n]+5, b0.get(2, 0)*shapeFunctionValues0[n]);
+							G_row4.set(0, dof_e0[n]+3, c0.get(0, 0)*shapeFunctionValues0[n]);
+							G_row4.set(0, dof_e0[n]+4, c0.get(1, 0)*shapeFunctionValues0[n]);
+							G_row4.set(0, dof_e0[n]+5, c0.get(2, 0)*shapeFunctionValues0[n]);
+						}
+					}
 					
-					G_row4.set(0, dof_e0[0]+3, c0.get(0, 0)*shapeFunctionValues0[0]);
-					G_row4.set(0, dof_e0[0]+4, c0.get(1, 0)*shapeFunctionValues0[0]);
-					G_row4.set(0, dof_e0[0]+5, c0.get(2, 0)*shapeFunctionValues0[0]);
-					G_row4.set(0, dof_e0[1]+3, c0.get(0, 0)*shapeFunctionValues0[3]);
-					G_row4.set(0, dof_e0[1]+4, c0.get(1, 0)*shapeFunctionValues0[3]);
-					G_row4.set(0, dof_e0[1]+5, c0.get(2, 0)*shapeFunctionValues0[3]);
-					G_row4.set(0, dof_e1[0]+3, -c0.get(0, 0)*shapeFunctionValues1[0]);
-					G_row4.set(0, dof_e1[0]+4, -c0.get(1, 0)*shapeFunctionValues1[0]);
-					G_row4.set(0, dof_e1[0]+5, -c0.get(2, 0)*shapeFunctionValues1[0]);
-					G_row4.set(0, dof_e1[1]+3, -c0.get(0, 0)*shapeFunctionValues1[3]);
-					G_row4.set(0, dof_e1[1]+4, -c0.get(1, 0)*shapeFunctionValues1[3]);
-					G_row4.set(0, dof_e1[1]+5, -c0.get(2, 0)*shapeFunctionValues1[3]);					
+					if (e1.getType() == Element.Type.BEAM) {
+						G_row3.set(0, dof_e1[0]+3, -b0.get(0, 0)*shapeFunctionValues1[0]);
+						G_row3.set(0, dof_e1[0]+4, -b0.get(1, 0)*shapeFunctionValues1[0]);
+						G_row3.set(0, dof_e1[0]+5, -b0.get(2, 0)*shapeFunctionValues1[0]);
+						G_row3.set(0, dof_e1[1]+3, -b0.get(0, 0)*shapeFunctionValues1[3]);
+						G_row3.set(0, dof_e1[1]+4, -b0.get(1, 0)*shapeFunctionValues1[3]);
+						G_row3.set(0, dof_e1[1]+5, -b0.get(2, 0)*shapeFunctionValues1[3]);
+						G_row4.set(0, dof_e1[0]+3, -c0.get(0, 0)*shapeFunctionValues1[0]);
+						G_row4.set(0, dof_e1[0]+4, -c0.get(1, 0)*shapeFunctionValues1[0]);
+						G_row4.set(0, dof_e1[0]+5, -c0.get(2, 0)*shapeFunctionValues1[0]);
+						G_row4.set(0, dof_e1[1]+3, -c0.get(0, 0)*shapeFunctionValues1[3]);
+						G_row4.set(0, dof_e1[1]+4, -c0.get(1, 0)*shapeFunctionValues1[3]);
+						G_row4.set(0, dof_e1[1]+5, -c0.get(2, 0)*shapeFunctionValues1[3]);
+					}
+					else {
+						for (int n = 0; n < element_nodes1.length; n++) {
+							G_row3.set(0, dof_e1[n]+3, -b0.get(0, 0)*shapeFunctionValues1[n]);
+							G_row3.set(0, dof_e1[n]+4, -b0.get(1, 0)*shapeFunctionValues1[n]);
+							G_row3.set(0, dof_e1[n]+5, -b0.get(2, 0)*shapeFunctionValues1[n]);
+							G_row4.set(0, dof_e1[n]+3, -c0.get(0, 0)*shapeFunctionValues1[n]);
+							G_row4.set(0, dof_e1[n]+4, -c0.get(1, 0)*shapeFunctionValues1[n]);
+							G_row4.set(0, dof_e1[n]+5, -c0.get(2, 0)*shapeFunctionValues1[n]);
+						}
+					}
 				}
 				
 				if (e1.getType() == Element.Type.BEAM) {
