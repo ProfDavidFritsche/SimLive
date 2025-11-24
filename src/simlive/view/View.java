@@ -972,7 +972,7 @@ public class View extends GLCanvas {
 								}
 								
 								if (SimLive.model.settings.newPartType == Element.Type.POINT_MASS) {
-									if (selectedNodes.size() == 0 && Snap.node != null) /* add new element */ {
+									if ((selectedNodes.size() == 0 || selectedNodes.get(0).getID() > Model.maxUsedNodeID) && Snap.node != null) /* add new element */ {
 										
 										int[] element_node = new int[]{Snap.node.getID()};
 										
