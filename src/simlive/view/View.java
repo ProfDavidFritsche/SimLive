@@ -858,7 +858,7 @@ public class View extends GLCanvas {
 							
 							if (SimLive.mode == Mode.PARTS) {
 								
-								if (SimLive.model.getNodes().contains(Snap.node) || !selectedSets.isEmpty() || !selectedParts3d.isEmpty()) {
+								if ((Snap.node != null && Snap.node.getID() <= Model.maxUsedNodeID) || !selectedSets.isEmpty() || !selectedParts3d.isEmpty()) {
 									if (selectedNodes.size() == 1 && selectedNodes.get(0).getID() <= Model.maxUsedNodeID) {
 										SimLive.disposeDialogAreas();							
 										SimLive.dialogArea = new NodeDialog(SimLive.compositeLeft, SWT.NONE, selectedNodes.get(0));
@@ -876,6 +876,7 @@ public class View extends GLCanvas {
 								}
 								else {
 									//double[] coords = screenToModelCoordinates(mousePos[0], mousePos[1]);
+									selectedNodes.remove(Snap.node);
 									Node newNode = new Node(Snap.coords2d[0], Snap.coords2d[1], 0);
 									selectedSets.clear();
 									selectedParts3d.clear();
@@ -2031,12 +2032,7 @@ public class View extends GLCanvas {
 			selectedSets.clear();
 			selectedParts3d.clear();
 			if (isControlKeyPressed || (SimLive.mode == Mode.PARTS &&
-					(SimLive.model.settings.newPartType == Element.Type.ROD ||
-					 SimLive.model.settings.newPartType == Element.Type.SPRING ||
-					 SimLive.model.settings.newPartType == Element.Type.BEAM ||
-					 SimLive.model.settings.newPartType == Element.Type.TRI ||
-					 SimLive.model.settings.newPartType == Element.Type.QUAD ||
-					 SimLive.dialogArea instanceof GeometricAreaDialog))) {
+					SimLive.model.settings.newPartType != Element.Type.POINT_MASS)) {
 				if (selectedNodes.contains(Snap.node)) {
 					selectedNodes.remove(Snap.node);
 				}
