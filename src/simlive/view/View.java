@@ -2774,7 +2774,7 @@ public class View extends GLCanvas {
 	}
 	
 	public static double[] getCoordsWithScaledDisp(int nodeID) {
-		if (nodeID <= Model.maxUsedNodeID) {
+		if (nodeID < SimLive.model.getNodes().size()) {
 			double[] coords = SimLive.model.getNodes().get(nodeID).getCoords().clone();
 			if (SimLive.mode == Mode.RESULTS) {
 				double[] disp = SimLive.post.getPostIncrement().getDisplacement(nodeID);
