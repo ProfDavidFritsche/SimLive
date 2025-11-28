@@ -2774,15 +2774,18 @@ public class View extends GLCanvas {
 	}
 	
 	public static double[] getCoordsWithScaledDisp(int nodeID) {
-		double[] coords = SimLive.model.getNodes().get(nodeID).getCoords().clone();
-		if (SimLive.mode == Mode.RESULTS) {
-			double[] disp = SimLive.post.getPostIncrement().getDisplacement(nodeID);
-			double scaling = SimLive.post.getScaling();
-			coords[0] += disp[0]*scaling;
-			coords[1] += disp[1]*scaling;
-			coords[2] += disp[2]*scaling;
+		if (nodeID <= Model.maxUsedNodeID) {
+			double[] coords = SimLive.model.getNodes().get(nodeID).getCoords().clone();
+			if (SimLive.mode == Mode.RESULTS) {
+				double[] disp = SimLive.post.getPostIncrement().getDisplacement(nodeID);
+				double scaling = SimLive.post.getScaling();
+				coords[0] += disp[0]*scaling;
+				coords[1] += disp[1]*scaling;
+				coords[2] += disp[2]*scaling;
+			}
+			return coords;
 		}
-		return coords;
+		return new double[3];
 	}
 	
 	public static Matrix getRotation(Vertex3d vertex) {
