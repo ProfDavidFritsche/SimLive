@@ -2774,16 +2774,17 @@ public class View extends GLCanvas {
 	}
 	
 	public static double[] getCoordsWithScaledDisp(int nodeID) {
-		if (nodeID < SimLive.model.getNodes().size()) {
+		if (SimLive.mode == Mode.RESULTS) {
 			double[] coords = SimLive.model.getNodes().get(nodeID).getCoords().clone();
-			if (SimLive.mode == Mode.RESULTS) {
-				double[] disp = SimLive.post.getPostIncrement().getDisplacement(nodeID);
-				double scaling = SimLive.post.getScaling();
-				coords[0] += disp[0]*scaling;
-				coords[1] += disp[1]*scaling;
-				coords[2] += disp[2]*scaling;
-			}
+			double[] disp = SimLive.post.getPostIncrement().getDisplacement(nodeID);
+			double scaling = SimLive.post.getScaling();
+			coords[0] += disp[0]*scaling;
+			coords[1] += disp[1]*scaling;
+			coords[2] += disp[2]*scaling;
 			return coords;
+		}
+		else if (nodeID < SimLive.model.getNodes().size()) {
+			return SimLive.model.getNodes().get(nodeID).getCoords();
 		}
 		return new double[3];
 	}
