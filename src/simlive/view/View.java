@@ -1677,7 +1677,6 @@ public class View extends GLCanvas {
             items[i].addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					SimLive.model.updateModel();
 					double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;					
 					if (!selectedSets.isEmpty()) {
 						SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
@@ -1690,6 +1689,7 @@ public class View extends GLCanvas {
 						if (copyPart) ((Part3dDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
 					}
 					copyPart = false;
+					SimLive.model.updateModel();
 					SimLive.synchronizeModelTreeWithViewSelection();
 				}
             });
@@ -2406,6 +2406,10 @@ public class View extends GLCanvas {
 			SimLive.model.getNodes().addAll(newNodes);
 		}
 		
+		for (int n = 0; n < SimLive.model.getNodes().size(); n++) {
+			SimLive.model.getNodes().get(n).update();
+		}
+		
 		/* copy sets and elements */
 		{
 			reorderSetsByID(selectedSets);
@@ -2414,6 +2418,7 @@ public class View extends GLCanvas {
 				copySubSets(newSet, indices);
 				newSets.add(newSet);
 				SimLive.model.getSets().add(newSet);
+				newSet.update();
 			}			
 		}
 		
