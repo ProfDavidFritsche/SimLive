@@ -6375,26 +6375,20 @@ public class View extends GLCanvas {
 		
 		for (int e = 0; e < set.getElements().size(); e++) {
 			Element element = set.getElements().get(e);
-			if (element.isPlaneElement()) {
-				double[] viewDir = getViewDirection(getCoordsWithScaledDisp(element.getElementNodes()[0]));
-				double[][] Rr = View.Rr[element.getID()];
-				if ((viewDir[0]*Rr[0][2]+viewDir[1]*Rr[1][2]+viewDir[2]*Rr[2][2])*sign > 0) {
-					if (element.getType() == Element.Type.TRI) {
-						if (major) {
-							renderPrincipalVectorsForTri(gl2, glu, (Tri) element, inc, true, max, arrowSize, arrowLength, outside, inside, sign);
-						}
-						if (minor) {
-							renderPrincipalVectorsForTri(gl2, glu, (Tri) element, inc, false, max, arrowSize, arrowLength, outside, inside, sign);
-						}
-					}
-					if (element.getType() == Element.Type.QUAD) {
-						if (major) {
-							renderPrincipalVectorsForQuad(gl2, glu, (Quad) element, inc, true, max, arrowSize, arrowLength, outside, inside, sign);
-						}
-						if (minor) {
-							renderPrincipalVectorsForQuad(gl2, glu, (Quad) element, inc, false, max, arrowSize, arrowLength, outside, inside, sign);
-						}
-					}
+			if (element.getType() == Element.Type.TRI) {
+				if (major) {
+					renderPrincipalVectorsForTri(gl2, glu, (Tri) element, inc, true, max, arrowSize, arrowLength, outside, inside, sign);
+				}
+				if (minor) {
+					renderPrincipalVectorsForTri(gl2, glu, (Tri) element, inc, false, max, arrowSize, arrowLength, outside, inside, sign);
+				}
+			}
+			if (element.getType() == Element.Type.QUAD) {
+				if (major) {
+					renderPrincipalVectorsForQuad(gl2, glu, (Quad) element, inc, true, max, arrowSize, arrowLength, outside, inside, sign);
+				}
+				if (minor) {
+					renderPrincipalVectorsForQuad(gl2, glu, (Quad) element, inc, false, max, arrowSize, arrowLength, outside, inside, sign);
 				}
 			}
 		}
