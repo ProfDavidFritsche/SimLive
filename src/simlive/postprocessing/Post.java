@@ -597,8 +597,9 @@ public class Post {
 			for (int elem = 0; elem < elements.size(); elem++) {
 				if (elements.get(elem).isPlaneElement()) {
 					
-					if (elements.get(elem).getType() == Element.Type.TRI) {
-						Matrix elemStrain = strain[i][elem][0];
+					int nrGaussPoints = elements.get(elem).getType() == Element.Type.TRI ? 1 : 4;
+					for (int gaussPoint = 0; gaussPoint < nrGaussPoints; gaussPoint++) {
+						Matrix elemStrain = strain[i][elem][gaussPoint];
 					
 						double principalStr = 0;
 						if (major) {
@@ -615,31 +616,8 @@ public class Post {
 						if (!major) {
 							angle += Math.PI/2.0;
 						}
-						vectors[i][elem][0][0] = principalStr;
-						vectors[i][elem][0][1] = angle;
-					}
-					if (elements.get(elem).getType() == Element.Type.QUAD) {
-						for (int gaussPoint = 0; gaussPoint < 4; gaussPoint++) {
-							Matrix elemStrain = strain[i][elem][gaussPoint];
-						
-							double principalStr = 0;
-							if (major) {
-								principalStr = 0.5*(elemStrain.get(0, 0)+elemStrain.get(1, 0))+
-										Math.sqrt(0.25*(elemStrain.get(0, 0)-elemStrain.get(1, 0))*(elemStrain.get(0, 0)-
-										elemStrain.get(1, 0))+0.25*elemStrain.get(2, 0)*elemStrain.get(2, 0));
-							}
-							else {
-								principalStr = 0.5*(elemStrain.get(0, 0)+elemStrain.get(1, 0))-
-										Math.sqrt(0.25*(elemStrain.get(0, 0)-elemStrain.get(1, 0))*(elemStrain.get(0, 0)-
-										elemStrain.get(1, 0))+0.25*elemStrain.get(2, 0)*elemStrain.get(2, 0));
-							}
-							double angle = 0.5*Math.atan2(elemStrain.get(2, 0), elemStrain.get(0, 0)-elemStrain.get(1, 0));
-							if (!major) {
-								angle += Math.PI/2.0;
-							}
-							vectors[i][elem][gaussPoint][0] = principalStr;
-							vectors[i][elem][gaussPoint][1] = angle;
-						}
+						vectors[i][elem][gaussPoint][0] = principalStr;
+						vectors[i][elem][gaussPoint][1] = angle;
 					}
 				}
 			}
@@ -759,8 +737,9 @@ public class Post {
 			for (int elem = 0; elem < elements.size(); elem++) {
 				if (elements.get(elem).isPlaneElement()) {
 					
-					if (elements.get(elem).getType() == Element.Type.TRI) {
-						Matrix elemStress = stress[i][elem][0];
+					int nrGaussPoints = elements.get(elem).getType() == Element.Type.TRI ? 1 : 4;
+					for (int gaussPoint = 0; gaussPoint < nrGaussPoints; gaussPoint++) {
+						Matrix elemStress = stress[i][elem][gaussPoint];
 					
 						double principalStr = 0;
 						if (major) {
@@ -777,31 +756,8 @@ public class Post {
 						if (!major) {
 							angle += Math.PI/2.0;
 						}
-						vectors[i][elem][0][0] = principalStr;
-						vectors[i][elem][0][1] = angle;
-					}
-					if (elements.get(elem).getType() == Element.Type.QUAD) {
-						for (int gaussPoint = 0; gaussPoint < 4; gaussPoint++) {
-							Matrix elemStress = stress[i][elem][gaussPoint];
-						
-							double principalStr = 0;
-							if (major) {
-								principalStr = 0.5*(elemStress.get(0, 0)+elemStress.get(1, 0))+
-										Math.sqrt(0.25*(elemStress.get(0, 0)-elemStress.get(1, 0))*(elemStress.get(0, 0)-
-										elemStress.get(1, 0))+0.25*elemStress.get(2, 0)*elemStress.get(2, 0));
-							}
-							else {
-								principalStr = 0.5*(elemStress.get(0, 0)+elemStress.get(1, 0))-
-										Math.sqrt(0.25*(elemStress.get(0, 0)-elemStress.get(1, 0))*(elemStress.get(0, 0)-
-										elemStress.get(1, 0))+0.25*elemStress.get(2, 0)*elemStress.get(2, 0));
-							}
-							double angle = 0.5*Math.atan2(2.0*elemStress.get(2, 0), elemStress.get(0, 0)-elemStress.get(1, 0));
-							if (!major) {
-								angle += Math.PI/2.0;
-							}
-							vectors[i][elem][gaussPoint][0] = principalStr;
-							vectors[i][elem][gaussPoint][1] = angle;
-						}
+						vectors[i][elem][gaussPoint][0] = principalStr;
+						vectors[i][elem][gaussPoint][1] = angle;
 					}
 				}
 			}
