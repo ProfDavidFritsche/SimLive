@@ -467,7 +467,7 @@ public class Tri extends PlaneElement {
 			newElement.setThickness(this.getThickness());
 			newElement.setStiffnessDamping(this.getStiffnessDamping());
 			newElement.setMassDamping(this.getMassDamping());
-			elements.add(elements.indexOf(this)+1, newElement);
+			elements.add(this.getID()+1, newElement);
 			newElements.add(newElement);
 		}
 		elementNodes[0] = edgeNodes[1];

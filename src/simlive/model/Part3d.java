@@ -277,7 +277,9 @@ public class Part3d implements DeepEqualsInterface {
 	
 	public void update() {
 		/* ID */
-		id = SimLive.model.getParts3d().indexOf(this);
+		if (id < 0 || id >= SimLive.model.getParts3d().size() || SimLive.model.getParts3d().get(id) != this) {
+			id = SimLive.model.getParts3d().indexOf(this);
+		}
 		
 		if (connect == null && neighbourFacets == null) {
 			initTopology();

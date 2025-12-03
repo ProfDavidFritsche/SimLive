@@ -219,7 +219,7 @@ public class Spring extends LineElement {
 		newElement.setQ0(q0.clone());
 		newElement.setStiffnessDamping(this.getStiffnessDamping());
 		newElement.setMassDamping(this.getMassDamping());
-		elements.add(elements.indexOf(this)+1, newElement);
+		elements.add(this.getID()+1, newElement);
 		newElements.add(newElement);
 		return newElements;
 	}

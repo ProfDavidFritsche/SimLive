@@ -128,7 +128,9 @@ public abstract class Element implements DeepEqualsInterface {
 	
 	protected void updateIDAndMaterial() {
 		/* ID */
-		id = SimLive.model.getElements().indexOf(this);
+		if (id < 0 || id >= SimLive.model.getElements().size() || SimLive.model.getElements().get(id) != this) {
+			id = SimLive.model.getElements().indexOf(this);
+		}
 		
 		/* assign material */
 		if (!isMaterialValid(SimLive.model.getMaterials())) {

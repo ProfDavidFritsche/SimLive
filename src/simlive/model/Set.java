@@ -124,7 +124,9 @@ public class Set implements DeepEqualsInterface {
 		}
 		
 		/* ID */
-		id = SimLive.model.getSets().indexOf(this);
+		if (id < 0 || id >= SimLive.model.getSets().size() || SimLive.model.getSets().get(id) != this) {
+			id = SimLive.model.getSets().indexOf(this);
+		}
 		
 		/* nodes */
 		this.nodes.clear();

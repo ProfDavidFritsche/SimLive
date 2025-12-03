@@ -79,7 +79,9 @@ public class Node implements DeepEqualsInterface {
 	
 	public void update() {
 		/* ID */
-		id = SimLive.model.getNodes().indexOf(this);
+		if (id < 0 || id >= SimLive.model.getNodes().size() || SimLive.model.getNodes().get(id) != this) {
+			id = SimLive.model.getNodes().indexOf(this);
+		}
 		
 		/* rotationalDOF */
 		isRotationalDOF = false;
