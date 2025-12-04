@@ -152,7 +152,9 @@ public abstract class LineElement extends Element {
 				length = r3_vec.normF();
 			}
 		}
-		q0 = q0_vec.getColumnPackedCopy();
+		if (SimLive.mode != Mode.RESULTS) {
+			q0 = q0_vec.getColumnPackedCopy();
+		}
 		r3_vec.timesEquals(1.0/length);
 		Matrix r2_vec = r3_vec.crossProduct(r1_vec);
 		Matrix R = new Matrix(3, 3);
