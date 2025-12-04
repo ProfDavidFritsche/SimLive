@@ -132,38 +132,35 @@ public class Increment {
 		return result;
 	}
 	
-	public Matrix getDMassMatrix(int nDofs) {
-		ArrayList<Element> elements = solution.getRefModel().getElements();
-		
-		Matrix D_mass = new Matrix(nDofs, nDofs);
-		
-		for (int elem = 0; elem < elements.size(); elem++) {
-			Matrix M_elem = elements.get(elem).M_elem;
-			D_mass = elements.get(elem).addLocalToGlobalMatrix(M_elem.times(elements.get(elem).getMassDamping()), D_mass);
-		}
-		
-		return D_mass;
-	}
-	
-	public Matrix getDStiffMatrix(int nDofs, Matrix u_global, ArrayList<Element> dStiffElems) {
+	public Matrix addDampingForce(int nDofs, Matrix f_int, Matrix u_global, Matrix v_global, ArrayList<Element> dStiffElems, ArrayList<Element> dMassElems) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		
-		Matrix[] K_elem = new Matrix[dStiffElems.size()];
+		Matrix[] f_stiff = new Matrix[dStiffElems.size()];
 		IntStream.range(0, dStiffElems.size()).parallel().forEach(e -> {
+			Element element = dStiffElems.get(e);
+			Matrix K_elem = null;
 			if (solution.getRefModel().settings.isLargeDisplacement) {
-				K_elem[e] = dStiffElems.get(e).getElementStiffnessNL(nodes, u_global);
+				K_elem = element.getElementStiffnessNL(nodes, u_global);
 			}
 			else {
-				K_elem[e] = dStiffElems.get(e).getElementStiffness(nodes);
+				K_elem = element.getElementStiffness(nodes);
 			}
+			f_stiff[e] = K_elem.times(element.globalToLocalVector(v_global)).times(element.getStiffnessDamping());
 	    });
-		Matrix result = new Matrix(nDofs, nDofs);
+		Matrix[] f_mass = new Matrix[dMassElems.size()];
+		IntStream.range(0, dMassElems.size()).parallel().forEach(e -> {
+			Element element = dMassElems.get(e);
+			Matrix M_elem = element.M_elem;
+			f_mass[e] = M_elem.times(element.globalToLocalVector(v_global)).times(element.getMassDamping());
+	    });
 		for (int e = 0; e < dStiffElems.size(); e++) {
-			Element element = dStiffElems.get(e);
-			result = element.addLocalToGlobalMatrix(K_elem[e].times(element.getStiffnessDamping()), result);
+			f_int = dStiffElems.get(e).addLocalToGlobalMatrix(f_stiff[e], f_int);
+		}
+		for (int e = 0; e < dMassElems.size(); e++) {
+			f_int = dMassElems.get(e).addLocalToGlobalMatrix(f_mass[e], f_int);
 		}
 		
-		return result;
+		return f_int;
 	}
 	
 	public Matrix getFrictionForce(int nDofs, Contact[] contacts, Matrix C_global, Matrix v_global, Matrix M_global, double timeStep) {

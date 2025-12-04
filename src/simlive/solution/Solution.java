@@ -530,11 +530,14 @@ public class Solution {
 		Matrix M_global = new Increment(this, 0.0, stepNr).assembleMassSequential(nDofs);
 		Matrix f_gravity = new Increment(this, 0.0, stepNr).getGravityForce(nDofs, step, M_global);
 		Matrix G_support = new Increment(this, 0.0, stepNr).getSupportPartOfGMatrix(nDofs);
-		Matrix D_mass = new Increment(this, 0.0, stepNr).getDMassMatrix(nDofs);
 		ArrayList<Element> dStiffElems = new ArrayList<Element>();
+		ArrayList<Element> dMassElems = new ArrayList<Element>();
 		for (int elem = 0; elem < refModel.getElements().size(); elem++) {
 			if (refModel.getElements().get(elem).getStiffnessDamping() > 0) {
 				dStiffElems.add(refModel.getElements().get(elem));
+			}
+			if (refModel.getElements().get(elem).getMassDamping() > 0) {
+				dMassElems.add(refModel.getElements().get(elem));
 			}
 		}
 		
@@ -561,8 +564,7 @@ public class Solution {
 			Matrix g = increment.getAssembledgMatrix(G, g_connect, g_contact, g_load).times(1.0/(timeStep*timeStep));
 			Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, G);
 			Matrix f_int = increment.assembleForceParallel(nDofs, u_global);
-			Matrix D_stiff = increment.getDStiffMatrix(nDofs, u_global, dStiffElems);
-			f_int = f_int.plus((D_mass.plus(D_stiff)).times(v_global));
+			f_int = increment.addDampingForce(nDofs, f_int, u_global, v_global, dStiffElems, dMassElems);
 			Matrix delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), new Matrix(nDofs, 1), M_global, G, g);
 			
 			Matrix a_constr = null;
