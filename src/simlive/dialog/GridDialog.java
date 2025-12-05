@@ -57,8 +57,8 @@ public class GridDialog extends Composite {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				double value = SimLive.getInputDouble(text, SimLive.ZERO_TOL, Double.MAX_VALUE);
-				SimLive.view.adaptZoomToNewGridSize(settings.meshSize, value);
-				settings.meshSize = value;
+				SimLive.view.adaptZoomToNewGridSize(Settings.meshSize, value);
+				Settings.meshSize = value;
 				SimLive.view.redraw();
 			}
 		});
@@ -67,7 +67,7 @@ public class GridDialog extends Composite {
 				if (!SimLive.isInputValid(arg0, false)) arg0.doit = false;
 			}
 		});
-		text.setText(SimLive.double2String(settings.meshSize));
+		text.setText(SimLive.double2String(Settings.meshSize));
 		
 		Label lblUnit = new Label(this, SWT.NONE);
 		lblUnit.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
@@ -100,11 +100,11 @@ public class GridDialog extends Composite {
 					value -= 1;
 					spinner.setSelection(value);
 				}
-				settings.meshCount = value;
+				Settings.meshCount = value;
 				SimLive.view.redraw();
 			}
 		});
-		spinner.setSelection(settings.meshCount);
+		spinner.setSelection(Settings.meshCount);
 		spinner.setMaximum(100);
 		spinner.setMinimum(2);
 		spinner.setIncrement(2);

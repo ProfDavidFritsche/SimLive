@@ -13,6 +13,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
 import simlive.SimLive;
+import simlive.misc.Settings;
 import simlive.misc.Units;
 import simlive.model.Node;
 
@@ -114,12 +115,12 @@ public class SpurGearDialog extends GeometricAreaDialog {
 		text.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				SimLive.model.settings.pressureAngle = SimLive.getInputDouble(text, 12.0, 35.0);
+				Settings.pressureAngle = SimLive.getInputDouble(text, 12.0, 35.0);
 				SimLive.view.redraw();
 			}
 		});
 		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		text.setText(SimLive.double2String(SimLive.model.settings.pressureAngle));
+		text.setText(SimLive.double2String(Settings.pressureAngle));
 		
 		Label lblUnit = new Label(this, SWT.NONE);
 		lblUnit.setText("°");
@@ -145,12 +146,12 @@ public class SpurGearDialog extends GeometricAreaDialog {
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				int z = (int) (SimLive.string2Double(text_2.getText())/SimLive.string2Double(text_1.getText()));
 				spinner.setSelection(z);
-				SimLive.model.settings.module = SimLive.string2Double(text_1.getText());
+				Settings.module = SimLive.string2Double(text_1.getText());
 				SimLive.view.redraw();
 			}
 		});
 		text_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		text_1.setText(SimLive.double2String(SimLive.model.settings.module));
+		text_1.setText(SimLive.double2String(Settings.module));
 		
 		Label lblUnit_1 = new Label(this, SWT.NONE);
 		lblUnit_1.setText(Units.getLengthUnit());

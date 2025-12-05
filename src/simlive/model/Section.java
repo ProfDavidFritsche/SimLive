@@ -1,6 +1,7 @@
 package simlive.model;
 
 import simlive.SimLive;
+import simlive.misc.Settings;
 import simlive.misc.Units;
 import simlive.model.SectionShape.Type;
 import simlive.view.View;
@@ -92,20 +93,20 @@ public class Section implements DeepEqualsInterface {
 	
 	public double[][] getSectionPoints() {
 		double[][] p = null;
-		if (!SimLive.model.settings.isShowSections || sectionShape.getType() == Type.CIRCLE ||
+		if (!Settings.isShowSections || sectionShape.getType() == Type.CIRCLE ||
 				sectionShape.getType() == Type.HOLLOW_CIRCLE || sectionShape.getType() == Type.DIRECT_INPUT) {
 			int[] viewport = View.getViewport();
-			double r = !SimLive.model.settings.isShowSections || sectionShape.getType() == Type.DIRECT_INPUT ?
+			double r = !Settings.isShowSections || sectionShape.getType() == Type.DIRECT_INPUT ?
 					SimLive.LINE_ELEMENT_RADIUS/viewport[2]/View.zoom : sectionShape.getDiameter()/2;
 			int slices = SimLive.view.getCylindricSectionSlices(r);
-			p = (SimLive.model.settings.isShowSections && sectionShape.getType() == Type.HOLLOW_CIRCLE) ? new double[slices*2+2][] :
+			p = (Settings.isShowSections && sectionShape.getType() == Type.HOLLOW_CIRCLE) ? new double[slices*2+2][] :
 				new double[slices+1][];
 			for (int k = 0; k < slices; k++) {
 				double phi = k*2*Math.PI/slices;
 				p[k] = new double[]{0, r*Math.cos(phi), r*Math.sin(phi)};
 			}
 			p[slices] = p[0].clone();
-			if (SimLive.model.settings.isShowSections && sectionShape.getType() == Type.HOLLOW_CIRCLE) {
+			if (Settings.isShowSections && sectionShape.getType() == Type.HOLLOW_CIRCLE) {
 				r -= sectionShape.getThickness();
 				for (int k = slices+1; k < slices*2+1; k++) {
 					double phi = (k-1)*2*Math.PI/slices;
@@ -144,20 +145,20 @@ public class Section implements DeepEqualsInterface {
 	
 	public double[][] getSectionNormals() {
 		double[][] n = null;
-		if (!SimLive.model.settings.isShowSections || sectionShape.getType() == Type.CIRCLE ||
+		if (!Settings.isShowSections || sectionShape.getType() == Type.CIRCLE ||
 				sectionShape.getType() == Type.HOLLOW_CIRCLE || sectionShape.getType() == Type.DIRECT_INPUT) {
 			int[] viewport = View.getViewport();
-			double r = !SimLive.model.settings.isShowSections || sectionShape.getType() == Type.DIRECT_INPUT ?
+			double r = !Settings.isShowSections || sectionShape.getType() == Type.DIRECT_INPUT ?
 					SimLive.LINE_ELEMENT_RADIUS/viewport[2]/View.zoom : sectionShape.getDiameter()/2;
 			int slices = SimLive.view.getCylindricSectionSlices(r);
-			n = (SimLive.model.settings.isShowSections && sectionShape.getType() == Type.HOLLOW_CIRCLE) ? new double[slices*2+2][] :
+			n = (Settings.isShowSections && sectionShape.getType() == Type.HOLLOW_CIRCLE) ? new double[slices*2+2][] :
 				new double[slices+1][];
 			for (int k = 0; k < slices; k++) {
 				double phi = k*2*Math.PI/slices;
 				n[k] = new double[]{0, Math.cos(phi), Math.sin(phi)};
 			}
 			n[slices] = n[0].clone();
-			if (SimLive.model.settings.isShowSections && sectionShape.getType() == Type.HOLLOW_CIRCLE) {
+			if (Settings.isShowSections && sectionShape.getType() == Type.HOLLOW_CIRCLE) {
 				for (int k = slices+1; k < slices*2+1; k++) {
 					double phi = k*2*Math.PI/slices;
 					n[k] = new double[]{0, -Math.cos(phi), Math.sin(phi)};

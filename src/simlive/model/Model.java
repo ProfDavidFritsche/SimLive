@@ -1216,7 +1216,7 @@ public class Model implements DeepEqualsInterface {
 	}*/
 	
 	public void mergeCoincidentNodes(ArrayList<Element> elementSet) {
-		double tolerance = settings.meshSize/1000.0;
+		double tolerance = Settings.meshSize/1000.0;
 		IntStream.range(0, elementSet.size()).parallel().forEach(e0 -> {
 			int[] nodes0 = elementSet.get(e0).getElementNodes();
 			for (int i = 0; i < nodes0.length; i++) {

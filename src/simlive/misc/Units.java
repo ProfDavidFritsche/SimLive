@@ -290,8 +290,8 @@ public class Units {
 			convertUnitsOfStep(oldUnits, newUnits, steps.get(s));
 		}
 		
-		SimLive.model.settings.module *= lengthFactor;
-		SimLive.model.settings.meshSize *= lengthFactor;
+		Settings.module *= lengthFactor;
+		Settings.meshSize *= lengthFactor;
 		SimLive.view.convertUnitsOfViewData(lengthFactor);
 	}
 

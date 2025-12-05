@@ -904,7 +904,7 @@ public class SimLive {
 		tltmOrientations.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.settings.isShowOrientations = tltmOrientations.getSelection();
+				Settings.isShowOrientations = tltmOrientations.getSelection();
 				view.redraw();
 			}
 		});
@@ -914,7 +914,7 @@ public class SimLive {
 		tltmNodes.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.settings.isShowNodes = tltmNodes.getSelection();
+				Settings.isShowNodes = tltmNodes.getSelection();
 				view.redraw();
 			}
 		});
@@ -924,7 +924,7 @@ public class SimLive {
 		tltmEdges.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.settings.isShowEdges = tltmEdges.getSelection();
+				Settings.isShowEdges = tltmEdges.getSelection();
 				view.redraw();
 			}
 		});
@@ -934,7 +934,7 @@ public class SimLive {
 		tltmSections.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.settings.isShowSections = tltmSections.getSelection();
+				Settings.isShowSections = tltmSections.getSelection();
 				view.redraw();
 			}
 		});
@@ -944,7 +944,7 @@ public class SimLive {
 		tltmGrid.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.settings.isShowGrid = tltmGrid.getSelection();
+				Settings.isShowGrid = tltmGrid.getSelection();
 				view.redraw();
 			}
 		});
@@ -963,61 +963,61 @@ public class SimLive {
 				Menu menu_objects = new Menu(menuItem_objects);
 				final MenuItem menuItem_orientations = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_orientations.setText("Orientations");
-				menuItem_orientations.setSelection(model.settings.isShowOrientations);
+				menuItem_orientations.setSelection(Settings.isShowOrientations);
 				menuItem_orientations.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowOrientations = menuItem_orientations.getSelection();
+						Settings.isShowOrientations = menuItem_orientations.getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_nodes = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_nodes.setText("Nodes");
-				menuItem_nodes.setSelection(model.settings.isShowNodes);				
+				menuItem_nodes.setSelection(Settings.isShowNodes);				
 				menuItem_nodes.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowNodes = ((MenuItem) e.getSource()).getSelection();
+						Settings.isShowNodes = ((MenuItem) e.getSource()).getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_edges = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_edges.setText("Edges");
-				menuItem_edges.setSelection(model.settings.isShowEdges);
+				menuItem_edges.setSelection(Settings.isShowEdges);
 				menuItem_edges.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowEdges = ((MenuItem) e.getSource()).getSelection();
+						Settings.isShowEdges = ((MenuItem) e.getSource()).getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_sections = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_sections.setText("Sections");
-				menuItem_sections.setSelection(model.settings.isShowSections);
+				menuItem_sections.setSelection(Settings.isShowSections);
 				menuItem_sections.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowSections = menuItem_sections.getSelection();
+						Settings.isShowSections = menuItem_sections.getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_supports = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_supports.setText("Supports");
-				menuItem_supports.setSelection(model.settings.isShowSupports);
+				menuItem_supports.setSelection(Settings.isShowSupports);
 				menuItem_supports.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowSupports = ((MenuItem) e.getSource()).getSelection();
+						Settings.isShowSupports = ((MenuItem) e.getSource()).getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_loads = new MenuItem(menu_objects, SWT.CHECK);
 				menuItem_loads.setText("Loads");
-				menuItem_loads.setSelection(model.settings.isShowLoads);
+				menuItem_loads.setSelection(Settings.isShowLoads);
 				menuItem_loads.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowLoads = ((MenuItem) e.getSource()).getSelection();
+						Settings.isShowLoads = ((MenuItem) e.getSource()).getSelection();
 						view.redraw();
 					}
 				});
@@ -1039,31 +1039,31 @@ public class SimLive {
 				Menu menu_coordSys = new Menu(menu);
 				final MenuItem menuItem_grid = new MenuItem(menu_coordSys, SWT.CHECK);
 				menuItem_grid.setText("Grid");
-				menuItem_grid.setSelection(model.settings.isShowGrid);
+				menuItem_grid.setSelection(Settings.isShowGrid);
 				menuItem_grid.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowGrid = menuItem_grid.getSelection();
+						Settings.isShowGrid = menuItem_grid.getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_axes = new MenuItem(menu_coordSys, SWT.CHECK);
 				menuItem_axes.setText("Axes");
-				menuItem_axes.setSelection(model.settings.isShowAxes);
+				menuItem_axes.setSelection(Settings.isShowAxes);
 				menuItem_axes.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowAxes = menuItem_axes.getSelection();
+						Settings.isShowAxes = menuItem_axes.getSelection();
 						view.redraw();
 					}
 				});
 				final MenuItem menuItem_scale = new MenuItem(menu_coordSys, SWT.CHECK);
 				menuItem_scale.setText("Scale");
-				menuItem_scale.setSelection(model.settings.isShowScale);
+				menuItem_scale.setSelection(Settings.isShowScale);
 				menuItem_scale.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						model.settings.isShowScale = menuItem_scale.getSelection();
+						Settings.isShowScale = menuItem_scale.getSelection();
 						view.redraw();
 					}
 				});
@@ -1092,7 +1092,7 @@ public class SimLive {
 						for (int l = 0; l < model.getDistributedLoads().size(); l++) {
 							model.getDistributedLoads().get(l).isShifted = false;
 						}
-						model.settings.resetDisplayOptions();
+						Settings.resetDisplayOptions();
 						view.redraw();
 					}
 				});
@@ -2710,9 +2710,6 @@ public class SimLive {
 				checkModel.start();
 			}
 		}
-		if (mode != Mode.RESULTS && model.settings.deepEquals(model.expandModel(modelPos).settings, Result.EQUAL) != Result.EQUAL) {
-			model.updateModel();
-		}
 		if (!tltmUndo.isDisposed() && !tltmRedo.isDisposed()) {
 			tltmUndo.setEnabled(modelPos > 0 && mode != Mode.RESULTS);
 			tltmRedo.setEnabled(modelPos < modelHistory.size()-1 && mode != Mode.RESULTS);
@@ -2722,11 +2719,11 @@ public class SimLive {
 		}
 		if (!tltmOrientations.isDisposed() && !tltmSections.isDisposed() && !tltmNodes.isDisposed() &&
 				!tltmEdges.isDisposed() && !tltmGrid.isDisposed()) {
-			tltmOrientations.setSelection(model.settings.isShowOrientations);
-			tltmSections.setSelection(model.settings.isShowSections);
-			tltmNodes.setSelection(model.settings.isShowNodes);
-			tltmEdges.setSelection(model.settings.isShowEdges);
-			tltmGrid.setSelection(model.settings.isShowGrid);
+			tltmOrientations.setSelection(Settings.isShowOrientations);
+			tltmSections.setSelection(Settings.isShowSections);
+			tltmNodes.setSelection(Settings.isShowNodes);
+			tltmEdges.setSelection(Settings.isShowEdges);
+			tltmGrid.setSelection(Settings.isShowGrid);
 		}
 		if (!tltmMeasureDistance.isDisposed() &&
 				!tltmMeasureAngle.isDisposed() && !tltmCreateLabels.isDisposed()) {
@@ -2761,7 +2758,8 @@ public class SimLive {
 			Solution.resetLog();
 			
 			model = new Model();
-			view.initializeZoomAndOrigin(model.settings.meshSize);
+			Settings.resetAllStaticOptions();
+			view.initializeZoomAndOrigin(Settings.meshSize);
 			
 			view.initViewForNewFile();
 			
