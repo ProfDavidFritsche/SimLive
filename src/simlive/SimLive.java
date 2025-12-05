@@ -2710,6 +2710,9 @@ public class SimLive {
 				checkModel.start();
 			}
 		}
+		if (mode != Mode.RESULTS && model.settings.deepEquals(model.expandModel(modelPos).settings, Result.EQUAL) != Result.EQUAL) {
+			model.updateModel();
+		}
 		if (!tltmUndo.isDisposed() && !tltmRedo.isDisposed()) {
 			tltmUndo.setEnabled(modelPos > 0 && mode != Mode.RESULTS);
 			tltmRedo.setEnabled(modelPos < modelHistory.size()-1 && mode != Mode.RESULTS);
