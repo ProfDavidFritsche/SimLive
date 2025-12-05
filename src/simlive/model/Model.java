@@ -1260,15 +1260,13 @@ public class Model implements DeepEqualsInterface {
 			}
 			
 			mergeCoincidentNodes(set.getElements());
-			/*Mode mode = SimLive.mode;
 			SimLive.mode = Mode.NONE;
 			updateModel();
-			SimLive.mode = mode;*/
+			SimLive.mode = Mode.PARTS;
 			
 			if (set.getType() == Set.Type.CIRCULAR) {
 				removeChordErrorOfRefinedSet(set);
 				if (set.getSpurGearValues() != null) {
-					updateModel();
 					removeFlankErrorOfRefinedSpurGear(set);
 				}
 			}

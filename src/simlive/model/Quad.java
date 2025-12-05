@@ -556,6 +556,7 @@ public class Quad extends PlaneElement {
 						   0.25*(nodes.get(elementNodes[0]).getZCoord()+nodes.get(elementNodes[1]).getZCoord()+
 								 nodes.get(elementNodes[2]).getZCoord()+nodes.get(elementNodes[3]).getZCoord())));
 		int middleNode = nodes.size()-1;
+		int id = this.getID()+1;
 		for (int i = 3; i > -1; i--) {
 			int[] newElementNodes = new int[4];
 			newElementNodes[i] = elementNodes[i];
@@ -572,7 +573,7 @@ public class Quad extends PlaneElement {
 				newElement.setThickness(this.getThickness());
 				newElement.setStiffnessDamping(this.getStiffnessDamping());
 				newElement.setMassDamping(this.getMassDamping());
-				elements.add(this.getID()+1, newElement);
+				elements.add(id++, newElement);
 				newElements.add(newElement);
 			}
 		}
