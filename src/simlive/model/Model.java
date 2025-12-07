@@ -1235,6 +1235,9 @@ public class Model implements DeepEqualsInterface {
 				}
 			}
 		});
+		SimLive.mode = Mode.NONE;
+		updateModel();
+		SimLive.mode = Mode.PARTS;
 	}
 	
 	private void refineSubSets(Set set) {
@@ -1260,9 +1263,6 @@ public class Model implements DeepEqualsInterface {
 			}
 			
 			mergeCoincidentNodes(set.getElements());
-			SimLive.mode = Mode.NONE;
-			updateModel();
-			SimLive.mode = Mode.PARTS;
 			
 			if (set.getType() == Set.Type.CIRCULAR) {
 				removeChordErrorOfRefinedSet(set);
