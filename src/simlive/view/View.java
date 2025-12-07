@@ -983,7 +983,6 @@ public class View extends GLCanvas {
 										}
 										SimLive.model.getSets().add(new Set(newElement, Set.Type.BASIC));
 										SimLive.model.getElements().add(newElement);
-										SimLive.model.updateModel();
 										deselectAll();
 										SimLive.disposeDialogAreas();
 									}
@@ -1023,7 +1022,6 @@ public class View extends GLCanvas {
 											}
 											SimLive.model.getSets().add(new Set(newElement, Set.Type.BASIC));
 											SimLive.model.getElements().add(newElement);
-											SimLive.model.updateModel();
 											deselectAll();
 											SimLive.disposeDialogAreas();
 										}
@@ -1049,7 +1047,6 @@ public class View extends GLCanvas {
 											Element newElement = new Tri(element_node);
 											SimLive.model.getSets().add(new Set(newElement, Set.Type.BASIC));
 											SimLive.model.getElements().add(newElement);
-											SimLive.model.updateModel();
 											deselectAll();
 											SimLive.disposeDialogAreas();
 										}
@@ -1076,7 +1073,6 @@ public class View extends GLCanvas {
 											Element newElement = new Quad(element_node);
 											SimLive.model.getSets().add(new Set(newElement, Set.Type.BASIC));
 											SimLive.model.getElements().add(newElement);
-											SimLive.model.updateModel();
 											deselectAll();
 											SimLive.disposeDialogAreas();
 										}
@@ -1128,6 +1124,7 @@ public class View extends GLCanvas {
 				SimLive.synchronizeModelTreeWithViewSelection();
 				
 				if (animation == null) {
+					if (selectedNodes.isEmpty()) SimLive.model.updateModel();
 					Snap.initData(mousePos, true, true);
 					Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);				
 					redraw();

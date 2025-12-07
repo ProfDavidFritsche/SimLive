@@ -1694,7 +1694,6 @@ public class Model implements DeepEqualsInterface {
 		elements.addAll(elementSet);
 		mergeCoincidentNodes(elementSet);
 		sets.add(new Set(elementSet, Set.Type.CIRCULAR));
-		updateModel();
 	}
 	
 	public void addRectangleFromQuads(double[] edge, double width, double height) {
@@ -1743,7 +1742,6 @@ public class Model implements DeepEqualsInterface {
 		elements.addAll(elementSet);
 		mergeCoincidentNodes(elementSet);
 		sets.add(new Set(elementSet, Set.Type.COMPOSITE));
-		updateModel();
 	}
 	
 	public void addTriangleFromQuads(double[] edge, double base, double height, double offset) {
@@ -1803,7 +1801,6 @@ public class Model implements DeepEqualsInterface {
 		elements.addAll(elementSet);
 		mergeCoincidentNodes(elementSet);
 		sets.add(new Set(elementSet, Set.Type.COMPOSITE));
-		updateModel();
 	}
 	
 	public void addExternalSpurGearFromTrisAndQuads(double[] center, int z, double alpha, double m,
@@ -1865,7 +1862,6 @@ public class Model implements DeepEqualsInterface {
 		Set set = new Set(elementSet, Set.Type.CIRCULAR);
 		set.setSpurGearValues(new SpurGearValues(alpha, m, r, false));
 		sets.add(set);
-		updateModel();
 	}
 	
 	public void addInternalSpurGearFromQuads(double[] center, int z, double alpha, double m,
@@ -1929,7 +1925,6 @@ public class Model implements DeepEqualsInterface {
 		Set set = new Set(elementSet, Set.Type.CIRCULAR);
 		set.setSpurGearValues(new SpurGearValues(alpha, m, r, true));
 		sets.add(set);
-		updateModel();
 	}
 
 	private double inv(double alpha) {
