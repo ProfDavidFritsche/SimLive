@@ -2581,6 +2581,9 @@ public class View extends GLCanvas {
 				}
 			}
 		}
+		SimLive.mode = Mode.NONE;
+		SimLive.model.updateModel();
+		SimLive.mode = Mode.PARTS;
 	}
 	
 	public void mergeSelectedSets() {
