@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+	<control>
+		<movj name="p0" x="220" y="75" z="34" r="0" nInc="5" />
+		<movl name="p1" x="220" y="75" z="14" r="0" nInc="5" />
+		<movl name="p2" x="320" y="75" z="14" r="0" nInc="5" />
+		<movl name="p3" x="320" y="55" z="14" r="0" nInc="5" />
+		<arc name="p4" x1="311.21" y1="33.79" z1="14" r1="0" x2="290" y2="25" z2="14" r2="0" nInc="5" />
+		<movl name="p5" x="250" y="25" z="14" r="0" nInc="5" />
+		<arc name="p6" x1="228.77" y1="33.79" z1="14" r1="0" x2="220" y2="55" z2="14" r2="0" nInc="5" />
+		<movl name="p7" x="220" y="75" z="14" r="0" nInc="5" />
+		<movl name="p8" x="220" y="75" z="34" r="0" nInc="5" />
+		<movj name="p9" x="320" y="16" z="34" r="0" nInc="5" />
+		<movl name="p10" x="320" y="16" z="14" r="0" nInc="5" />
+		<movl name="p11" x="336" y="0" z="14" r="0" nInc="5" />
+		<movl name="p12" x="320" y="-16" z="14" r="0" nInc="5" />
+		<movl name="p13" x="320" y="-16" z="34" r="0" nInc="5" />
+		<movj name="p14" x="300" y="-35" z="34" r="0" nInc="5" />
+		<movl name="p15" x="300" y="-35" z="14" r="0" nInc="5" />
+		<arc name="p16" x1="300" y1="-75" z1="14" r1="0" x2="280" y2="-55" z2="14" r2="0" nInc="10" />
+		<arc name="p17" x1="250" y1="-85" z1="14" r1="0" x2="250" y2="-25" z2="14" r2="0" nInc="10" />
+		<movl name="p18" x="250" y="-25" z="34" r="0" nInc="5" />
+		<movj name="p19" x="283.5959" y="0" z="233.93458" r="0" nInc="10" />
+	</control>
+	<config type="MG400" baseNodeID="10" gravity="Z_DIR" gValue="-9810.0"
+		j1="Connector 9" j2="Connector 3" j3="Connector 7" j4="Connector 8"
+		x="xDisp" y="yDisp" z="zDisp" r="rotation"
+		nodeID="16" zCoord="-113" zDisp="-210" />
+</root>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+	<control>
+		<movj name="p1" x="-115.5" y="-300" z="0" r="0" nInc="10" />
+		<movl name="p2" x="-115.5" y="-300" z="-55" r="0" nInc="5" />
+		<movl name="p3" x="-115.5" y="-300" z="-45" r="0" nInc="5" />
+		<movl name="p4" x="-115.5" y="-300" z="0" r="0" nInc="5" />
+		<movj name="p5" x="386.37033" y="0" z="0" r="90" nInc="40" />
+		<switchOrient name="p6" nInc="10" />
+		<movj name="p7" x="-115.5" y="300" z="0" r="180" nInc="40" />
+		<movl name="p8" x="-115.5" y="300" z="-45" r="180" nInc="5" />
+		<movl name="p9" x="-115.5" y="300" z="-55" r="180" nInc="10" />
+		<movl name="p10" x="-115.5" y="300" z="0" r="180" nInc="5" />
+		<movj name="p11" x="386.37033" y="0" z="0" r="180" nInc="10" />		
+	</control>
+	<config type="M1" baseNodeID="5" gravity="Z_DIR" gValue="-9810.0"
+		j1="Connector 1" j2="Connector 2" j3="Connector 3"
+		x="xDisp" y="yDisp" z="zDisp" r="rotation"
+		switchOrient="switchOrient" switchMoment="10000" />
+</root>
