@@ -1675,18 +1675,20 @@ public class View extends GLCanvas {
             items[i].addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;					
-					if (!selectedSets.isEmpty()) {
-						SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
-								SWT.NONE, selectedSets, SimLive.model.settings);
-						if (copyPart) ((PartDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
+					if (SimLive.mode == Mode.PARTS) {
+						double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;					
+						if (!selectedSets.isEmpty()) {
+							SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
+									SWT.NONE, selectedSets, SimLive.model.settings);
+							if (copyPart) ((PartDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
+						}
+						if (!selectedParts3d.isEmpty()) {
+							SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
+									SWT.NONE, selectedParts3d, SimLive.model.settings);
+							if (copyPart) ((Part3dDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
+						}
+						copyPart = false;
 					}
-					if (!selectedParts3d.isEmpty()) {
-						SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
-								SWT.NONE, selectedParts3d, SimLive.model.settings);
-						if (copyPart) ((Part3dDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
-					}
-					copyPart = false;
 					SimLive.model.updateModel();
 					SimLive.synchronizeModelTreeWithViewSelection();
 				}
