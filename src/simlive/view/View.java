@@ -5904,40 +5904,42 @@ public class View extends GLCanvas {
 				R = ((PlaneElement) connector.getElement0()).getR0();
 			if (SimLive.mode == Mode.RESULTS) {
 				Element e0 = SimLive.post.getSolution().getRefModel().getElements().get(connector.getElement0().getID());
-				int[] element_nodes0 = e0.getElementNodes();
-				Matrix u_elem = e0.globalToLocalVector(SimLive.post.getPostIncrement().get_u_global());
-				double[][] rot = new double[3][element_nodes0.length];
-				for (int n = 0; n < element_nodes0.length; n++) {
-					rot[0][n] = u_elem.get(3+6*n, 0);
-					rot[1][n] = u_elem.get(4+6*n, 0);
-					rot[2][n] = u_elem.get(5+6*n, 0);
-				}
-				double rotX, rotY, rotZ;
-				if (e0.getType() == Element.Type.BEAM) {
-					double[] shapeFunctionValues0 = ((Beam) e0).getShapeFunctionValues(connector.getT0());
-					rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
-					rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
-					rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
-				}
-				else {
-					double[] shapeFunctionValues0 = ((PlaneElement) e0).getShapeFunctionValues(connector.getR0()[0], connector.getR0()[1]);
-					rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
-					rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
-					rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
-				}
-				Matrix rot0 = new Matrix(new double[]{rotX, rotY, rotZ}, 3);
-				double factor = 0;
-	    		if (SimLive.model.settings.isLargeDisplacement) {
-	    			factor = SimLive.post.getScaling();
-	    		}
-	    		else {
-	    			factor = rot0.normF();
-	    			if (factor > 0) {
-		    			factor = Math.atan(SimLive.post.getScaling()*factor)/factor;
+				if (e0.getType() == Element.Type.BEAM || e0.isPlaneElement()) {
+					int[] element_nodes0 = e0.getElementNodes();
+					Matrix u_elem = e0.globalToLocalVector(SimLive.post.getPostIncrement().get_u_global());
+					double[][] rot = new double[3][element_nodes0.length];
+					for (int n = 0; n < element_nodes0.length; n++) {
+						rot[0][n] = u_elem.get(3+6*n, 0);
+						rot[1][n] = u_elem.get(4+6*n, 0);
+						rot[2][n] = u_elem.get(5+6*n, 0);
+					}
+					double rotX, rotY, rotZ;
+					if (e0.getType() == Element.Type.BEAM) {
+						double[] shapeFunctionValues0 = ((Beam) e0).getShapeFunctionValues(connector.getT0());
+						rotX = shapeFunctionValues0[0]*rot[0][0]+shapeFunctionValues0[3]*rot[0][1];
+						rotY = shapeFunctionValues0[0]*rot[1][0]+shapeFunctionValues0[3]*rot[1][1];
+						rotZ = shapeFunctionValues0[0]*rot[2][0]+shapeFunctionValues0[3]*rot[2][1];
+					}
+					else {
+						double[] shapeFunctionValues0 = ((PlaneElement) e0).getShapeFunctionValues(connector.getR0()[0], connector.getR0()[1]);
+						rotX = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[0]);
+						rotY = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[1]);
+						rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
+					}
+					Matrix rot0 = new Matrix(new double[]{rotX, rotY, rotZ}, 3);
+					double factor = 0;
+		    		if (SimLive.model.settings.isLargeDisplacement) {
+		    			factor = SimLive.post.getScaling();
 		    		}
-	    		}
-	    		Matrix Rg = Beam.rotationMatrixFromAngles(rot0.times(factor));
-				R = Rg.times(R);
+		    		else {
+		    			factor = rot0.normF();
+		    			if (factor > 0) {
+			    			factor = Math.atan(SimLive.post.getScaling()*factor)/factor;
+			    		}
+		    		}
+		    		Matrix Rg = Beam.rotationMatrixFromAngles(rot0.times(factor));
+					R = Rg.times(R);
+				}
 			}
 			
 			if (connector.getType() == Connector.Type.FIXED) {
