@@ -1,6 +1,7 @@
 package simlive.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import simlive.SimLive;
 
@@ -18,6 +19,7 @@ public class ContactPair implements DeepEqualsInterface {
 	private Type type = Type.DEFORMABLE_DEFORMABLE;
 	private ArrayList<Element> rigidElements = new ArrayList<Element>();
 	private ArrayList<Node> rigidNodes = new ArrayList<Node>();
+	private ArrayList<Integer[]> edges = new ArrayList<Integer[]>();
 	public String name;
 	
 	public ContactPair() {
@@ -150,6 +152,7 @@ public class ContactPair implements DeepEqualsInterface {
 		if (this.type == Type.RIGID_DEFORMABLE) {
 			this.setRigidDeformable();
 		}
+		updateEdges();
 	}
 	
 	public ArrayList<Node> getSlaveNodes() {
@@ -160,6 +163,33 @@ public class ContactPair implements DeepEqualsInterface {
 		return masterSets;
 	}
 	
+	public ArrayList<Integer[]> getEdges() {
+		return edges;
+	}
+
+	public void setEdges(ArrayList<Integer[]> edges) {
+		this.edges = edges;
+	}
+
+	private void updateEdges() {
+		if (Model.twoDimensional) {
+			edges.clear();
+			for (int s = 0; s < masterSets.size(); s++) {
+				for (int e = 0; e < masterSets.get(s).getElements().size(); e++) {
+					Element masterElement = masterSets.get(s).getElements().get(e);
+					int[] element_nodes = masterElement.getElementNodes();
+					for (int i = 0; i < element_nodes.length; i++) {
+						int n0 = element_nodes[i];
+						int n1 = element_nodes[(i+1)%element_nodes.length];
+						if (SimLive.view.outlineEdge.length > n0 && SimLive.contains(SimLive.view.outlineEdge[n0], n1)) {
+							edges.add(new Integer[]{s, e, i});
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public ContactPair clone(Model model) {
 		ContactPair contactPair = new ContactPair();
 		for (int i = 0; i < this.slaveNodes.size(); i++) {
@@ -171,6 +201,9 @@ public class ContactPair implements DeepEqualsInterface {
 		}
 		for (int i = 0; i < this.rigidNodes.size(); i++) {
 			contactPair.rigidNodes.add(this.rigidNodes.get(i).clone());
+		}
+		for (int i = 0; i < this.edges.size(); i++) {
+			contactPair.edges.add(this.edges.get(i).clone());
 		}
 		if (this.type == Type.DEFORMABLE_DEFORMABLE) {
 			for (int i = 0; i < this.masterSets.size(); i++) {
@@ -208,6 +241,9 @@ public class ContactPair implements DeepEqualsInterface {
 		}
 		result = SimLive.deepEquals(this.rigidElements, contactPair.rigidElements, result);
 		result = SimLive.deepEquals(this.rigidNodes, contactPair.rigidNodes, result);
+		for (int i = 0; i < this.edges.size(); i++) {
+			if (!Arrays.equals(this.edges.get(i), contactPair.edges.get(i))) return Result.RECALC;
+		}
 		if (this.switchContactSide != contactPair.switchContactSide) return Result.RECALC;
 		if (this.isMaxPenetration != contactPair.isMaxPenetration) return Result.RECALC;
 		if (this.maxPenetration != contactPair.maxPenetration) return Result.RECALC;
@@ -260,6 +296,24 @@ public class ContactPair implements DeepEqualsInterface {
 			masterSets.retainAll(SimLive.model.getSets());
 		}
 		updateForwardTol();
+		if (Model.twoDimensional && type == Type.DEFORMABLE_DEFORMABLE) {
+			for (int e = 0; e < edges.size(); e++) {
+				int set = edges.get(e)[0];
+				int element = edges.get(e)[1];
+				int edge = edges.get(e)[2];
+				if (set < masterSets.size() && element < masterSets.get(set).getElements().size() &&
+						edge < masterSets.get(set).getElements().get(element).getElementNodes().length) {
+					int[] element_nodes = masterSets.get(set).getElements().get(element).getElementNodes();
+					int n0 = element_nodes[edge];
+					int n1 = element_nodes[(edge+1)%element_nodes.length];
+					if (SimLive.view.outlineEdge.length > n0 && SimLive.contains(SimLive.view.outlineEdge[n0], n1)) {
+						continue;
+					}					
+				}
+				updateEdges();
+				break;
+			}
+		}
 	}
 
 }
