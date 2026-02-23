@@ -3447,6 +3447,78 @@ public class View extends GLCanvas {
 			}
 		}
 		
+		//orientations of edges
+		if (SimLive.mode == Mode.CONTACTS && Model.twoDimensional) {
+			double arrowSize = SimLive.ORIENTATION_SIZE/width/zoom;
+			for (int c = 0; c < objects.size(); c++) {
+				ContactPair contactPair = (ContactPair) objects.get(c);
+				ArrayList<Element> elements = new ArrayList<Element>();
+				if (contactPair.getType() == ContactPair.Type.DEFORMABLE_DEFORMABLE) {
+					for (int s = 0; s < contactPair.getMasterSets().size(); s++) {
+						elements.addAll(contactPair.getMasterSets().get(s).getElements());
+					}
+				}
+				else {
+					elements.addAll(contactPair.getRigidElements());
+				}
+				
+				int maxNodeNr = 0;
+				for (int e = 0; e < elements.size(); e++) {
+					Element masterElement = elements.get(e);
+					int[] element_nodes = masterElement.getElementNodes();
+					for (int i = 0; i < element_nodes.length; i++) {
+						if (element_nodes[i] > maxNodeNr) maxNodeNr = element_nodes[i];
+					}
+				}
+				int[][] outlineEdge = new int[maxNodeNr+1][0];
+				
+				for (int e = 0; e < elements.size(); e++) {
+					Element masterElement = elements.get(e);
+					int[] element_nodes = masterElement.getElementNodes();
+					for (int i = 0; i < element_nodes.length; i++) {
+						int n0 = element_nodes[i];
+						int n1 = element_nodes[(i+1)%element_nodes.length];
+						if (((PlaneElement) masterElement).getR0().get(2, 2) < 0.0) {
+							n0 = n1; //swap n0 and n1
+							n1 = element_nodes[i];
+						}
+						outlineEdge[n0] = SimLive.add(outlineEdge[n0], n1);
+						if (SimLive.contains(outlineEdge[n1], n0)) {
+							outlineEdge[n0] = SimLive.remove(outlineEdge[n0], n1);
+							outlineEdge[n1] = SimLive.remove(outlineEdge[n1], n0);
+						}
+					}
+				}
+				
+				for (int e = 0; e < elements.size(); e++) {
+					int[] elemNodes = elements.get(e).getElementNodes();
+					for (int i = 0; i < elemNodes.length; i++) {
+						int n0 = elemNodes[i];
+						int n1 = elemNodes[(i+1)%elemNodes.length];
+						if (SimLive.contains(outlineEdge[n0], n1)) {
+							double[] coords0 = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE ?
+									getCoordsWithScaledDisp(n0) : contactPair.getRigidNodes().get(n0).getCoords();
+							double[] coords1 = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE ?
+									getCoordsWithScaledDisp(n1) : contactPair.getRigidNodes().get(n1).getCoords();
+							double[] a = new double[2];
+							a[0] = coords1[0]-coords0[0];
+							a[1] = coords1[1]-coords0[1];
+							double length = Math.sqrt(a[0]*a[0]+a[1]*a[1]);
+							gl2.glPushMatrix();
+							gl2.glTranslated((coords0[0]+coords1[0])/2.0, (coords0[1]+coords1[1])/2.0, (coords0[2]+coords1[2])/2.0);
+							gl2.glRotated(Math.acos(a[1]/length)*180.0/Math.PI, 0, 0, a[0] == 0 ? 1 : Math.signum(-a[0]));
+							gl2.glRotatef(90, 0, 1, 0);
+							gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
+							drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
+									(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
+									SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
+							gl2.glPopMatrix();
+						}
+					}			
+				}
+			}
+		}
+		
 		/* external reactions */
 		double arrowSize = SimLive.ARROW_SIZE/width/zoom;
 		double nodeRadius = SimLive.NODE_RADIUS/width/zoom;
