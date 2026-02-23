@@ -865,19 +865,6 @@ public class XML {
 				}
 				contactPair.setMaster(sets);
 				contactPair.setType(ContactPair.Type.valueOf(getStringAttribute(XMLcontactPair, "type")), false);
-				if (Model.twoDimensional) {
-					ArrayList<Integer[]> edges = new ArrayList<Integer[]>();
-					org.jdom.Element XMLedges = XMLcontactPair.getChild("edges");
-					Object[] listEdges = XMLedges.getChildren().toArray();
-					for (int j = 0; j < listEdges.length; j++) {
-						org.jdom.Element XMLedge = (org.jdom.Element) listEdges[j];
-						int set = getIntegerAttribute(XMLedge, "set");
-						int element = getIntegerAttribute(XMLedge, "element");
-						int edge = getIntegerAttribute(XMLedge, "edge");
-						edges.add(new Integer[]{set, element, edge});					
-					}
-					contactPair.setEdges(edges);
-				}
 				SimLive.model.getContactPairs().add(contactPair);
 			}
 
@@ -1379,17 +1366,6 @@ public class XML {
 					XMLmasterSets.addContent(XMLset);
 				}
 				XMLcontactPair.addContent(XMLmasterSets);
-				if (Model.twoDimensional) {
-					org.jdom.Element XMLedges = new org.jdom.Element("edges");
-					for (int e = 0; e < contactPair.getEdges().size(); e++) {
-						org.jdom.Element XMLedge = new org.jdom.Element("edge");
-						setIntegerAttribute(XMLedge, "set", contactPair.getEdges().get(e)[0]);
-						setIntegerAttribute(XMLedge, "element", contactPair.getEdges().get(e)[1]);
-						setIntegerAttribute(XMLedge, "edge", contactPair.getEdges().get(e)[2]);
-						XMLedges.addContent(XMLedge);
-					}
-					XMLcontactPair.addContent(XMLedges);
-				}
 				XMLcontactPairs.addContent(XMLcontactPair);
 			}
 			XMLmodel.addContent(XMLcontactPairs);

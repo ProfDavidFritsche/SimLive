@@ -152,6 +152,7 @@ public class ContactDialog extends StoreDialog {
 		btnSetMaximumPenetration.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
 		btnSetMaximumPenetration.setText("Set Maximum Penetration");
 		btnSetMaximumPenetration.setSelection(contactPair.isMaxPenetration());
+		btnSetMaximumPenetration.setEnabled(!Model.twoDimensional);
 		
 		Label lblValue = new Label(this, SWT.NONE);
 		lblValue.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
