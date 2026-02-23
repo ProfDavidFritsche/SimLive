@@ -241,7 +241,7 @@ public class ContactPair implements DeepEqualsInterface {
 		}
 		result = SimLive.deepEquals(this.rigidElements, contactPair.rigidElements, result);
 		result = SimLive.deepEquals(this.rigidNodes, contactPair.rigidNodes, result);
-		for (int i = 0; i < this.edges.size(); i++) {
+		for (int i = 0; i < this.edges.size(); i++) if (contactPair.edges.size() > i) {
 			if (!Arrays.equals(this.edges.get(i), contactPair.edges.get(i))) return Result.RECALC;
 		}
 		if (this.switchContactSide != contactPair.switchContactSide) return Result.RECALC;
@@ -284,6 +284,7 @@ public class ContactPair implements DeepEqualsInterface {
 		}
 		if (type == Type.RIGID_DEFORMABLE) {
 			if (rigidElements.isEmpty() && rigidNodes.isEmpty()) {
+				if (Model.twoDimensional) updateEdges();
 				setRigidDeformable();
 			}
 		}
@@ -297,22 +298,7 @@ public class ContactPair implements DeepEqualsInterface {
 		}
 		updateForwardTol();
 		if (Model.twoDimensional && type == Type.DEFORMABLE_DEFORMABLE) {
-			for (int e = 0; e < edges.size(); e++) {
-				int set = edges.get(e)[0];
-				int element = edges.get(e)[1];
-				int edge = edges.get(e)[2];
-				if (set < masterSets.size() && element < masterSets.get(set).getElements().size() &&
-						edge < masterSets.get(set).getElements().get(element).getElementNodes().length) {
-					int[] element_nodes = masterSets.get(set).getElements().get(element).getElementNodes();
-					int n0 = element_nodes[edge];
-					int n1 = element_nodes[(edge+1)%element_nodes.length];
-					if (SimLive.view.outlineEdge.length > n0 && SimLive.contains(SimLive.view.outlineEdge[n0], n1)) {
-						continue;
-					}					
-				}
-				updateEdges();
-				break;
-			}
+			updateEdges();
 		}
 	}
 
