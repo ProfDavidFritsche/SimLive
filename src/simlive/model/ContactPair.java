@@ -241,7 +241,7 @@ public class ContactPair implements DeepEqualsInterface {
 		}
 		result = SimLive.deepEquals(this.rigidElements, contactPair.rigidElements, result);
 		result = SimLive.deepEquals(this.rigidNodes, contactPair.rigidNodes, result);
-		for (int i = 0; i < this.edges.size(); i++) {
+		for (int i = 0; i < this.edges.size(); i++) if (contactPair.edges.size() > i) {
 			if (!Arrays.equals(this.edges.get(i), contactPair.edges.get(i))) return Result.RECALC;
 		}
 		if (this.switchContactSide != contactPair.switchContactSide) return Result.RECALC;
