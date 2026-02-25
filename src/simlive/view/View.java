@@ -133,6 +133,7 @@ public class View extends GLCanvas {
 	private ArrayList<Part3d> selectedParts3d = new ArrayList<Part3d>();
 	private ArrayList<Set> selectedSets = new ArrayList<Set>();
 	private ArrayList<Node> selectedNodes = new ArrayList<Node>();
+	private ArrayList<Element> selectedEdges = new ArrayList<Element>();
 	public Label selectedLabel = null;
 	public Label focusPoint = null;
 	public boolean setFocusPoint = false;
@@ -178,6 +179,9 @@ public class View extends GLCanvas {
 	public int nodeID;
 	public double zDisp, zCoord;
 	private double[][] lines;
+	
+	//public static int edgeIndex = -1;
+	//private static ContactPair selectedContactPair = null;
 	
 	public View(Composite parent, int style, GLData gldata) {
 		super(parent, style, gldata);
@@ -471,6 +475,9 @@ public class View extends GLCanvas {
 							}
 							if (SimLive.boxSelect == SimLive.BoxSelect.PARTS_3D) {
 								selectParts3dInBox();
+							}
+							if (SimLive.boxSelect == SimLive.BoxSelect.EDGES) {
+								selectEdgesInBox();
 							}
 						}
 					}
@@ -834,9 +841,17 @@ public class View extends GLCanvas {
 								}
 								else if ((selectedParts3d.isEmpty() && selectedNodes.isEmpty() || !isControlKeyPressed) &&
 										Snap.element != null) {
-									if (!selectSets()) {
-										deselectAllAndDisposeDialogs();
-										return;
+									if (Snap.set != null) {
+										if (!selectSets()) {
+											deselectAllAndDisposeDialogs();
+											return;
+										}
+									}
+									else {
+										if (!selectEdges()) {
+											deselectAllAndDisposeDialogs();
+											return;
+										}
 									}
 								}
 								else if ((selectedSets.isEmpty() && selectedNodes.isEmpty() || !isControlKeyPressed) &&
@@ -851,6 +866,7 @@ public class View extends GLCanvas {
 							if (!isControlKeyPressed) {
 								if ((SimLive.mode != Mode.PARTS && Snap.node == null && !selectedNodes.isEmpty()) ||
 										(Snap.element == null && !selectedSets.isEmpty()) ||
+										(Snap.element == null && !selectedEdges.isEmpty()) ||
 										(Snap.part3d == null && !selectedParts3d.isEmpty())) {
 									deselectAllAndDisposeDialogs();
 									return;
@@ -1151,6 +1167,9 @@ public class View extends GLCanvas {
 				else if (!selectedParts3d.isEmpty()) {
 					SimLive.boxSelect = BoxSelect.PARTS_3D;
 				}
+				else if (!selectedEdges.isEmpty()) {
+					SimLive.boxSelect = BoxSelect.EDGES;
+				}
 				else {
 					SimLive.boxSelect = BoxSelect.PARTS;
 				}
@@ -1423,17 +1442,48 @@ public class View extends GLCanvas {
 			}
 			if (objects.get(0) instanceof ContactPair &&
 					(!selectedNodes.isEmpty() || (!selectedSets.isEmpty() &&
-					SimLive.model.doSetsContainOnlyPlaneElements(selectedSets)))) {
+					(SimLive.model.doSetsContainOnlyPlaneElements(selectedSets)) || !selectedEdges.isEmpty()))) {
 				ContactPair contactPair = (ContactPair) objects.get(0);
 				getStoreMenuItem(popup).addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						if (!selectedNodes.isEmpty()) contactPair.setSlave(getSelectedNodes());
-						if (!selectedSets.isEmpty()) {
-							contactPair.setMaster(getSelectedSets());
+						if (!selectedEdges.isEmpty()) {
+							ArrayList<Integer[]> edges = new ArrayList<Integer[]>();
+							for (int edge = 0; edge < selectedEdges.size(); edge++) {
+								Rod rod = (Rod) selectedEdges.get(edge);
+								int index = contactPair.getOutline().indexOf(rod);
+								Node node0 = contactPair.getOutlineNodes().get(rod.getElementNodes()[0]);
+								Node node1 = contactPair.getOutlineNodes().get(rod.getElementNodes()[1]);
+								for (int s0 = 0; s0 < contactPair.getMasterSets().size(); s0++) {
+									for (int e0 = 0; e0 < contactPair.getMasterSets().get(s0).getElements().size(); e0++) {
+										int[] elemNodes = contactPair.getMasterSets().get(s0).getElements().get(e0).getElementNodes();
+										for (int i0 = 0; i0 < elemNodes.length; i0++) {
+											Node n0 = contactPair.getType() == Type.RIGID_DEFORMABLE ? contactPair.getRigidNodes().get(elemNodes[i0]) :
+												SimLive.model.getNodes().get(elemNodes[i0]);
+											Node n1 = contactPair.getType() == Type.RIGID_DEFORMABLE ? contactPair.getRigidNodes().get(elemNodes[(i0+1)%elemNodes.length]) :
+												SimLive.model.getNodes().get(elemNodes[(i0+1)%elemNodes.length]);
+											if (node0.getXCoord() == n0.getXCoord() &&
+												node0.getYCoord() == n0.getYCoord() &&
+												node1.getXCoord() == n1.getXCoord() &&
+												node1.getYCoord() == n1.getYCoord()) {
+												
+												edges.add(new Integer[]{s0, e0, i0, index});
+											}
+										}
+									}
+								}
+							}
+							contactPair.setEdges(edges);
+						}
+						else {
+							if (!selectedSets.isEmpty()) {
+								contactPair.setMaster(getSelectedSets());
+							}
 						}
 						storeMenuItemSelected(0, !contactPair.getSlaveNodes().isEmpty());
-						storeMenuItemSelected(1, !contactPair.getMasterSets().isEmpty());
+						if (Model.twoDimensional) storeMenuItemSelected(1, !contactPair.getEdges().isEmpty());
+						else storeMenuItemSelected(1, !contactPair.getMasterSets().isEmpty());
 					}
 				});
 			}
@@ -1980,6 +2030,7 @@ public class View extends GLCanvas {
 		if (part3d != null) {
 			selectedNodes.clear();
 			selectedSets.clear();
+			selectedEdges.clear();
 			if (isControlKeyPressed) {
 				if (selectedParts3d.contains(part3d)) {
 					selectedParts3d.remove(part3d);
@@ -2006,6 +2057,7 @@ public class View extends GLCanvas {
 		if (set != null) {
 			selectedNodes.clear();
 			selectedParts3d.clear();
+			selectedEdges.clear();
 			if (isControlKeyPressed) {
 				if (selectedSets.contains(set)) {
 					selectedSets.remove(set);
@@ -2027,10 +2079,38 @@ public class View extends GLCanvas {
 		return !selectedSets.isEmpty();
 	}
 	
+	private boolean selectEdges() {
+		Element edge = Snap.element;
+		if (edge != null && Snap.set == null) {
+			selectedSets.clear();
+			selectedNodes.clear();
+			selectedParts3d.clear();
+			if (isControlKeyPressed) {
+				if (selectedEdges.contains(edge)) {
+					selectedEdges.remove(edge);
+				}
+				else {
+					selectedEdges.add(edge);
+				}
+			}
+			else {
+				if (selectedEdges.size() == 1 && selectedEdges.contains(edge)) {
+					selectedEdges.clear();
+				}
+				else {
+					selectedEdges.clear();
+					selectedEdges.add(edge);
+				}
+			}
+		}
+		return !selectedEdges.isEmpty();
+	}
+	
 	private boolean selectNodes() {
 		if (Snap.node != null) {
 			selectedSets.clear();
 			selectedParts3d.clear();
+			selectedEdges.clear();
 			if (isControlKeyPressed || (SimLive.mode == Mode.PARTS &&
 					Settings.newPartType != Element.Type.POINT_MASS)) {
 				if (selectedNodes.contains(Snap.node)) {
@@ -2118,6 +2198,47 @@ public class View extends GLCanvas {
 		catch (Exception e) {
 		}
 		return pointX < maxX && pointX > minX && pointY < maxY && pointY > minY;
+	}
+	
+	private void selectEdgesInBox() {
+		ArrayList<Object> objects = SimLive.getModelTreeSelection();
+		double[][] bCoords = new double[4][2];
+		bCoords[0][0] = selectionBox.x;
+		bCoords[0][1] = selectionBox.y;
+		bCoords[1][0] = selectionBox.x+selectionBox.width;
+		bCoords[1][1] = selectionBox.y;
+		bCoords[2][0] = selectionBox.x+selectionBox.width;
+		bCoords[2][1] = selectionBox.y+selectionBox.height;
+		bCoords[3][0] = selectionBox.x;
+		bCoords[3][1] = selectionBox.y+selectionBox.height;
+		Stream<Object> stream = objects.stream();
+		stream.forEach(object -> {
+			ContactPair contactPair = (ContactPair) object;
+			for (int e = 0; e < contactPair.getOutline().size(); e++) {
+				Rod edge = (Rod) contactPair.getOutline().get(e);
+				if (isEdgeInBox(contactPair, edge, bCoords)) {
+					selectedEdges.add(edge);
+				}
+			}
+		});
+	}
+	
+	private boolean isEdgeInBox(ContactPair contactPair, Rod edge, double[][] bCoords) {
+		double[] coords0 = contactPair.getOutlineNodes().get(edge.getElementNodes()[0]).getCoords();
+		double[] coords1 = contactPair.getOutlineNodes().get(edge.getElementNodes()[1]).getCoords();
+		double[] p0 = modelToScreenCoordinates(coords0);
+		double[] p1 = modelToScreenCoordinates(coords1);
+		if (selectionBoxContains(bCoords, p0) || selectionBoxContains(bCoords, p1)) {
+			return true;
+		}
+		for (int i = 0; i < 4; i++) {				
+			if (GeomUtility.doLineSegmentsIntersect(
+					bCoords[i], bCoords[(i+1)%4],
+					p0, p1)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private void selectSetsInBox() {
@@ -2307,6 +2428,7 @@ public class View extends GLCanvas {
 		selectedParts3d.clear();
 		selectedSets.clear();
 		selectedNodes.clear();
+		selectedEdges.clear();
 		selectedMeasurement = null;
 		selectedLabel = null;
 		//Sim2d.model.updateModel();
@@ -3335,6 +3457,35 @@ public class View extends GLCanvas {
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
 	    		lineElementRadius, scaling, Set.View.PINNED, zoom, selectedSets, objects);
 	    
+	    /* edges */
+	    if (Model.twoDimensional && SimLive.mode == SimLive.Mode.CONTACTS) {
+	    	for (int c = 0; c < objects.size(); c++) {
+	    		ContactPair contactPair = (ContactPair) objects.get(c);
+	    		boolean[] edge = new boolean[contactPair.getOutline().size()];
+	    		for (int e = 0; e < contactPair.getEdges().size(); e++) {
+	    			edge[contactPair.getEdges().get(e)[3]] = true;
+	    		}
+	    		for (int e = 0; e < contactPair.getOutline().size(); e++) {
+	    			float[] uniColor = null;
+	    			Rod rod = (Rod) contactPair.getOutline().get(e);
+	    			if (selectedEdges.contains(rod)) {
+	    				uniColor = SimLive.COLOR_SELECTION;
+	    			}
+	    			else if (edge[e]) {
+	    				uniColor = SimLive.COLOR_RED;
+	    			}
+	    			else {
+	    				gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_WHITE, 0);
+	    	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, SimLive.COLOR_BLACK, 0);
+	    			}
+		    		int[] elemNodes = rod.getElementNodes();
+	    			Node node0 = contactPair.getOutlineNodes().get(elemNodes[0]);
+		    		Node node1 = contactPair.getOutlineNodes().get(elemNodes[1]);
+		    		renderLineElementWithSection(gl2, rod, scaling, null, uniColor, node0, node1);
+	    		}
+	    	}
+	    }
+		
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
     	/* connectors */
 		for (int c = 0; c < SimLive.model.getConnectors().size(); c++) {
@@ -3448,76 +3599,39 @@ public class View extends GLCanvas {
 		}
 		
 		//orientations of edges
-		if (SimLive.mode == Mode.CONTACTS && Model.twoDimensional) {
+		/*if (SimLive.mode == Mode.CONTACTS && Model.twoDimensional) {
 			double arrowSize = SimLive.ORIENTATION_SIZE/width/zoom;
+			gl2.glEnable(GL2.GL_LIGHTING);
 			for (int c = 0; c < objects.size(); c++) {
 				ContactPair contactPair = (ContactPair) objects.get(c);
-				ArrayList<Element> elements = new ArrayList<Element>();
-				if (contactPair.getType() == ContactPair.Type.DEFORMABLE_DEFORMABLE) {
-					for (int s = 0; s < contactPair.getMasterSets().size(); s++) {
-						elements.addAll(contactPair.getMasterSets().get(s).getElements());
-					}
-				}
-				else {
-					elements.addAll(contactPair.getRigidElements());
-				}
-				
-				int maxNodeNr = 0;
-				for (int e = 0; e < elements.size(); e++) {
-					Element masterElement = elements.get(e);
-					int[] element_nodes = masterElement.getElementNodes();
-					for (int i = 0; i < element_nodes.length; i++) {
-						if (element_nodes[i] > maxNodeNr) maxNodeNr = element_nodes[i];
-					}
-				}
-				int[][] outlineEdge = new int[maxNodeNr+1][0];
-				
-				for (int e = 0; e < elements.size(); e++) {
-					Element masterElement = elements.get(e);
-					int[] element_nodes = masterElement.getElementNodes();
-					for (int i = 0; i < element_nodes.length; i++) {
-						int n0 = element_nodes[i];
-						int n1 = element_nodes[(i+1)%element_nodes.length];
-						if (((PlaneElement) masterElement).getR0().get(2, 2) < 0.0) {
-							n0 = n1; //swap n0 and n1
-							n1 = element_nodes[i];
-						}
-						outlineEdge[n0] = SimLive.add(outlineEdge[n0], n1);
-						if (SimLive.contains(outlineEdge[n1], n0)) {
-							outlineEdge[n0] = SimLive.remove(outlineEdge[n0], n1);
-							outlineEdge[n1] = SimLive.remove(outlineEdge[n1], n0);
-						}
-					}
-				}
-				
-				for (int e = 0; e < elements.size(); e++) {
-					int[] elemNodes = elements.get(e).getElementNodes();
-					for (int i = 0; i < elemNodes.length; i++) {
-						int n0 = elemNodes[i];
-						int n1 = elemNodes[(i+1)%elemNodes.length];
-						if (SimLive.contains(outlineEdge[n0], n1)) {
-							double[] coords0 = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE ?
-									getCoordsWithScaledDisp(n0) : contactPair.getRigidNodes().get(n0).getCoords();
-							double[] coords1 = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE ?
-									getCoordsWithScaledDisp(n1) : contactPair.getRigidNodes().get(n1).getCoords();
-							double[] a = new double[2];
-							a[0] = coords1[0]-coords0[0];
-							a[1] = coords1[1]-coords0[1];
-							double length = Math.sqrt(a[0]*a[0]+a[1]*a[1]);
-							gl2.glPushMatrix();
-							gl2.glTranslated((coords0[0]+coords1[0])/2.0, (coords0[1]+coords1[1])/2.0, (coords0[2]+coords1[2])/2.0);
-							gl2.glRotated(Math.acos(a[1]/length)*180.0/Math.PI, 0, 0, a[0] == 0 ? 1 : Math.signum(-a[0]));
-							gl2.glRotatef(90, 0, 1, 0);
-							gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
-							drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
-									(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
-									SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
-							gl2.glPopMatrix();
-						}
-					}			
+				for (int e = 0; e < contactPair.getEdges().size(); e++) {
+					int set = contactPair.getEdges().get(e)[0];
+					int elem = contactPair.getEdges().get(e)[1];
+					int edge = contactPair.getEdges().get(e)[2];
+					Element element = contactPair.getMasterSets().get(set).getElements().get(elem);
+					int[] element_nodes = element.getElementNodes();
+					int n0 = element_nodes[edge];
+					int n1 = element_nodes[(edge+1)%element_nodes.length];
+					double[] coords0 = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE ?
+							getCoordsWithScaledDisp(n0) : contactPair.getRigidNodes().get(n0).getCoords();
+					double[] coords1 = contactPair.getType() == Type.DEFORMABLE_DEFORMABLE ?
+							getCoordsWithScaledDisp(n1) : contactPair.getRigidNodes().get(n1).getCoords();
+					double[] a = new double[2];
+					a[0] = coords1[0]-coords0[0];
+					a[1] = coords1[1]-coords0[1];
+					double length = Math.sqrt(a[0]*a[0]+a[1]*a[1]);
+					gl2.glPushMatrix();
+					gl2.glTranslated((coords0[0]+coords1[0])/2.0, (coords0[1]+coords1[1])/2.0, (coords0[2]+coords1[2])/2.0);
+					gl2.glRotated(Math.acos(a[1]/length)*180.0/Math.PI, 0, 0, a[0] > 0.0 ? -1 : 1);
+					gl2.glRotatef(90, 0, 1, 0);
+					gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
+					drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
+							(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
+							SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
+			    	gl2.glPopMatrix();
 				}
 			}
-		}
+		}*/
 		
 		/* external reactions */
 		double arrowSize = SimLive.ARROW_SIZE/width/zoom;
@@ -4983,7 +5097,7 @@ public class View extends GLCanvas {
 						scalarPlot, uniColor, zoom);
 			}
 			else {
-				renderLineElementWithSection(gl2, (LineElement) element, scaling, scalarPlot, uniColor);
+				renderLineElementWithSection(gl2, (LineElement) element, scaling, scalarPlot, uniColor, null, null);
 			}
 		}
 		gl2.glEnable(GL2.GL_LIGHTING);
@@ -5016,11 +5130,12 @@ public class View extends GLCanvas {
 		return true;
 	}
 	
-	private void renderLineElementWithSection(GL2 gl2, LineElement element, double scaling, ScalarPlot scalarPlot, float[] uniColor) {
-		boolean existing = element.getID() < SimLive.model.getElements().size();
+	private void renderLineElementWithSection(GL2 gl2, LineElement element, double scaling, ScalarPlot scalarPlot, float[] uniColor,
+			Node node0, Node node1) {
+		boolean existing = element.getID() < SimLive.model.getElements().size() && node0 == null && node1 == null;
 		int[] elemNodes = element.getElementNodes();
-		double[] coords0 = getCoordsWithScaledDisp(elemNodes[0]);
-		double[] coords1 = getCoordsWithScaledDisp(elemNodes[1]);
+		double[] coords0 = node0 == null ? getCoordsWithScaledDisp(elemNodes[0]) : node0.getCoords();
+		double[] coords1 = node1 == null ? getCoordsWithScaledDisp(elemNodes[1]) : node1.getCoords();
 		double[] diff = new double[3];
 		diff[0] = coords1[0]-coords0[0];
 		diff[1] = coords1[1]-coords0[1];
@@ -5045,9 +5160,9 @@ public class View extends GLCanvas {
     	gl2.glMultMatrixd(getArrayFromRotationMatrix(Rr, true), 0);
     	
     	double t = 0.0, y = 0.0, z = 0.0;
-		int lineDivisions = getLineDivisions(element);
-		if (!existing) {
-			lineDivisions = 1;
+		int lineDivisions = 1;
+		if (existing) {
+			lineDivisions = getLineDivisions(element);
 		}
 		boolean shading = uniColor == null && scalarPlot == null;
 		double[][] N = shading ? section.getSectionNormals() : null;

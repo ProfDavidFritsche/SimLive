@@ -65,7 +65,7 @@ public class ContactDialog extends StoreDialog {
 		
 		Composite composite1 = new Composite(this, SWT.NONE);
 		composite1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
-		GridLayout gridLayout2 = new GridLayout(4, false);
+		GridLayout gridLayout2 = new GridLayout(6, false);
 		SimLive.formatGridLayoutForComposite(gridLayout2);
 		composite1.setLayout(gridLayout2);
 		
@@ -81,9 +81,21 @@ public class ContactDialog extends StoreDialog {
 		lblMasterParts.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
 		lblMasterParts.setText("Master Parts");
 		
+		if (Model.twoDimensional) {
+			Label lblAnd = new Label(composite1, SWT.NONE);
+			lblAnd.setFont(SimLive.FONT_BOLD);
+			lblAnd.setText("And");
+			
+			Label lblMasterEdges = new Label(composite1, SWT.NONE);
+			lblMasterEdges.setFont(SimLive.FONT_BOLD);
+			lblMasterEdges.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
+			lblMasterEdges.setText("Master Edges");
+		}
+		
 		lblOK[1] = new Label(composite1, SWT.NONE);
 		lblOK[1].setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-		setOKLabel(1, !contactPair.getMasterSets().isEmpty());
+		if (Model.twoDimensional) setOKLabel(1, !contactPair.getEdges().isEmpty());
+		else setOKLabel(1, !contactPair.getMasterSets().isEmpty());
 		
 		Label lblProperties = new Label(this, SWT.NONE);
 		lblProperties.setText("Properties");

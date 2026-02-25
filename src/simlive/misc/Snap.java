@@ -182,6 +182,9 @@ public abstract class Snap {
 				strArray[0] = element.getTypeString() + " " + (elemID+1);
 			}
 		}
+		else {
+			strArray[0] = "Edge";
+		}
 		return strArray;
 	}
 	

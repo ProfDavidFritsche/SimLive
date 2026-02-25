@@ -225,7 +225,7 @@ public class SimLive {
 						MATERIALS, SECTIONS, STEPS, GRID, SOLUTION, RESULTS}
 	public static Mode mode = Mode.NONE;
 	
-	public enum BoxSelect {NODES, PARTS, PARTS_3D}
+	public enum BoxSelect {NODES, PARTS, PARTS_3D, EDGES}
 	public static BoxSelect boxSelect;
 	public enum Select {DEFAULT, DISTANCE, ANGLE, LABEL}
 	public static Select select;

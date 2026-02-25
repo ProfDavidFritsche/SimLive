@@ -154,6 +154,68 @@ public abstract class Search {
 				elementAtPointInSet(point, sets.get(s), projectedPoint, viewport, q0, lookAt);
 			}
 		}
+		if (Model.twoDimensional && SimLive.mode == Mode.CONTACTS) {
+			double[] modelCoords = q0.getColumnPackedCopy();
+			ArrayList<Object> objects = SimLive.getModelTreeSelection();
+			for (int c = 0; c < objects.size(); c++) {
+				ContactPair contactPair = (ContactPair) objects.get(c);
+				for (int e = 0; e < contactPair.getOutline().size(); e++) {
+					Element elem = contactPair.getOutline().get(e);
+					int[] elemNodes = elem.getElementNodes();
+					Node node0 = contactPair.getOutlineNodes().get(elemNodes[0]);
+					Node node1 = contactPair.getOutlineNodes().get(elemNodes[1]);
+					double[] c0 = node0.getCoords();
+					double[] c1 = node1.getCoords();
+					Matrix p0 = new Matrix(c0, 3);
+					Matrix p1 = new Matrix(c1, 3);
+					Matrix dir0 = p1.minus(p0);
+					double length0 = dir0.normF();
+					dir0.timesEquals(1.0/length0);
+					Matrix d = null;
+					Matrix n = dir0.crossProduct(lookAt);
+					Matrix n2 = lookAt.crossProduct(n);
+					double x = (q0.minus(p0)).dotProduct(n2)/dir0.dotProduct(n2);
+					if (x > 0.0 && x < length0) {
+						d = p0.plus(dir0.times(x));
+					}
+					
+					double sqrDist = Double.MAX_VALUE;
+					double[] p = null;
+					if (d != null) {
+						p = View.modelToScreenCoordinates(d.getColumnPackedCopy());
+						
+						sqrDist = (p[0]-point[0])*(p[0]-point[0])+(p[1]-point[1])*(p[1]-point[1]);
+						double factor = SimLive.view.getSizeFactorPerspective(d.getColumnPackedCopy());
+						sqrDist *= factor*factor;
+					}
+					if (sqrDist > Search.minSqrDistLine) {
+						d = null;
+						double[] intersection = ((LineElement) elem).getCoordsInElement(modelCoords);
+						if (intersection != null) {
+							double t = ((LineElement) elem).getLocalFromGlobalCoordinates(intersection);
+							t = Math.min(Math.max(0, t), 1);
+							d = new Matrix(((LineElement) elem).getGlobalFromLocalCoordinates(t), 3);
+							p = View.modelToScreenCoordinates(d.getColumnPackedCopy());
+						}
+					}
+					
+					if (d != null) {
+						
+						double zCoord = p[2];
+						if (zCoord < Search.zCoord) {
+							Search.zCoord = zCoord;
+							
+							if (projectedPoint != null) {
+								projectedPoint[0] = (int) Math.round(p[0]);
+								projectedPoint[1] = (int) Math.round(p[1]);
+							}
+							Search.element = elem;
+							Snap.coords3d = d.getColumnPackedCopy();
+						}
+					}
+				}
+			}
+		}
 		
 		return Search.element;
 	}

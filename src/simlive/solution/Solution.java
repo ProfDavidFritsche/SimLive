@@ -105,12 +105,7 @@ public class Solution {
 		/*generateSlaveNodeList*/
 		Contact.generateSlaveNodeList(refModel.getContactPairs(), refModel.getElements(), refModel.getNodes().size());
 		
-		if (Model.twoDimensional) {
-			/*generateEdgeList*/
-			Contact.generateEdgeList(refModel.getContactPairs());
-			
-			setSuppressedDofs2d();
-		}
+		if (Model.twoDimensional) setSuppressedDofs2d();
 	}
 	
 	public boolean checkModel() {
@@ -261,7 +256,8 @@ public class Solution {
 		
 		for (int c = 0; c < contactPairs.size(); c++) {
 			if (contactPairs.get(c).getSlaveNodes().isEmpty() ||
-				contactPairs.get(c).getMasterSets().isEmpty()) {
+				contactPairs.get(c).getMasterSets().isEmpty() ||
+				(Model.twoDimensional && contactPairs.get(c).getEdges().isEmpty())) {
 				errors.add("Contact \""+contactPairs.get(c).name+"\" is not completely defined.");
 			}
 		}

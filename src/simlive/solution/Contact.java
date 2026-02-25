@@ -26,7 +26,6 @@ public class Contact {
 	private boolean isSticking;
 	private static ArrayList<Node> slaveNodes;
 	private static int[][] slaveNodeElements;
-	private static ArrayList<ArrayList<Integer[]>> edges;
 	private boolean isDeformableDeformable;
 
 	public Contact(Element masterElement, double penetration, double[] norm, double frictionCoefficient, double[] shapeFunctionValues, boolean isDeformableDeformable) {
@@ -89,54 +88,6 @@ public class Contact {
 					}
 				}
 			}
-		}
-	}
-	
-	public static void generateEdgeList(ArrayList<ContactPair> contactPairs) {
-		edges = new ArrayList<ArrayList<Integer[]>>();
-		for (int c = 0; c < contactPairs.size(); c++) {
-			ContactPair contactPair = contactPairs.get(c);
-			
-			ArrayList<Element> masterElements = new ArrayList<Element>();
-			for (int s = 0; s < contactPair.getMasterSets().size(); s++) {
-				masterElements.addAll(contactPair.getMasterSets().get(s).getElements());
-			}
-			
-			int maxNodeNr = 0;
-			for (int e = 0; e < masterElements.size(); e++) {
-				Element masterElement = masterElements.get(e);
-				int[] element_nodes = masterElement.getElementNodes();
-				for (int i = 0; i < element_nodes.length; i++) {
-					if (element_nodes[i] > maxNodeNr) maxNodeNr = element_nodes[i];
-				}
-			}
-			int[][] outlineEdge = new int[maxNodeNr+1][0];
-			
-			for (int e = 0; e < masterElements.size(); e++) {
-				Element masterElement = masterElements.get(e);
-				int[] element_nodes = masterElement.getElementNodes();
-				for (int i = 0; i < element_nodes.length; i++) {
-					int n0 = element_nodes[i];
-					int n1 = element_nodes[(i+1)%element_nodes.length];
-					if (((PlaneElement) masterElement).getR0().get(2, 2) < 0.0) {
-						n0 = n1; //swap n0 and n1
-						n1 = element_nodes[i];
-					}
-					outlineEdge[n0] = SimLive.add(outlineEdge[n0], n1);
-					if (SimLive.contains(outlineEdge[n1], n0)) {
-						outlineEdge[n0] = SimLive.remove(outlineEdge[n0], n1);
-						outlineEdge[n1] = SimLive.remove(outlineEdge[n1], n0);
-					}
-				}
-			}
-			
-			ArrayList<Integer[]> edgesTemp = new ArrayList<Integer[]>();
-			for (int i = 0; i < outlineEdge.length; i++) {
-				for (int j = 0; j < outlineEdge[i].length; j++) {
-					edgesTemp.add(new Integer[]{i, outlineEdge[i][j]});
-				}
-			}
-			edges.add(edgesTemp);
 		}
 	}
 	
@@ -430,23 +381,35 @@ public class Contact {
 			for (int c = 0; c < contactPairs.size(); c++) if (contactPairs.get(c).getSlaveNodes().contains(slaveNode)) {
 				ContactPair contactPair = contactPairs.get(c);
 				
-				double[][][] masterNodeCoords = new double[edges.get(c).size()][2][];
+				ArrayList<Integer[]> edges = new ArrayList<Integer[]>();
+				for (int e = 0; e < contactPair.getEdges().size(); e++) {
+					int set = contactPair.getEdges().get(e)[0];
+					int elem = contactPair.getEdges().get(e)[1];
+					int edge = contactPair.getEdges().get(e)[2];
+					Element element = contactPair.getMasterSets().get(set).getElements().get(elem);
+					int[] element_nodes = element.getElementNodes();
+					int n0 = element_nodes[edge];
+					int n1 = element_nodes[(edge+1)%element_nodes.length];
+					edges.add(new Integer[]{n0, n1});
+				}
+				
+				double[][][] masterNodeCoords = new double[edges.size()][2][];
 				
 				int maxNodeNr = 0;
-				for (int e = 0; e < edges.get(c).size(); e++) {
-					int k0 = edges.get(c).get(e)[0];
-					int k1 = edges.get(c).get(e)[1];
+				for (int e = 0; e < edges.size(); e++) {
+					int k0 = edges.get(e)[0];
+					int k1 = edges.get(e)[1];
 					masterNodeCoords[e][0] = getMasterNodeCoords(contactPair, k0, solution, u_global);
 					masterNodeCoords[e][1] = getMasterNodeCoords(contactPair, k1, solution, u_global);
 					maxNodeNr = Math.max(maxNodeNr, Math.max(k0, k1));
 				}
 				
-				double[][] edgeNormals = new double[edges.get(c).size()][3];
+				double[][] edgeNormals = new double[edges.size()][3];
 				double[][] nodeNormals = new double[maxNodeNr+1][];
 									
-				for (int e = 0; e < edges.get(c).size(); e++) {
-					int k0 = edges.get(c).get(e)[0];
-					int k1 = edges.get(c).get(e)[1];
+				for (int e = 0; e < edges.size(); e++) {
+					int k0 = edges.get(e)[0];
+					int k1 = edges.get(e)[1];
 					double[] a = new double[2];
 					a[0] = masterNodeCoords[e][1][0] - masterNodeCoords[e][0][0];
 					a[1] = masterNodeCoords[e][1][1] - masterNodeCoords[e][0][1];
@@ -461,9 +424,9 @@ public class Contact {
 					nodeNormals[k1][1] += edgeNormals[e][1];
 				}
 				
-				for (int e = 0; e < edges.get(c).size(); e++) {
-					int k0 = edges.get(c).get(e)[0];
-					int k1 = edges.get(c).get(e)[1];
+				for (int e = 0; e < edges.size(); e++) {
+					int k0 = edges.get(e)[0];
+					int k1 = edges.get(e)[1];
 					double[] diff0 = new double[2];
 					diff0[0] = coords[0] - masterNodeCoords[e][0][0];
 					diff0[1] = coords[1] - masterNodeCoords[e][0][1];
