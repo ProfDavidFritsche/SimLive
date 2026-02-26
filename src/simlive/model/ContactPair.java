@@ -352,23 +352,32 @@ public class ContactPair implements DeepEqualsInterface {
 		}
 	}
 	
-	private boolean isEdgeValid(Node node0, Node node1, int[][] outlineEdge, ArrayList<Element> elements) {
+	private boolean checkOutline() {
+		ArrayList<Element> elements = new ArrayList<Element>();
+		for (int s = 0; s < masterSets.size(); s++) {
+			elements.addAll(masterSets.get(s).getElements());
+		}
+		int[][] outlineEdge = getOutlineEdge(elements);
 		for (int e = 0; e < elements.size(); e++) {
 			int[] elemNodes = elements.get(e).getElementNodes();
 			for (int i = 0; i < elemNodes.length; i++) {
 				if (SimLive.contains(outlineEdge[elemNodes[i]], elemNodes[(i+1)%elemNodes.length])) {
 					Node n0 = SimLive.model.getNodes().get(elemNodes[i]);
 					Node n1 = SimLive.model.getNodes().get(elemNodes[(i+1)%elemNodes.length]);
-					if (node0.getXCoord() == n0.getXCoord() &&
-						node0.getYCoord() == n0.getYCoord() &&
-						node1.getXCoord() == n1.getXCoord() &&
-						node1.getYCoord() == n1.getYCoord()) {
-						return true;
+					int e0;
+					for (e0 = 0; e0 < outline.size(); e0++) {
+						Node node0 = outlineNodes.get(outline.get(e0).getElementNodes()[0]);
+						Node node1 = outlineNodes.get(outline.get(e0).getElementNodes()[1]);
+						if (node0.getXCoord() == n0.getXCoord() &&
+							node0.getYCoord() == n0.getYCoord() &&
+							node1.getXCoord() == n1.getXCoord() &&
+							node1.getYCoord() == n1.getYCoord()) break;
 					}
+					if (e0 == outline.size()) return false;
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	public void update() {
@@ -377,20 +386,8 @@ public class ContactPair implements DeepEqualsInterface {
 		if (type == Type.DEFORMABLE_DEFORMABLE) {
 			masterSets.retainAll(SimLive.model.getSets());
 			
-			/* reset if outline does not match master sets */
-			ArrayList<Element> elements = new ArrayList<Element>();
-			for (int s = 0; s < masterSets.size(); s++) {
-				elements.addAll(masterSets.get(s).getElements());
-			}
-			int[][] outlineEdge = getOutlineEdge(elements);
-			for (int e = 0; e < outline.size(); e++) {
-				Node node0 = outlineNodes.get(outline.get(e).getElementNodes()[0]);
-				Node node1 = outlineNodes.get(outline.get(e).getElementNodes()[1]);
-				if (!isEdgeValid(node0, node1, outlineEdge, elements)) {
-					setMaster(new ArrayList<Set>());
-					break;
-				}
-			}
+			/* generate if outline does not match master sets */
+			if (!checkOutline()) generateOutline();
 		}
 		updateForwardTol();
 	}
