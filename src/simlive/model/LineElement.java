@@ -54,7 +54,7 @@ public abstract class LineElement extends Element {
 		for (int i = 0; i < sections.size(); i++) {
 			if (sections.get(i).deepEquals(section, Result.EQUAL) == Result.EQUAL) return sections.get(i);
 		}
-		return Section.getDefaultSection();
+		return null;
 	}
 	
 	public double[] getQ0() {

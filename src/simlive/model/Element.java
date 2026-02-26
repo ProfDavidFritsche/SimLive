@@ -53,7 +53,7 @@ public abstract class Element implements DeepEqualsInterface {
 		for (int i = 0; i < materials.size(); i++) {
 			if (materials.get(i).deepEquals(material, Result.EQUAL) == Result.EQUAL) return materials.get(i);
 		}
-		return Material.getDefaultMaterials().get(0);
+		return null;
 	}
 	
 	public abstract Element.Type getType();

@@ -94,7 +94,7 @@ public class ContactDialog extends StoreDialog {
 		
 		lblOK[1] = new Label(composite1, SWT.NONE);
 		lblOK[1].setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-		if (Model.twoDimensional) setOKLabel(1, !contactPair.getEdges().isEmpty());
+		if (Model.twoDimensional) setOKLabel(1, contactPair.hasStoredEdges());
 		else setOKLabel(1, !contactPair.getMasterSets().isEmpty());
 		
 		Label lblProperties = new Label(this, SWT.NONE);

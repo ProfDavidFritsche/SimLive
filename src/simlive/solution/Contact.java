@@ -26,6 +26,7 @@ public class Contact {
 	private boolean isSticking;
 	private static ArrayList<Node> slaveNodes;
 	private static int[][] slaveNodeElements;
+	private static ArrayList<ArrayList<Integer[]>> edges;
 	private boolean isDeformableDeformable;
 
 	public Contact(Element masterElement, double penetration, double[] norm, double frictionCoefficient, double[] shapeFunctionValues, boolean isDeformableDeformable) {
@@ -88,6 +89,40 @@ public class Contact {
 					}
 				}
 			}
+		}
+	}
+	
+	public static void generateEdgeList(ArrayList<ContactPair> contactPairs) {
+		edges = new ArrayList<ArrayList<Integer[]>>();
+		for (int c = 0; c < contactPairs.size(); c++) {
+			ContactPair contactPair = contactPairs.get(c);
+			ArrayList<Integer[]> edgesTemp = new ArrayList<Integer[]>();
+			for (int e = 0; e < contactPair.getOutline().size(); e++) {
+				Rod rod = (Rod) contactPair.getOutline().get(e);
+				if (rod.isStoredEdge()) {
+					Node node0 = contactPair.getOutlineNodes().get(rod.getElementNodes()[0]);
+					Node node1 = contactPair.getOutlineNodes().get(rod.getElementNodes()[1]);
+					for (int s0 = 0; s0 < contactPair.getMasterSets().size(); s0++) {
+						for (int e0 = 0; e0 < contactPair.getMasterSets().get(s0).getElements().size(); e0++) {
+							int[] elemNodes = contactPair.getMasterSets().get(s0).getElements().get(e0).getElementNodes();
+							for (int i0 = 0; i0 < elemNodes.length; i0++) {
+								Node n0 = contactPair.getType() == Type.RIGID_DEFORMABLE ? contactPair.getRigidNodes().get(elemNodes[i0]) :
+									SimLive.model.getNodes().get(elemNodes[i0]);
+								Node n1 = contactPair.getType() == Type.RIGID_DEFORMABLE ? contactPair.getRigidNodes().get(elemNodes[(i0+1)%elemNodes.length]) :
+									SimLive.model.getNodes().get(elemNodes[(i0+1)%elemNodes.length]);
+								if (node0.getXCoord() == n0.getXCoord() &&
+									node0.getYCoord() == n0.getYCoord() &&
+									node1.getXCoord() == n1.getXCoord() &&
+									node1.getYCoord() == n1.getYCoord()) {
+									
+									edgesTemp.add(new Integer[]{elemNodes[i0], elemNodes[(i0+1)%elemNodes.length]});
+								}
+							}
+						}
+					}
+				}
+			}
+			edges.add(edgesTemp);
 		}
 	}
 	
@@ -380,36 +415,25 @@ public class Contact {
 			
 			for (int c = 0; c < contactPairs.size(); c++) if (contactPairs.get(c).getSlaveNodes().contains(slaveNode)) {
 				ContactPair contactPair = contactPairs.get(c);
+				ArrayList<Integer[]> edgesTemp = edges.get(c);
 				
-				ArrayList<Integer[]> edges = new ArrayList<Integer[]>();
-				for (int e = 0; e < contactPair.getEdges().size(); e++) {
-					int set = contactPair.getEdges().get(e)[0];
-					int elem = contactPair.getEdges().get(e)[1];
-					int edge = contactPair.getEdges().get(e)[2];
-					Element element = contactPair.getMasterSets().get(set).getElements().get(elem);
-					int[] element_nodes = element.getElementNodes();
-					int n0 = element_nodes[edge];
-					int n1 = element_nodes[(edge+1)%element_nodes.length];
-					edges.add(new Integer[]{n0, n1});
-				}
-				
-				double[][][] masterNodeCoords = new double[edges.size()][2][];
+				double[][][] masterNodeCoords = new double[edges.get(c).size()][2][];
 				
 				int maxNodeNr = 0;
-				for (int e = 0; e < edges.size(); e++) {
-					int k0 = edges.get(e)[0];
-					int k1 = edges.get(e)[1];
+				for (int e = 0; e < edgesTemp.size(); e++) {
+					int k0 = edgesTemp.get(e)[0];
+					int k1 = edgesTemp.get(e)[1];
 					masterNodeCoords[e][0] = getMasterNodeCoords(contactPair, k0, solution, u_global);
 					masterNodeCoords[e][1] = getMasterNodeCoords(contactPair, k1, solution, u_global);
 					maxNodeNr = Math.max(maxNodeNr, Math.max(k0, k1));
 				}
 				
-				double[][] edgeNormals = new double[edges.size()][3];
+				double[][] edgeNormals = new double[edgesTemp.size()][3];
 				double[][] nodeNormals = new double[maxNodeNr+1][];
 									
-				for (int e = 0; e < edges.size(); e++) {
-					int k0 = edges.get(e)[0];
-					int k1 = edges.get(e)[1];
+				for (int e = 0; e < edgesTemp.size(); e++) {
+					int k0 = edgesTemp.get(e)[0];
+					int k1 = edgesTemp.get(e)[1];
 					double[] a = new double[2];
 					a[0] = masterNodeCoords[e][1][0] - masterNodeCoords[e][0][0];
 					a[1] = masterNodeCoords[e][1][1] - masterNodeCoords[e][0][1];
@@ -424,9 +448,9 @@ public class Contact {
 					nodeNormals[k1][1] += edgeNormals[e][1];
 				}
 				
-				for (int e = 0; e < edges.size(); e++) {
-					int k0 = edges.get(e)[0];
-					int k1 = edges.get(e)[1];
+				for (int e = 0; e < edgesTemp.size(); e++) {
+					int k0 = edgesTemp.get(e)[0];
+					int k1 = edgesTemp.get(e)[1];
 					double[] diff0 = new double[2];
 					diff0[0] = coords[0] - masterNodeCoords[e][0][0];
 					diff0[1] = coords[1] - masterNodeCoords[e][0][1];

@@ -1449,40 +1449,16 @@ public class View extends GLCanvas {
 					public void widgetSelected(SelectionEvent e) {
 						if (!selectedNodes.isEmpty()) contactPair.setSlave(getSelectedNodes());
 						if (!selectedEdges.isEmpty()) {
-							ArrayList<Integer[]> edges = new ArrayList<Integer[]>();
-							for (int edge = 0; edge < selectedEdges.size(); edge++) {
-								Rod rod = (Rod) selectedEdges.get(edge);
-								int index = contactPair.getOutline().indexOf(rod);
-								Node node0 = contactPair.getOutlineNodes().get(rod.getElementNodes()[0]);
-								Node node1 = contactPair.getOutlineNodes().get(rod.getElementNodes()[1]);
-								for (int s0 = 0; s0 < contactPair.getMasterSets().size(); s0++) {
-									for (int e0 = 0; e0 < contactPair.getMasterSets().get(s0).getElements().size(); e0++) {
-										int[] elemNodes = contactPair.getMasterSets().get(s0).getElements().get(e0).getElementNodes();
-										for (int i0 = 0; i0 < elemNodes.length; i0++) {
-											Node n0 = contactPair.getType() == Type.RIGID_DEFORMABLE ? contactPair.getRigidNodes().get(elemNodes[i0]) :
-												SimLive.model.getNodes().get(elemNodes[i0]);
-											Node n1 = contactPair.getType() == Type.RIGID_DEFORMABLE ? contactPair.getRigidNodes().get(elemNodes[(i0+1)%elemNodes.length]) :
-												SimLive.model.getNodes().get(elemNodes[(i0+1)%elemNodes.length]);
-											if (node0.getXCoord() == n0.getXCoord() &&
-												node0.getYCoord() == n0.getYCoord() &&
-												node1.getXCoord() == n1.getXCoord() &&
-												node1.getYCoord() == n1.getYCoord()) {
-												
-												edges.add(new Integer[]{s0, e0, i0, index});
-											}
-										}
-									}
-								}
+							for (int e0 = 0; e0 < contactPair.getOutline().size(); e0++) {
+								Rod rod = (Rod) contactPair.getOutline().get(e0);
+								rod.setStoredEdge(selectedEdges.contains(rod));
 							}
-							contactPair.setEdges(edges);
 						}
-						else {
-							if (!selectedSets.isEmpty()) {
-								contactPair.setMaster(getSelectedSets());
-							}
+						if (!selectedSets.isEmpty()) {
+							contactPair.setMaster(getSelectedSets());
 						}
 						storeMenuItemSelected(0, !contactPair.getSlaveNodes().isEmpty());
-						if (Model.twoDimensional) storeMenuItemSelected(1, !contactPair.getEdges().isEmpty());
+						if (Model.twoDimensional) storeMenuItemSelected(1, contactPair.hasStoredEdges());
 						else storeMenuItemSelected(1, !contactPair.getMasterSets().isEmpty());
 					}
 				});
@@ -3461,17 +3437,13 @@ public class View extends GLCanvas {
 	    if (Model.twoDimensional && SimLive.mode == SimLive.Mode.CONTACTS) {
 	    	for (int c = 0; c < objects.size(); c++) {
 	    		ContactPair contactPair = (ContactPair) objects.get(c);
-	    		boolean[] edge = new boolean[contactPair.getOutline().size()];
-	    		for (int e = 0; e < contactPair.getEdges().size(); e++) {
-	    			edge[contactPair.getEdges().get(e)[3]] = true;
-	    		}
 	    		for (int e = 0; e < contactPair.getOutline().size(); e++) {
 	    			float[] uniColor = null;
 	    			Rod rod = (Rod) contactPair.getOutline().get(e);
 	    			if (selectedEdges.contains(rod)) {
 	    				uniColor = SimLive.COLOR_SELECTION;
 	    			}
-	    			else if (edge[e]) {
+	    			else if (rod.isStoredEdge()) {
 	    				uniColor = SimLive.COLOR_RED;
 	    			}
 	    			else {
@@ -5132,7 +5104,8 @@ public class View extends GLCanvas {
 	
 	private void renderLineElementWithSection(GL2 gl2, LineElement element, double scaling, ScalarPlot scalarPlot, float[] uniColor,
 			Node node0, Node node1) {
-		boolean existing = element.getID() < SimLive.model.getElements().size() && node0 == null && node1 == null;
+		boolean contactEdge = node0 != null && node1 != null;
+		boolean existing = element.getID() < SimLive.model.getElements().size() && !contactEdge;
 		int[] elemNodes = element.getElementNodes();
 		double[] coords0 = node0 == null ? getCoordsWithScaledDisp(elemNodes[0]) : node0.getCoords();
 		double[] coords1 = node1 == null ? getCoordsWithScaledDisp(elemNodes[1]) : node1.getCoords();
@@ -5142,7 +5115,7 @@ public class View extends GLCanvas {
 		diff[2] = coords1[2]-coords0[2];
 		double length = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
 		if (length < SimLive.ZERO_TOL) return;
-		Section section = element.isSectionValid(SimLive.model.getSections()) ?
+		Section section = element.isSectionValid(SimLive.model.getSections()) && !contactEdge ?
 				element.getSection() :
 				new Section(new SectionShape(SectionShape.Type.DIRECT_INPUT));
 		double[][] P = section.getSectionPoints();

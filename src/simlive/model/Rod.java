@@ -8,6 +8,16 @@ import simlive.solution.Solution;
 
 public class Rod extends LineElement {
 	
+	private boolean storedEdge = false;
+	
+	public boolean isStoredEdge() {
+		return storedEdge;
+	}
+
+	public void setStoredEdge(boolean storedEdge) {
+		this.storedEdge = storedEdge;
+	}
+
 	private Rod() {
 		super();
 	}
@@ -271,6 +281,7 @@ public class Rod extends LineElement {
 	@Override
 	public Element clone(Model model) {
 		Rod rod = new Rod();
+		rod.storedEdge = this.storedEdge;
 		rod.elementNodes = this.elementNodes.clone();
 		rod.material = findMaterial(model.getMaterials(), material);
 		rod.section = findSection(model.getSections(), section);
@@ -286,6 +297,7 @@ public class Rod extends LineElement {
 	public Result deepEquals(Object obj, Result result) {
 		if (!(obj instanceof Rod)) return Result.RECALC;
 		Rod element = (Rod) obj;
+		if (this.storedEdge != element.storedEdge) return Result.RECALC;
 		if (this.getType() != element.getType()) return Result.RECALC;
 		if (!Arrays.equals(this.elementNodes, element.elementNodes)) return Result.RECALC;
 		if (this.material != null && element.material != null)
