@@ -358,6 +358,7 @@ public class ContactPair implements DeepEqualsInterface {
 			elements.addAll(masterSets.get(s).getElements());
 		}
 		int[][] outlineEdge = getOutlineEdge(elements);
+		int nrFound = 0;
 		for (int e = 0; e < elements.size(); e++) {
 			int[] elemNodes = elements.get(e).getElementNodes();
 			for (int i = 0; i < elemNodes.length; i++) {
@@ -371,13 +372,17 @@ public class ContactPair implements DeepEqualsInterface {
 						if (node0.getXCoord() == n0.getXCoord() &&
 							node0.getYCoord() == n0.getYCoord() &&
 							node1.getXCoord() == n1.getXCoord() &&
-							node1.getYCoord() == n1.getYCoord()) break;
+							node1.getYCoord() == n1.getYCoord()) {
+							
+							nrFound++;
+							break;
+						}
 					}
 					if (e0 == outline.size()) return false;
 				}
 			}
 		}
-		return true;
+		return nrFound == outline.size();
 	}
 	
 	public void update() {
