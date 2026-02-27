@@ -154,9 +154,6 @@ public abstract class Search {
 				elementAtPointInSet(point, sets.get(s), projectedPoint, viewport, q0, lookAt);
 			}
 		}
-		if (Model.twoDimensional && SimLive.mode == Mode.CONTACTS) {
-			edgeAtPoint(point, projectedPoint, q0, lookAt);
-		}
 		
 		return Search.element;
 	}
@@ -177,6 +174,9 @@ public abstract class Search {
 		}
 		for (int s = 0; s < sets.size(); s++) {
 			elementAtPointInSet(point, sets.get(s), projectedPoint, viewport, q0, lookAt);
+		}
+		if (Model.twoDimensional && SimLive.mode == Mode.CONTACTS) {
+			edgeAtPoint(point, projectedPoint, q0, lookAt);
 		}
 		
 		return Search.element;

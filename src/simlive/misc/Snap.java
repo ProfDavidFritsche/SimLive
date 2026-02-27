@@ -80,7 +80,7 @@ public abstract class Snap {
 				}
 				else if (element != null) {
 					SimLive.view.labelAtMousePos = Label.getNewLabelForElement(element);
-					if (SimLive.select != SimLive.Select.LABEL) {
+					if (SimLive.select != SimLive.Select.LABEL || set == null) {
 						strArray = getTextForElement(element);
 						SimLive.view.labelAtMousePos.setText(strArray[0], strArray[1], null);
 					}
