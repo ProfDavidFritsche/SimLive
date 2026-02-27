@@ -1166,7 +1166,7 @@ public class View extends GLCanvas {
 				}
 				else if (!selectedParts3d.isEmpty()) {
 					SimLive.boxSelect = BoxSelect.PARTS_3D;
-				}
+				}				
 				else if (!selectedEdges.isEmpty()) {
 					SimLive.boxSelect = BoxSelect.EDGES;
 				}
@@ -3266,7 +3266,7 @@ public class View extends GLCanvas {
 			}
 		}
 		if (SimLive.mode == SimLive.Mode.CONTACTS) {
-			for (int i = 0; i < objects.size(); i++) {
+			for (int i = 0; i < objects.size(); i++) if (!(Model.twoDimensional && ((ContactPair) objects.get(i)).hasStoredEdges())) {
 				connectSets1.addAll(((ContactPair) objects.get(i)).getMasterSets());
 			}
 		}
@@ -3338,7 +3338,8 @@ public class View extends GLCanvas {
 			if (contactPair.getType() == Type.RIGID_DEFORMABLE) {
 				gl2.glMaterialf(GL2.GL_FRONT, GL2.GL_SHININESS, 0);
 				float[] color = SimLive.COLOR_WHITE;
-				if (SimLive.mode == SimLive.Mode.CONTACTS && objects.contains(contactPair)) {
+				if (SimLive.mode == SimLive.Mode.CONTACTS && objects.contains(contactPair) &&
+						!(Model.twoDimensional && contactPair.hasStoredEdges())) {
 		    		color = SimLive.COLOR_BLUE;
 				}
 				float[] modelview = new float[16];
@@ -3444,7 +3445,7 @@ public class View extends GLCanvas {
 	    				uniColor = SimLive.COLOR_SELECTION;
 	    			}
 	    			else if (rod.isStoredEdge()) {
-	    				uniColor = SimLive.COLOR_RED;
+	    				uniColor = SimLive.COLOR_BLUE;
 	    			}
 	    			else {
 	    				gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_WHITE, 0);

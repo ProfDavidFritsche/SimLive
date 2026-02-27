@@ -88,7 +88,7 @@ public class ContactDialog extends StoreDialog {
 			
 			Label lblMasterEdges = new Label(composite1, SWT.NONE);
 			lblMasterEdges.setFont(SimLive.FONT_BOLD);
-			lblMasterEdges.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
+			lblMasterEdges.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
 			lblMasterEdges.setText("Master Edges");
 		}
 		
