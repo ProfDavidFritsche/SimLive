@@ -65,7 +65,7 @@ public class ContactDialog extends StoreDialog {
 		
 		Composite composite1 = new Composite(this, SWT.NONE);
 		composite1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
-		GridLayout gridLayout2 = new GridLayout(6, false);
+		GridLayout gridLayout2 = new GridLayout(Model.twoDimensional ? 6 : 4, false);
 		SimLive.formatGridLayoutForComposite(gridLayout2);
 		composite1.setLayout(gridLayout2);
 		
