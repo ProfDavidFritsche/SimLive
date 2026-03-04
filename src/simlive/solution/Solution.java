@@ -43,6 +43,7 @@ public class Solution {
 	private Contact[] contacts; //parallelStream
 	private int nSuppressedDofs = 0; //solve2d
 	private boolean[] suppressedDof = null; //solve2d
+	private Matrix C_coupling_global = null;
 	
 	
 	public Solution(Model model) {
@@ -320,6 +321,8 @@ public class Solution {
 		}
 		minElemLength = Math.sqrt(minElemLength);
 		
+		C_coupling_global = new Matrix(nDofs, 1);
+		
 		for (int s = 0; s < refModel.getSteps().size(); s++) {
 			Step step = refModel.getSteps().get(s);
 			
@@ -400,7 +403,6 @@ public class Solution {
 				u_global0 = new Matrix(nDofs, 1);
 			}
 			Matrix C_reaction_global = new Matrix(nDofs, 1);
-			Matrix C_coupling_global = new Matrix(nDofs, 1);
 			Matrix f_int = increments[i].assembleForceParallel(nDofs, u_global);
 			Matrix f_ext = null;
 			
@@ -512,7 +514,6 @@ public class Solution {
 		
 		Matrix u_global = new Matrix(nDofs, 1);
 		Matrix v_global = new Matrix(nDofs, 1);
-		Matrix C_coupling_global = new Matrix(nDofs, 1);
 		if (startInc > 0) {
 			u_global = increments[startInc-1].get_u_global().copy();
 			v_global = increments[startInc-1].get_v_global().copy();				
