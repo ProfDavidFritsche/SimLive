@@ -407,7 +407,7 @@ public class Solution {
 			for (int iter = 0; iter < maxIterations; iter++) {
 				
 				/* contact search */
-				Contact.search(contacts, refModel.getContactPairs(), this, u_global, u_global0, C_coupling_global);
+				Contact.search(contacts, refModel.getContactPairs(), this, u_global, u_global0, f_int);
 				
 				Matrix f_fric = increments[i].getFrictionForce(nDofs, contacts, C_coupling_global, null, null, 0.0);
 				f_ext = increments[i].getExternalForce(nDofs, step, f_gravity, u_global).plus(f_fric);
@@ -512,7 +512,6 @@ public class Solution {
 		
 		Matrix u_global = new Matrix(nDofs, 1);
 		Matrix v_global = new Matrix(nDofs, 1);
-		Matrix C_coupling_global = new Matrix(nDofs, 1);
 		if (startInc > 0) {
 			u_global = increments[startInc-1].get_u_global().copy();
 			v_global = increments[startInc-1].get_v_global().copy();				
@@ -549,11 +548,12 @@ public class Solution {
 			Increment increment = new Increment(this, time, stepNr);
 			
 			Matrix u_global_with_delta = u_global.times(2.0).minus(u_global_old);
+			Matrix f_int = increment.assembleForceParallel(nDofs, u_global);
 			
 			/* contact search */
-			Contact.search(contacts, refModel.getContactPairs(), this, u_global_with_delta, u_global_with_delta, C_coupling_global);
+			Contact.search(contacts, refModel.getContactPairs(), this, u_global_with_delta, u_global_with_delta, f_int);
 			
-			Matrix f_fric = increment.getFrictionForce(nDofs, contacts, C_coupling_global, v_global, M_global, timeStep);
+			Matrix f_fric = increment.getFrictionForce(nDofs, contacts, f_int, v_global, M_global, timeStep);
 			Matrix f_ext = increment.getExternalForce(nDofs, step, f_gravity, u_global).plus(f_fric);
 			Matrix G_connect = increment.getConnectorPartOfGMatrix(nDofs, u_global);
 			Matrix G_contact = increment.getContactPartOfGMatrix(nDofs, contacts, u_global);
@@ -564,7 +564,6 @@ public class Solution {
 			Matrix g_load = increment.getLoadPartOfgMatrix(nDofs, u_global_with_delta);
 			Matrix g = increment.getAssembledgMatrix(G, g_connect, g_contact, g_load).times(1.0/(timeStep*timeStep));
 			Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, G);
-			Matrix f_int = increment.assembleForceParallel(nDofs, u_global);
 			f_int = increment.addDampingForce(nDofs, f_int, u_global, v_global, dStiffElems, dMassElems);
 			Matrix delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), new Matrix(nDofs, 1), M_global, G, g);
 			
@@ -605,9 +604,6 @@ public class Solution {
 			
 			Matrix u_global_new = a_global.times(timeStep*timeStep).plus(u_global.times(2.0)).minus(u_global_old);
 			v_global = u_global_new.minus(u_global_old).times(1.0/(2.0*timeStep));
-			
-			Matrix G_onlyCoupling = increment.getAssembledGMatrix(nDofs, G_support.getEmptyCopy(), G_connect, G_contact, G_load.getEmptyCopy());
-			C_coupling_global = constraintMethod.getConstraintForce(new Matrix(nDofs, 1), a_constr, G_onlyCoupling, g, M_global);
 			
 			/* post increment */
 			if (i%(nInc/step.nIncrements) == 0) {

@@ -179,10 +179,10 @@ public class Contact {
 	}
 	
 	public static void search(Contact[] contacts, ArrayList<ContactPair> contactPairs,
-			Solution solution, Matrix u_global, Matrix u_global0, Matrix C_global) {
+			Solution solution, Matrix u_global, Matrix u_global0, Matrix f_int) {
 		
 		if (Model.twoDimensional) {
-			search2d(contacts, contactPairs, solution, u_global, u_global0, C_global);
+			search2d(contacts, contactPairs, solution, u_global, u_global0, f_int);
 			return;
 		}
 		
@@ -359,13 +359,10 @@ public class Contact {
 			/* check contact with masterElement0 */
 			if (masterElement0 != null) {
 				
-				double contactForce = 0.0;
-				if (C_global != null) {
-					contactForce = C_global.get(dofNode, 0)*masterNormals0[0]+C_global.get(dofNode+1, 0)*masterNormals0[1]+C_global.get(dofNode+2, 0)*masterNormals0[2];
-				}
+				double contactForce = f_int.get(dofNode, 0)*masterNormals0[0]+f_int.get(dofNode+1, 0)*masterNormals0[1]+f_int.get(dofNode+2, 0)*masterNormals0[2];
 				
 				if ((contacts[slaveNodeID] == null && maxPenetration > -forwardTol) ||
-					(contacts[slaveNodeID] != null && ((maxPenetration > -forwardTol && contactForce <= 0.0 && C_global != null) ||
+					(contacts[slaveNodeID] != null && ((maxPenetration > -forwardTol && contactForce <= 0.0) ||
 					 noSeparation))) {
 					
 					double[] shapeFunctionValues = null;
@@ -391,7 +388,7 @@ public class Contact {
 	}
 	
 	private static void search2d(Contact[] contacts, ArrayList<ContactPair> contactPairs,
-			Solution solution, Matrix u_global, Matrix u_global0, Matrix C_global) {
+			Solution solution, Matrix u_global, Matrix u_global0, Matrix f_int) {
 		
 		/* do search for all slave nodes */
 		Stream<Node> stream = slaveNodes.parallelStream();
@@ -493,12 +490,10 @@ public class Contact {
 			/* check contact with masterElement0 */
 			if (masterElement0 != null) {
 				
-				double contactForce = 0.0;
-				if (C_global != null) {
-					contactForce = C_global.get(dofNode, 0)*edgeNormal0[0]+C_global.get(dofNode+1, 0)*edgeNormal0[1];
-				}
+				double contactForce = f_int.get(dofNode, 0)*edgeNormal0[0]+f_int.get(dofNode+1, 0)*edgeNormal0[1];
+				
 				if ((contacts[slaveNodeID] == null && maxPenetration > -forwardTol) ||
-						(contacts[slaveNodeID] != null && ((maxPenetration > -forwardTol && contactForce <= 0.0 && C_global != null) ||
+						(contacts[slaveNodeID] != null && ((maxPenetration > -forwardTol && contactForce <= 0.0) ||
 						 noSeparation))) {
 					
 					double[] shapeFunctionValues = null;
