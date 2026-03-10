@@ -1408,7 +1408,7 @@ public class View extends GLCanvas {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						ArrayList<Set> sets = getSelectedSets();
-						ungroupSetsRecursive(sets);
+						//ungroupSetsRecursive(sets);
 						distributedLoad.unrefine();
 						SimLive.model.updateAllElements();
 						distributedLoad.setElementSets(sets);
