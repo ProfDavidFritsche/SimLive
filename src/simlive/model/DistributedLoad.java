@@ -172,6 +172,7 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 				element.setElementNodes(elementNodes);
 				set.getElements().clear();
 				set.getElements().add(element);
+				set.getSets().clear();
 			}
 			elementSets.remove(set);
 		}
