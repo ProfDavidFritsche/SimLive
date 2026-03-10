@@ -1235,9 +1235,10 @@ public class Model implements DeepEqualsInterface {
 				}
 			}
 		});
+		Mode oldMode = SimLive.mode;
 		SimLive.mode = Mode.NONE;
 		updateModel();
-		SimLive.mode = Mode.PARTS;
+		SimLive.mode = oldMode;
 	}
 	
 	private void refineSubSets(Set set) {

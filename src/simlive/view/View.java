@@ -1410,6 +1410,7 @@ public class View extends GLCanvas {
 						ArrayList<Set> sets = getSelectedSets();
 						ungroupSetsRecursive(sets);
 						distributedLoad.unrefine();
+						SimLive.model.updateAllElements();
 						distributedLoad.setElementSets(sets);
 						storeMenuItemSelected(0, !distributedLoad.getElementSets().isEmpty());
 					}
@@ -2681,9 +2682,10 @@ public class View extends GLCanvas {
 				}
 			}
 		}
+		Mode oldMode = SimLive.mode;
 		SimLive.mode = Mode.NONE;
 		SimLive.model.updateModel();
-		SimLive.mode = Mode.PARTS;
+		SimLive.mode = oldMode;
 	}
 	
 	public void mergeSelectedSets() {
