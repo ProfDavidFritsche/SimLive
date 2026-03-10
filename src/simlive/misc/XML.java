@@ -13,7 +13,6 @@ import org.jdom.output.XMLOutputter;
 
 import Jama.Matrix;
 import simlive.SimLive;
-import simlive.SimLive.Mode;
 import simlive.model.Beam;
 import simlive.model.Connector;
 import simlive.model.Connector3d;
