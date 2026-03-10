@@ -388,7 +388,7 @@ public class SimLive {
             			int index = getModelTreeSelectionIndex();
                 		doModelTreeNewSelection(getModelTreeSelectionIndexAfterDelete(index));
             		}
-            		model.updateModel();
+            		model.updateModel(true);
             		view.redraw();
             	}
             	if(arg0.keyCode == SWT.CONTROL) {
@@ -2145,7 +2145,7 @@ public class SimLive {
 	
 	private static void doModelTreeNewSelection(int index) {
 		if (mode != Mode.NONE) {
-			model.updateModel();
+			model.updateModel(true);
 			int mode = SimLive.mode.ordinal()-1;
 			if (modelTree.getItems()[mode].getItemCount() > 0) {
 				modelTree.setSelection(modelTree.getItems()[mode].getItem(index));
@@ -2259,7 +2259,7 @@ public class SimLive {
 					
 					SimLive.model.getParts3d().add(obj3d);
 				}
-				SimLive.model.updateModel();
+				SimLive.model.updateModel(true);
 				SimLive.view.deselectAllAndDisposeDialogs();
 				SimLive.view.fitToView();
 				SimLive.freezeGUI(false);
@@ -2338,7 +2338,7 @@ public class SimLive {
 		setDisplayPartsLabel();
 		view.setCursor(null);
 		View.Rr = null;
-		SimLive.model.updateModel();
+		SimLive.model.updateModel(true);
 		((CTabFolder) view.getParent()).getItem(0).setText("Model View");
 		SimLive.view.lockSelectParts3d = false;
 		view.redraw();
@@ -2735,7 +2735,7 @@ public class SimLive {
 	
 	private void undoRedo(boolean undo) {
 		view.deselectAllAndDisposeDialogs();
-		model.updateModel();
+		model.updateModel(true);
 		if (undo) {
 			modelPos--;
 		}

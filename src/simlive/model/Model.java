@@ -262,7 +262,7 @@ public class Model implements DeepEqualsInterface {
 		}
 		nodes.clear();
 		nodes.addAll(R);
-		updateModel();
+		updateModel(true);
 	}
 	
 	private Matrix getAdjacencyMatrix() {
@@ -562,7 +562,7 @@ public class Model implements DeepEqualsInterface {
 		return totalDuration;
 	}
 	
-	public void updateModel() {
+	public void updateModel(boolean storeModelHistory) {
 		if (SimLive.mode != Mode.RESULTS) {
 			deleteUnusedNodes();
 			updateAllContacts();
@@ -580,7 +580,7 @@ public class Model implements DeepEqualsInterface {
 			updateAllLabels();
 			SimLive.view.cleanViewData();
 			
-			storeModelHistory();
+			if (storeModelHistory) storeModelHistory();
 			
 			SimLive.shell.getDisplay().syncExec(new Runnable() {
 				public void run() {
@@ -763,8 +763,8 @@ public class Model implements DeepEqualsInterface {
 	}
 	
 	private void storeModelHistory() {
-		if (SimLive.mode != Mode.NONE && (SimLive.modelHistory.isEmpty() ||
-				expandModel(SimLive.modelPos).deepEquals(this, Result.EQUAL) != Result.EQUAL)) {
+		if (SimLive.modelHistory.isEmpty() ||
+				expandModel(SimLive.modelPos).deepEquals(this, Result.EQUAL) != Result.EQUAL) {
 			for (int i = SimLive.modelHistory.size()-1; i > SimLive.modelPos; i--) {
 				SimLive.modelHistory.remove(i);
 			}
@@ -781,7 +781,7 @@ public class Model implements DeepEqualsInterface {
 	}
 	
 	public void finalUpdateModel() {
-		updateModel();
+		updateModel(true);
 		mapVerticesToElements();
 	}
 	
@@ -1235,10 +1235,7 @@ public class Model implements DeepEqualsInterface {
 				}
 			}
 		});
-		Mode oldMode = SimLive.mode;
-		SimLive.mode = Mode.NONE;
-		updateModel();
-		SimLive.mode = oldMode;
+		updateModel(false);
 	}
 	
 	private void refineSubSets(Set set) {

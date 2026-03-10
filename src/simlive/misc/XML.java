@@ -921,7 +921,7 @@ public class XML {
 			Settings.isShowLoads = getBooleanAttribute(XMLsettings, "isShowLoads");
 			//Sim2d.settings.isShowReactions = getBooleanAttribute(XMLsettings, "isShowReactions");
 			
-			SimLive.model.updateModel();
+			SimLive.model.updateModel(true);
 			
 			return true;
 
@@ -1521,11 +1521,8 @@ public class XML {
 			xmlOutput.output(doc, new FileWriter(fileName));
 			
 			/* this will undo the conversion for file writing */
-			Mode mode = SimLive.mode;
-			SimLive.mode = Mode.NONE;
-			model.updateModel();
+			model.updateModel(false);
 			model.deleteUnusedNodes();
-			SimLive.mode = mode;
 			
 		}
 		catch (IOException io) {
@@ -1543,10 +1540,7 @@ public class XML {
 		for (int c = 0; c < rigidContactPairs.size(); c++) {
 			rigidContactPairs.get(c).setType(Type.DEFORMABLE_DEFORMABLE, true);
 		}
-		Mode mode = SimLive.mode;
-		SimLive.mode = Mode.NONE;
-		SimLive.model.updateModel();
-		SimLive.mode = mode;
+		SimLive.model.updateModel(false);
 		for (int c = 0; c < rigidContactPairs.size(); c++) {
 			rigidContactPairs.get(c).setType(Type.RIGID_DEFORMABLE, false);
 		}

@@ -394,7 +394,7 @@ public class Part3dDialog extends Composite {
 		}
 		
 		updateDialog(new double[3]);
-		SimLive.model.updateModel();
+		SimLive.model.updateModel(true);
 		SimLive.view.redraw();
 	}
 	

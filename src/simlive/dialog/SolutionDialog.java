@@ -65,7 +65,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				model.settings.constraintType = ConstraintMethod.Type.values()[combo.getSelectionIndex()];
-				SimLive.model.updateModel();
+				SimLive.model.updateModel(true);
 				composite.dispose();
 				composite = getComposite(SolutionDialog.this, model);
 				composite.moveBelow(combo);
@@ -109,7 +109,7 @@ public class SolutionDialog extends Composite {
 				public void widgetDefaultSelected(SelectionEvent arg0) {
 					double value = SimLive.getInputDouble(text_1);
 					model.settings.penaltyFactor = value;
-					SimLive.model.updateModel();
+					SimLive.model.updateModel(true);
 				}
 			});
 			text_1.addFocusListener(new FocusAdapter() {
@@ -141,7 +141,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				model.settings.isReorderNodes = btnReorderNodes.getSelection();
-				SimLive.model.updateModel();
+				SimLive.model.updateModel(true);
 			}
 		});
 		btnReorderNodes.setText("Reorder Nodes");
@@ -154,7 +154,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				model.settings.isLargeDisplacement = btnLargeDisplacement.getSelection();
-				SimLive.model.updateModel();
+				SimLive.model.updateModel(true);
 			}
 		});
 		btnLargeDisplacement.setText("Large Displacement");
@@ -167,7 +167,7 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				model.settings.isWriteMatrixView = btnWriteMatrixView.getSelection();
-				SimLive.model.updateModel();
+				SimLive.model.updateModel(true);
 			}
 		});
 		btnWriteMatrixView.setText("Write Matrix View");

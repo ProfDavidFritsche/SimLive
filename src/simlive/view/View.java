@@ -239,7 +239,7 @@ public class View extends GLCanvas {
 						if (!selectedParts3d.isEmpty()) {
 							deleteSelectedParts3d();
 						}
-						SimLive.model.updateModel();
+						SimLive.model.updateModel(true);
 					}
 				}
 				if (e.keyCode == SWT.ESC) {
@@ -1140,7 +1140,7 @@ public class View extends GLCanvas {
 				SimLive.synchronizeModelTreeWithViewSelection();
 				
 				if (animation == null) {
-					if (selectedNodes.isEmpty()) SimLive.model.updateModel();
+					if (selectedNodes.isEmpty()) SimLive.model.updateModel(true);
 					Snap.initData(mousePos, true, true);
 					Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);				
 					redraw();
@@ -1716,7 +1716,7 @@ public class View extends GLCanvas {
 						}
 						copyPart = false;
 					}
-					SimLive.model.updateModel();
+					SimLive.model.updateModel(true);
 					SimLive.synchronizeModelTreeWithViewSelection();
 				}
             });
@@ -2682,10 +2682,7 @@ public class View extends GLCanvas {
 				}
 			}
 		}
-		Mode oldMode = SimLive.mode;
-		SimLive.mode = Mode.NONE;
-		SimLive.model.updateModel();
-		SimLive.mode = oldMode;
+		SimLive.model.updateModel(false);
 	}
 	
 	public void mergeSelectedSets() {

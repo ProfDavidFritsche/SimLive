@@ -113,7 +113,7 @@ public class ContactDialog extends StoreDialog {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				contactPair.setType(Type.values()[combo.getSelectionIndex()], true);
-				SimLive.model.updateModel();				
+				SimLive.model.updateModel(true);				
 				SimLive.view.redraw();
 			}
 		});
