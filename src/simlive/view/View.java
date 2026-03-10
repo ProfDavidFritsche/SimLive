@@ -2618,7 +2618,7 @@ public class View extends GLCanvas {
 		}
 	}
 	
-	private void ungroupSetsRecursive(ArrayList<Set> sets) {
+	/*private void ungroupSetsRecursive(ArrayList<Set> sets) {
 		for (int s = sets.size()-1; s > -1; s--) {
 			Set set = sets.get(s);
 			if (!set.getSets().isEmpty()) {
@@ -2643,7 +2643,7 @@ public class View extends GLCanvas {
 				sets.remove(set);
 			}
 		}
-	}
+	}*/
 	
 	public void groupSelectedSets() {
 		ArrayList<Set> sets = selectedSets;
