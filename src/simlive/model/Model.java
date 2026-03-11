@@ -1256,13 +1256,8 @@ public class Model implements DeepEqualsInterface {
 					set.getElements().addAll(e+1, newElements);
 				}
 			}
-			if (!isSetPartOfDistributedLoad(set)) {
-				for (int e = 0; e < set.getElements().size(); e++) {
-					set.getSets().add(new Set(set.getElements().get(e), Set.Type.BASIC));
-				}
-				if (set.getType() == Set.Type.BASIC) {
-					set.setType(Set.Type.COMPOSITE);
-				}
+			if (set.getType() == Set.Type.BASIC && !isSetPartOfDistributedLoad(set)) {
+				set.setType(Set.Type.COMPOSITE);
 			}
 			
 			mergeCoincidentNodes(set.getElements());
