@@ -1408,7 +1408,7 @@ public class View extends GLCanvas {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						ArrayList<Set> sets = getSelectedSets();
-						ungroupRefinedSets(sets);
+						ungroupSetsRecursive(sets);
 						distributedLoad.unrefine();
 						SimLive.model.updateAllElements();
 						distributedLoad.setElementSets(sets);
@@ -2618,10 +2618,21 @@ public class View extends GLCanvas {
 		}
 	}
 	
-	private void ungroupRefinedSets(ArrayList<Set> sets) {
+	private void ungroupSetsRecursive(ArrayList<Set> sets) {
 		for (int s = sets.size()-1; s > -1; s--) {
 			Set set = sets.get(s);
-			if (set.getSets().isEmpty() && set.getType() == Set.Type.COMPOSITE) {
+			if (!set.getSets().isEmpty()) {
+				for (int s1 = 0; s1 < set.getSets().size(); s1++) {
+					Set newSet = set.getSets().get(s1);
+					newSet.view = set.view;
+					SimLive.model.getSets().add(newSet);
+					sets.add(newSet);
+				}
+				SimLive.model.getSets().remove(set);
+				sets.remove(set);
+				ungroupSetsRecursive(sets);
+			}
+			else if (set.getType() != Set.Type.BASIC) {
 				for (int e = 0; e < set.getElements().size(); e++) {
 					Set newSet = new Set(set.getElements().get(e), Set.Type.BASIC);
 					newSet.view = set.view;
