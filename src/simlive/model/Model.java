@@ -1257,7 +1257,7 @@ public class Model implements DeepEqualsInterface {
 				}
 			}
 			if (!isSetPartOfDistributedLoad(set)) {
-				for (int e = 0; e < set.getElements().size(); e++) if (!set.getElements().get(e).isPlaneElement()) {
+				for (int e = 0; e < set.getElements().size(); e++) {
 					set.getSets().add(new Set(set.getElements().get(e), Set.Type.BASIC));
 				}
 				if (set.getType() == Set.Type.BASIC) {
