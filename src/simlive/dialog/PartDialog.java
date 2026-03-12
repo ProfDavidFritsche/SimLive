@@ -920,20 +920,25 @@ public class PartDialog extends Composite {
 	}
 	
 	public boolean isSplittable(ArrayList<Set> sets) {
-		int[] sharedNode = new int[SimLive.model.getNodes().size()];
-		for (int e = 0; e < SimLive.model.getElements().size(); e++) {
-			int[] elemNodes = SimLive.model.getElements().get(e).getElementNodes();
-			for (int n = 0; n < elemNodes.length; n++) {
-				sharedNode[elemNodes[n]]++;
-			}
-		}
+		int nrLocalNodes = 0;
+		ArrayList<Node> globalNodes = new ArrayList<Node>();
 		for (int s = 0; s < sets.size(); s++) {
 			Set set = sets.get(s);
 			for (int n = 0; n < set.getNodes().size(); n++) {
-				if (sharedNode[set.getNodes().get(n).getID()] > 1) return true;
+				if (!globalNodes.contains(set.getNodes().get(n))) {
+					globalNodes.add(set.getNodes().get(n));
+				}
+			}
+			if (set.getType() == Set.Type.BASIC && set.getElements().size() > 1) {
+				nrLocalNodes += 2;
+			}
+			else {
+				for (int e = 0; e < set.getElements().size(); e++) {
+					nrLocalNodes += set.getElements().get(e).getElementNodes().length;
+				}
 			}
 		}
-		return false;
+		return nrLocalNodes > globalNodes.size();
 	}
 	
 	public boolean isMergeable() {
