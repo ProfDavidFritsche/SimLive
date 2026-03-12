@@ -2669,14 +2669,17 @@ public class View extends GLCanvas {
 		ArrayList<Set> sets = selectedSets;
 		for (int s = 0; s < sets.size(); s++) {
 			Set set = sets.get(s);
-			if (!(set.getType() == Set.Type.BASIC && set.getElements().size() > 1)) {
-				for (int e = 0; e < set.getElements().size(); e++) {
+			boolean isDistributedLoad = set.getType() == Set.Type.BASIC && set.getElements().size() > 1;
+			for (int e = 0; e < set.getElements().size(); e++) {
+				if (!isDistributedLoad || e == 0 || e == set.getElements().size()-1) {
 					int[] elemNodes = set.getElements().get(e).getElementNodes();
 					for (int n = 0; n < elemNodes.length; n++) {
-						double[] coords = SimLive.model.getNodes().get(elemNodes[n]).getCoords();
-						Node node = new Node(coords[0], coords[1], coords[2]);
-						SimLive.model.getNodes().add(node);
-						elemNodes[n] = SimLive.model.getNodes().size()-1;
+						if (!isDistributedLoad || set.getNodes().contains(SimLive.model.getNodes().get(elemNodes[n]))) {
+							double[] coords = SimLive.model.getNodes().get(elemNodes[n]).getCoords();
+							Node node = new Node(coords[0], coords[1], coords[2]);
+							SimLive.model.getNodes().add(node);
+							elemNodes[n] = SimLive.model.getNodes().size()-1;
+						}
 					}
 					set.getElements().get(e).setElementNodes(elemNodes);
 				}
