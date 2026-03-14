@@ -2666,9 +2666,14 @@ public class View extends GLCanvas {
 	}
 	
 	public void splitSelectedSets() {
-		ArrayList<Set> sets = selectedSets;
-		for (int s = 0; s < sets.size(); s++) {
-			Set set = sets.get(s);
+		for (int s = 0; s < selectedSets.size(); s++) {
+			splitSelectedSubSet(selectedSets.get(s));
+		}
+		SimLive.model.updateModel(false);
+	}
+	
+	private void splitSelectedSubSet(Set set) {				
+		if (set.getSets().isEmpty()) {
 			for (int e = 0; e < set.getElements().size(); e++) {
 				if (!set.isDistributedLoad() || e == 0 || e == set.getElements().size()-1) {
 					int[] elemNodes = set.getElements().get(e).getElementNodes();
@@ -2684,7 +2689,11 @@ public class View extends GLCanvas {
 				}
 			}
 		}
-		SimLive.model.updateModel(false);
+		else {
+			for (int s = 0; s < set.getSets().size(); s++) {
+				splitSelectedSubSet(set.getSets().get(s));
+			}
+		}
 	}
 	
 	public void mergeSelectedSets() {
