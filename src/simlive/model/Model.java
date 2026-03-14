@@ -1256,7 +1256,7 @@ public class Model implements DeepEqualsInterface {
 					set.getElements().addAll(e+1, newElements);
 				}
 			}
-			if (set.getType() == Set.Type.BASIC && !isSetPartOfDistributedLoad(set)) {
+			if (set.getType() == Set.Type.BASIC && !set.isDistributedLoad()) {
 				set.setType(Set.Type.COMPOSITE);
 			}
 			
@@ -1989,16 +1989,6 @@ public class Model implements DeepEqualsInterface {
 				if (elem0_nodes[n] == elem1_nodes[m]) {
 					return true;
 				}
-			}
-		}
-		return false;
-	}
-	
-	private boolean isSetPartOfDistributedLoad(Set set) {
-		for (int d = 0; d < distributedLoads.size(); d++) {
-			DistributedLoad load = distributedLoads.get(d);
-			if (load.getElementSets().contains(set)) {
-				return true;
 			}
 		}
 		return false;
