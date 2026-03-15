@@ -142,21 +142,24 @@ public class Set implements DeepEqualsInterface {
 				}
 			}
 		}
-		for (int d = 0; d < SimLive.model.getDistributedLoads().size(); d++) {
-			DistributedLoad load = SimLive.model.getDistributedLoads().get(d);			
-			for (int s = 0; s < load.getElementSets().size(); s++) {
-				ArrayList<Element> elements = load.getElementSets().get(s).getElements();
-				if (this.elements.containsAll(elements)) {
-					for (int e = 1; e < elements.size()-1; e++) {
-						int[] element_nodes = elements.get(e).getElementNodes();
-						this.nodes.remove(SimLive.model.getNodes().get(element_nodes[0]));
-						this.nodes.remove(SimLive.model.getNodes().get(element_nodes[1]));
-					}
-				}
-			}
-		}
+		removeNodesRecursive(this);
 		
 		return elements;
+	}
+	
+	private void removeNodesRecursive(Set set) {
+		if (set.isDistributedLoad()) {
+			for (int e = 1; e < set.getElements().size()-1; e++) {
+				int[] element_nodes = set.getElements().get(e).getElementNodes();
+				this.nodes.remove(SimLive.model.getNodes().get(element_nodes[0]));
+				this.nodes.remove(SimLive.model.getNodes().get(element_nodes[1]));
+			}
+		}
+		else {
+			for (int s = 0; s < set.getSets().size(); s++) {
+				removeNodesRecursive(set.getSets().get(s));
+			}
+		}
 	}
 	
 	public int getID() {
