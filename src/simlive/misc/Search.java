@@ -554,20 +554,7 @@ public abstract class Search {
 				}
 				if (sqrDist > Search.minSqrDistLine) {
 					d = null;
-					double[] intersection = null;
-					if (elem.getType() == Element.Type.SPRING) {
-						double r = 2*SimLive.SPRING_RADIUS/viewport[2]/View.zoom;
-						double[][] intersect = GeomUtility.getIntersectionLineCylinder(modelCoords,
-								lookAt.getColumnPackedCopy(), c0, dir0.getColumnPackedCopy(), r, length0);
-						if (intersect != null) {
-							double zCoord0 = View.modelToScreenCoordinates(intersect[0])[2];
-							double zCoord1 = View.modelToScreenCoordinates(intersect[1])[2];
-							intersection = zCoord0 < zCoord1 ? intersect[0] : intersect[1];
-						}
-					}
-					else {
-						intersection = ((LineElement) elem).getCoordsInElement(modelCoords);
-					}
+					double[] intersection = ((LineElement) elem).getCoordsInElement(modelCoords);
 					if (intersection != null) {
 						double t = ((LineElement) elem).getLocalFromGlobalCoordinates(intersection);
 						t = Math.min(Math.max(0, t), 1);

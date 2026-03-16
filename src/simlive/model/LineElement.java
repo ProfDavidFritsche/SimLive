@@ -238,16 +238,30 @@ public abstract class LineElement extends Element {
 	}
 	
 	public double[] getCoordsInElement(double[] modelCoords2d) {
-		if (this.getType() != Element.Type.SPRING &&
-				Settings.isShowSections && isSectionValid(SimLive.model.getSections()) &&
+		double[] coords0 = View.getCoordsWithScaledDisp(elementNodes[0]);
+		double[] coords1 = View.getCoordsWithScaledDisp(elementNodes[1]);
+		double[] diff = new double[3];
+		diff[0] = coords1[0]-coords0[0];
+		diff[1] = coords1[1]-coords0[1];
+		diff[2] = coords1[2]-coords0[2];
+		double length = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
+		
+		if (this.getType() == Element.Type.SPRING) {
+			diff[0] /= length;
+			diff[1] /= length;
+			diff[2] /= length;
+			double[] dir = View.getViewDirection(modelCoords2d);
+			double r = 2*SimLive.SPRING_RADIUS/View.getViewport()[2]/View.zoom;
+			double[][] intersect = GeomUtility.getIntersectionLineCylinder(modelCoords2d,
+					dir, coords0, diff, r, length);
+			if (intersect != null) {
+				double zCoord0 = View.modelToScreenCoordinates(intersect[0])[2];
+				double zCoord1 = View.modelToScreenCoordinates(intersect[1])[2];
+				return zCoord0 < zCoord1 ? intersect[0] : intersect[1];
+			}
+		}
+		else if (Settings.isShowSections && isSectionValid(SimLive.model.getSections()) &&
 				section.getSectionShape().getType() != SectionShape.Type.DIRECT_INPUT) {
-			double[] coords0 = View.getCoordsWithScaledDisp(elementNodes[0]);
-			double[] coords1 = View.getCoordsWithScaledDisp(elementNodes[1]);
-			double[] diff = new double[3];
-			diff[0] = coords1[0]-coords0[0];
-			diff[1] = coords1[1]-coords0[1];
-			diff[2] = coords1[2]-coords0[2];
-			double length = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
 			Matrix Rr = null;
 			try {
 				Rr = new Matrix(View.Rr[id]);
