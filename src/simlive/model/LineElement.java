@@ -245,15 +245,19 @@ public abstract class LineElement extends Element {
 		diff[1] = coords1[1]-coords0[1];
 		diff[2] = coords1[2]-coords0[2];
 		double length = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
-		
+		Matrix Rr = null;
+		try {
+			Rr = new Matrix(View.Rr[id]);
+		}
+		catch (Exception e) {
+			return new double[3];
+		}
+    	
 		if (this.getType() == Element.Type.SPRING) {
-			diff[0] /= length;
-			diff[1] /= length;
-			diff[2] /= length;
 			double[] dir = View.getViewDirection(modelCoords2d);
 			double r = 2*SimLive.SPRING_RADIUS/View.getViewport()[2]/View.zoom;
 			double[][] intersect = GeomUtility.getIntersectionLineCylinder(modelCoords2d,
-					dir, coords0, diff, r, length);
+					dir, coords0, Rr.getMatrix(0, 2, 0, 0).getColumnPackedCopy(), r, length);
 			if (intersect != null) {
 				double zCoord0 = View.modelToScreenCoordinates(intersect[0])[2];
 				double zCoord1 = View.modelToScreenCoordinates(intersect[1])[2];
@@ -262,14 +266,7 @@ public abstract class LineElement extends Element {
 		}
 		else if (Settings.isShowSections && isSectionValid(SimLive.model.getSections()) &&
 				section.getSectionShape().getType() != SectionShape.Type.DIRECT_INPUT) {
-			Matrix Rr = null;
-			try {
-				Rr = new Matrix(View.Rr[id]);
-			}
-			catch (Exception e) {
-				return new double[3];
-			}
-	    	
+			
 			double[][] P = section.getSectionPoints();
 				
 			double t = 0.0, y = 0.0, z = 0.0;
