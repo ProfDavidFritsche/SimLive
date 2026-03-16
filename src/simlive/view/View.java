@@ -2537,7 +2537,7 @@ public class View extends GLCanvas {
 		else {
 			ArrayList<Element> newElements = new ArrayList<Element>();
 			
-			if (set.isDistributedLoad()) {
+			if (set.isDistributedLoad) {
 				/* set used by distributed load - copy as single beam */
 				Element element = set.getElements().get(0);
 				Element newElement = element.clone(SimLive.model);
@@ -2579,7 +2579,7 @@ public class View extends GLCanvas {
 				element.setElementNodes(newElemNodes);
 			}
 			// distributed load
-			if (sets.get(s).isDistributedLoad()) {
+			if (sets.get(s).isDistributedLoad) {
 				ArrayList<Element> elements = sets.get(s).getElements();
 				for (int e = 0; e < elements.size(); e++) {
 					elements.add(e, elements.get(elements.size()-1));
@@ -2674,10 +2674,10 @@ public class View extends GLCanvas {
 	private void splitSelectedSubSet(Set set) {				
 		if (set.getSets().isEmpty()) {
 			for (int e = 0; e < set.getElements().size(); e++) {
-				if (!set.isDistributedLoad() || e == 0 || e == set.getElements().size()-1) {
+				if (!set.isDistributedLoad || e == 0 || e == set.getElements().size()-1) {
 					int[] elemNodes = set.getElements().get(e).getElementNodes();
 					for (int n = 0; n < elemNodes.length; n++) {
-						if (!set.isDistributedLoad() || set.getNodes().contains(SimLive.model.getNodes().get(elemNodes[n]))) {
+						if (!set.isDistributedLoad || set.getNodes().contains(SimLive.model.getNodes().get(elemNodes[n]))) {
 							double[] coords = SimLive.model.getNodes().get(elemNodes[n]).getCoords();
 							Node node = new Node(coords[0], coords[1], coords[2]);
 							SimLive.model.getNodes().add(node);

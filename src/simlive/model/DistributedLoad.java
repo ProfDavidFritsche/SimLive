@@ -132,6 +132,7 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 		ArrayList<Set> beamSets = new ArrayList<Set>();
 		if (set.getSets().isEmpty()) {
 			if (SimLive.model.doElementsContainOnlyType(set.getElements(), Element.Type.BEAM)) {
+				set.isDistributedLoad = true;
 				beamSets.add(set);
 			}
 		}
@@ -172,6 +173,7 @@ public class DistributedLoad extends AbstractLoad implements DeepEqualsInterface
 				element.setElementNodes(elementNodes);
 				set.getElements().clear();
 				set.getElements().add(element);
+				set.isDistributedLoad = false;
 			}
 			elementSets.remove(set);
 		}

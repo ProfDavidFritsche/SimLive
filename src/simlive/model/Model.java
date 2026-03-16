@@ -1256,7 +1256,7 @@ public class Model implements DeepEqualsInterface {
 					set.getElements().addAll(e+1, newElements);
 				}
 			}
-			if (set.getType() == Set.Type.BASIC && !set.isDistributedLoad()) {
+			if (set.getType() == Set.Type.BASIC && !set.isDistributedLoad) {
 				set.setType(Set.Type.COMPOSITE);
 			}
 			

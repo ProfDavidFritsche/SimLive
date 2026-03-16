@@ -17,6 +17,7 @@ public class Set implements DeepEqualsInterface {
 	private ArrayList<Node> nodes;
 	private ArrayList<Set> sets;
 	private int id;
+	public boolean isDistributedLoad;
 	private SpurGearValues spurGearValues;
 	public enum View {DEFAULT, HIDDEN, PINNED};
 	public View view = View.DEFAULT;
@@ -74,6 +75,7 @@ public class Set implements DeepEqualsInterface {
 			set.sets.add(this.sets.get(i).clone(model));
 		}
 		set.id = this.id;
+		set.isDistributedLoad = this.isDistributedLoad;
 		if (this.spurGearValues != null) {
 			set.spurGearValues = this.spurGearValues.clone(model);
 		}
@@ -88,6 +90,7 @@ public class Set implements DeepEqualsInterface {
 		result = SimLive.deepEquals(sets, set.sets, result);
 		if (this.type != set.type) return Result.RECALC;
 		if (this.id != set.id) return Result.RECALC;
+		if (this.isDistributedLoad != set.isDistributedLoad) result = Result.RECALC;
 		if (this.spurGearValues != null && set.spurGearValues != null) {
 			result = this.spurGearValues.deepEquals(set.spurGearValues, result);
 		}
@@ -115,10 +118,6 @@ public class Set implements DeepEqualsInterface {
 		return nodes;
 	}
 	
-	public boolean isDistributedLoad() {
-		return type == Set.Type.BASIC && elements.size() > 1;
-	}
-	
 	public ArrayList<Element> update() {
 		if (!sets.isEmpty()) {
 			elements.clear();
@@ -142,21 +141,24 @@ public class Set implements DeepEqualsInterface {
 				}
 			}
 		}
-		for (int d = 0; d < SimLive.model.getDistributedLoads().size(); d++) {
-			DistributedLoad load = SimLive.model.getDistributedLoads().get(d);			
-			for (int s = 0; s < load.getElementSets().size(); s++) {
-				ArrayList<Element> elements = load.getElementSets().get(s).getElements();
-				if (this.elements.containsAll(elements)) {
-					for (int e = 1; e < elements.size()-1; e++) {
-						int[] element_nodes = elements.get(e).getElementNodes();
-						this.nodes.remove(SimLive.model.getNodes().get(element_nodes[0]));
-						this.nodes.remove(SimLive.model.getNodes().get(element_nodes[1]));
-					}
-				}
-			}
-		}
+		removeNodesRecursive(this);
 		
 		return elements;
+	}
+	
+	private void removeNodesRecursive(Set set) {
+		if (set.isDistributedLoad) {
+			for (int e = 1; e < set.getElements().size()-1; e++) {
+				int[] element_nodes = set.getElements().get(e).getElementNodes();
+				this.nodes.remove(SimLive.model.getNodes().get(element_nodes[0]));
+				this.nodes.remove(SimLive.model.getNodes().get(element_nodes[1]));
+			}
+		}
+		else {
+			for (int s = 0; s < set.getSets().size(); s++) {
+				removeNodesRecursive(set.getSets().get(s));
+			}
+		}
 	}
 	
 	public int getID() {
