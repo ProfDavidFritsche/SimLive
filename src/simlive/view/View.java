@@ -2254,7 +2254,6 @@ public class View extends GLCanvas {
 				}
 				else {
 					double[][] p = pElementScreenPolys[element.getID()];
-					if (p == null) return false;
 					for (int n = 0; n < p.length; n++) {
 						if (selectionBoxContains(bCoords, p[n])) {
 							return true;
