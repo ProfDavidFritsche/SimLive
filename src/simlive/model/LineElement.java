@@ -228,9 +228,11 @@ public abstract class LineElement extends Element {
 		norm[0] = (B[1]-A[1])*(C[2]-A[2])-(B[2]-A[2])*(C[1]-A[1]);
 		norm[1] = (B[2]-A[2])*(C[0]-A[0])-(B[0]-A[0])*(C[2]-A[2]);
 		norm[2] = (B[0]-A[0])*(C[1]-A[1])-(B[1]-A[1])*(C[0]-A[0]);
-		double[] intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, A, norm);
-		if (GeomUtility.isPointInTriangle3d(A, B, C, intersect)) {
-			return intersect;
+		if (norm[0]*dir[0]+norm[1]*dir[1]+norm[2]*dir[2] < 0) {
+			double[] intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, A, norm);
+			if (GeomUtility.isPointInTriangle3d(A, B, C, intersect)) {
+				return intersect;
+			}
 		}
 		return null;
 	}
@@ -300,13 +302,13 @@ public abstract class LineElement extends Element {
 				}
 				if (i == 0) {
 					for (int k = 0; k < P.length; k++) {
-						double[] intersect = getIntersection(modelCoords2d, dir, p[i][0], p[i][(k+1)%P.length], p[i][k]);
+						double[] intersect = getIntersection(modelCoords2d, dir, p[i][0], p[i][k], p[i][(k+1)%P.length]);
 						if (intersect != null) return intersect;
 					}
 				}
 				if (i == lineDivisions-1) {
 					for (int k = 0; k < P.length; k++) {
-						double[] intersect = getIntersection(modelCoords2d, dir, p[i+1][0], p[i+1][k], p[i+1][(k+1)%P.length]);
+						double[] intersect = getIntersection(modelCoords2d, dir, p[i+1][0], p[i+1][(k+1)%P.length], p[i+1][k]);
 						if (intersect != null) return intersect;
 					}
 				}

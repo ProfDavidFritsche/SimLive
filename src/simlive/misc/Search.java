@@ -577,8 +577,8 @@ public abstract class Search {
 				}
 				
 				if (d != null) {
-					
-					double zCoord = p[2];
+					double[] intersection = ((LineElement) elem).getCoordsInElement(modelCoords);
+					double zCoord = intersection != null ? View.modelToScreenCoordinates(intersection)[2] : p[2];
 					if (zCoord < Search.zCoord) {
 						Search.zCoord = zCoord;
 						
