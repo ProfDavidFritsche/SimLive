@@ -5086,33 +5086,6 @@ public class View extends GLCanvas {
 		gl2.glEnable(GL2.GL_LIGHTING);
 	}
 	
-	private boolean isLineElementVisibleOnScreen(LineElement element, double[] coords0, double[] coords1, double radius, double scaling) {
-		//check if sphere with radius is visible
-		double[] coords = new double[3];
-		coords[0] = coords0[0]+(coords1[0]-coords0[0])/2;
-		coords[1] = coords0[1]+(coords1[1]-coords0[1])/2;
-		coords[2] = coords0[2]+(coords1[2]-coords0[2])/2;
-		double[] screen = modelToScreenCoordinates(coords);
-		if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
-			double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(element.getID());
-			double length0 = element.getLength();
-			//max from shape function is length0*4.0/27.0
-			double dispY0 = angles[0][1]*length0*4.0/27.0*scaling;
-			double dispZ0 = angles[0][2]*length0*4.0/27.0*scaling;
-			double dispY1 = angles[1][1]*length0*4.0/27.0*scaling;
-			double dispZ1 = angles[1][2]*length0*4.0/27.0*scaling;
-			radius += Math.sqrt(dispY0*dispY0+dispZ0*dispZ0)+Math.sqrt(dispY1*dispY1+dispZ1*dispZ1);
-		}
-		int[] viewport = getViewport();
-		double factor = Math.abs(getSizeFactorPerspective(coords));
-		radius *= zoom*viewport[2]/2/factor;
-		if (screen[0] < -radius || screen[0] > viewport[2]+radius ||
-			screen[1] < -radius || screen[1] > viewport[3]+radius) {
-			return false;
-		}
-		return true;
-	}
-	
 	private void renderLineElementWithSection(GL2 gl2, LineElement element, double scaling, ScalarPlot scalarPlot, float[] uniColor,
 			Node node0, Node node1) {
 		boolean contactEdge = node0 != null && node1 != null;
@@ -5130,8 +5103,6 @@ public class View extends GLCanvas {
 				element.getSection() :
 				new Section(new SectionShape(SectionShape.Type.DIRECT_INPUT));
 		double[][] P = section.getSectionPoints();
-		if (!isLineElementVisibleOnScreen(element, coords0, coords1,
-				Math.sqrt(P[0][1]*P[0][1]+P[0][2]*P[0][2])+length/2.0, scaling)) return;
 		gl2.glPushMatrix();
 		gl2.glTranslated(coords0[0], coords0[1], coords0[2]);
 		Matrix Rr = null;
@@ -5324,8 +5295,6 @@ public class View extends GLCanvas {
 		diff[2] = coords1[2]-coords0[2];
 		double length = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
 		if (length < SimLive.ZERO_TOL) return;
-		if (!isLineElementVisibleOnScreen(element, coords0, coords1,
-				SimLive.SPRING_RADIUS*2.0/width/zoom+length/2.0, 0.0)) return;
 		gl2.glPushMatrix();
 		gl2.glTranslated(coords0[0], coords0[1], coords0[2]);
 		Matrix Rr = null;
