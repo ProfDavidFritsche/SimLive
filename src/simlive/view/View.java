@@ -6542,6 +6542,7 @@ public class View extends GLCanvas {
 			double max, double arrowSize, double arrowLength, GLUquadric outside, GLUquadric inside, int sign) {
 		int elementID = tri.getID();
 		Matrix R = new Matrix(Rr[elementID]);		
+		double rot = tri.getRigidRotationAngle(R);
 		double[] RR = getArrayFromRotationMatrix(R, true);
     	
     	double[] coords = tri.getGlobalFromLocalCoordinates(1.0/3.0, 1.0/3.0);
@@ -6555,7 +6556,7 @@ public class View extends GLCanvas {
 		}
 		
 		double length = v[0];
-		double angle = v[1];
+		double angle = v[1]-rot;
 		
 		boolean flip = false;
 		if (length < 0) {
@@ -6600,7 +6601,9 @@ public class View extends GLCanvas {
     	norm.timesEquals(1.0/norm.normF());
 		int elementID = quad.getID();
 		Matrix R = new Matrix(3, 3);
-		Matrix yDir = norm.crossProduct(new Matrix(Rr[elementID]).getMatrix(0, 2, 0, 0));
+		Matrix Rr = new Matrix(View.Rr[elementID]);
+		double rot = quad.getRigidRotationAngle(Rr);
+		Matrix yDir = norm.crossProduct(Rr.getMatrix(0, 2, 0, 0));
 		Matrix xDir = yDir.crossProduct(norm);
 		R.setMatrix(0, 2, 0, 0, xDir);
 		R.setMatrix(0, 2, 1, 1, yDir);
@@ -6625,7 +6628,7 @@ public class View extends GLCanvas {
 			}
 			
 			double length = v[0];
-			double angle = v[1];
+			double angle = v[1]-rot;
 			
 			boolean flip = false;
 			if (length < 0) {

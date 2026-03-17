@@ -2,6 +2,7 @@ package simlive.model;
 
 import java.util.ArrayList;
 
+import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 import simlive.SimLive;
 import simlive.SimLive.Mode;
@@ -120,6 +121,35 @@ public abstract class PlaneElement extends Element {
 	@Override
 	public boolean isPlaneElement() {
 		return true;
+	}
+	
+	public double getRigidRotationAngle(Matrix Rr) {
+		//Rr is attached to first edge
+		//this routine calculates the additional inplane rigid body rotation
+		double[][] X = new double[2][elementNodes.length];
+		double[][] u = new double[2][elementNodes.length];
+		Matrix R0T = R0.transpose();
+		Matrix RrT = Rr.transpose();
+		for (int i = 0; i < elementNodes.length; i++) {
+			Matrix coords0 = R0T.times(new Matrix(SimLive.model.getNodes().get(elementNodes[i]).getCoords(), 3));
+			X[0][i] = coords0.get(0, 0);
+			X[1][i] = coords0.get(1, 0);
+			Matrix coords1 = RrT.times(new Matrix(View.getCoordsWithScaledDisp(elementNodes[i]), 3));
+			u[0][i] = coords1.get(0, 0)-X[0][i];
+			u[1][i] = coords1.get(1, 0)-X[1][i];
+		}
+		Matrix drdX = getJacobian(X[0], X[1], 0, 0).inverse();
+		Matrix dudr = getJacobian(u[0], u[1], 0, 0);
+		Matrix F = drdX.times(dudr).plus(Matrix.identity(2, 2));
+		Matrix C = F.transpose().times(F);		
+		EigenvalueDecomposition eig = C.eig(false);
+		Matrix D = eig.getD();
+		for (int i = 0; i < D.getRowDimension(); i++) {
+			D.set(i, i, Math.sqrt(D.get(i, i)));
+		}
+		Matrix U = eig.getV().times(D).times(eig.getV().transpose());
+		Matrix R = F.times(U.inverse());
+		return Math.atan2(R.get(1, 0), R.get(0, 0));
 	}
 	
 	public abstract double[] getLocalCoords(int localNodeID);
