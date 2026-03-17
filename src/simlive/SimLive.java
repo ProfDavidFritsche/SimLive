@@ -183,7 +183,7 @@ public class SimLive {
 	public static final float[] COLOR_TRANSPARENT = new float[]{1f, 1f, 1f, 0.4f};
 	public static final double ZERO_TOL = 1E-8;
 	public static final double UNIT_SIZE = 1.0;
-	public static final double NODE_RADIUS = 15.0*UNIT_SIZE;
+	public static final double NODE_RADIUS = 12.0*UNIT_SIZE;
 	public static final double SNAP_TOL = 3.0*UNIT_SIZE;
 	public static final double LINE_ELEMENT_RADIUS = 8.0*UNIT_SIZE;
 	public static final double COORDINATE_SYSTEM_SIZE = 200.0*UNIT_SIZE;
@@ -209,16 +209,6 @@ public class SimLive {
 	public static final double CURVE_PLOT_SIZE = 200.0*UNIT_SIZE;
 	public static final double ANGLE_LEG_SIZE = 50.0*UNIT_SIZE;
 	public static final double COS_ANGLE_INNER_EDGE = 0.7;
-	
-	public static final int UNIT_SIZE1 = 10;
-	public static final int GROUP_FRAME_GAP = 2*UNIT_SIZE1;
-	public static final int SPRING_WIDTH = 3*UNIT_SIZE1/2;
-	public static final int LINE_WIDTH = 2*UNIT_SIZE1/3;
-	public static final int ARROWHEAD_SIZE = 3*UNIT_SIZE1/2;
-	public static final double ARROWHEAD_ANGLE = 15*Math.PI/180.0;
-	public static final int ORIENTATION_ARROW_SIZE = 4*UNIT_SIZE1;
-	public static final double ROUND_ARROW_ANGLE = 235*Math.PI/180.0;	
-	public static final int ROUND_ARROW_RADIUS = 3*UNIT_SIZE1;	
 	public static final int CONTINUOUS_LOAD_REFINE_LEVEL = 4;
 	
 	public enum Mode {NONE, PARTS, SUPPORTS, LOADS, CONNECTORS, CONTACTS,
