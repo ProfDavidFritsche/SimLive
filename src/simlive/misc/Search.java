@@ -32,7 +32,6 @@ public abstract class Search {
 	private static Facet3d facet3d;
 	private final static double minSqrDistNode = SimLive.NODE_RADIUS/2.0 * SimLive.NODE_RADIUS/2.0;
 	private final static double minSqrDistLine = SimLive.LINE_ELEMENT_RADIUS/2.0 * SimLive.LINE_ELEMENT_RADIUS/2.0;
-	private final static double minSqrDistPointMass = SimLive.POINT_MASS_RADIUS * SimLive.POINT_MASS_RADIUS;
 	private static double zCoord;
 	
 	public static Node getNodeAtPoint(int[] point, boolean isMouseDragged, Node moveNode) {
@@ -472,25 +471,12 @@ public abstract class Search {
 				int[] elemNodes = elem.getElementNodes();
 				Node node = SimLive.model.getNodes().get(elemNodes[0]);
 				double[] coords0 = View.getCoordsWithScaledDisp(node.getID());
-				double[] p = View.modelToScreenCoordinates(coords0);				
-				double sqrDist = (p[0]-point[0])*(p[0]-point[0])+(p[1]-point[1])*(p[1]-point[1]);
-				double factor = SimLive.view.getSizeFactorPerspective(coords0);
-				sqrDist *= factor*factor;
-				if (sqrDist < Search.minSqrDistPointMass) {
-					double[] diff = new double[3];
-					diff[0] = coords0[0]-modelCoords[0];
-					diff[1] = coords0[1]-modelCoords[1];
-					diff[2] = coords0[2]-modelCoords[2];
-					double scal = diff[0]*lookAt.get(0, 0)+diff[1]*lookAt.get(1, 0)+diff[2]*lookAt.get(2, 0);
-					diff[0] -= scal*lookAt.get(0, 0);
-					diff[1] -= scal*lookAt.get(1, 0);
-					diff[2] -= scal*lookAt.get(2, 0);
-					double dist = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
-					double[] coords = new double[3];
-					coords[0] = coords0[0]+dist*lookAt.get(0, 0);
-					coords[1] = coords0[1]+dist*lookAt.get(1, 0);
-					coords[2] = coords0[2]+dist*lookAt.get(2, 0);
-					double zCoord = View.modelToScreenCoordinates(coords)[2];
+				double radius = 2*SimLive.POINT_MASS_RADIUS/viewport[2]/View.zoom;
+				double[][] intersect = GeomUtility.getIntersectionLineSphere(coords0, radius, modelCoords, lookAt.getColumnPackedCopy());
+				if (intersect != null) {
+					double zCoord0 = View.modelToScreenCoordinates(intersect[0])[2];
+					double zCoord1 = View.modelToScreenCoordinates(intersect[1])[2];
+					double zCoord = Math.min(zCoord0, zCoord1);
 					if (zCoord < Search.zCoord) {
 						Search.zCoord = zCoord;
 						Search.element = elem;

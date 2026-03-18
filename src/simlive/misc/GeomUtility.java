@@ -283,4 +283,23 @@ public abstract class GeomUtility {
 		intersect[1] = lPoint.plus(lDir.times(t2)).getColumnPackedCopy();
 		return intersect;
 	}
+	
+	public static double[][] getIntersectionLineSphere(double[] center, double radius, double[] linePoint, double[] lineDir) {
+        Matrix L = new Matrix(new double[]{linePoint[0]-center[0], linePoint[1]-center[1], linePoint[2]-center[2]}, 3);
+        Matrix lDir = new Matrix(lineDir, 3);
+		double a = lDir.dotProduct(lDir);
+        double b = 2*lDir.dotProduct(L);
+        double c = L.dotProduct(L)-(radius*radius);
+        double discriminant = b*b-4*a*c;
+        if (discriminant < 0) {
+            return null;
+        }
+        else {
+            double t1 = (-b-Math.sqrt(discriminant))/(2*a);
+            double t2 = (-b+Math.sqrt(discriminant))/(2*a);
+            Matrix lPoint = new Matrix(linePoint, 3);
+            return new double[][]{lPoint.plus(lDir.times(t1)).getColumnPackedCopy(),
+            		lPoint.plus(lDir.times(t2)).getColumnPackedCopy()};
+        }
+    }
 }
