@@ -70,10 +70,11 @@ public class Vertex3d implements DeepEqualsInterface {
 		Vertex3d vertex = (Vertex3d) obj;
 		if (this.id != vertex.id) return Result.RECALC;
 		if (!Arrays.equals(this.coords, vertex.coords)) return Result.RECALC;
-		if (this.elementID != vertex.elementID) return Result.RECALC;
-		if (this.t != vertex.t) return Result.RECALC;
-		if (this.r[0] != vertex.r[0]) return Result.RECALC;
-		if (this.r[1] != vertex.r[1]) return Result.RECALC;
+		//do not check following because it might detect a wrong model change
+		/*if (this.elementID != vertex.elementID) return false;
+		if (this.t != vertex.t) return false;
+		if (this.r[0] != vertex.r[0]) return false;
+		if (this.r[1] != vertex.r[1]) return false;*/
 		return result;
 	}
 
