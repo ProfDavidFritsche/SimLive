@@ -781,7 +781,7 @@ public class Model implements DeepEqualsInterface {
 	}
 	
 	public void finalUpdateModel() {
-		updateModel(true);
+		updateModel(false);
 		mapVerticesToElements();
 	}
 	
