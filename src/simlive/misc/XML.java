@@ -1012,6 +1012,8 @@ public class XML {
 	}
 	
 	public static void writeFile(String fileName, Model model, Settings settings) {
+		if (SimLive.mode == SimLive.Mode.RESULTS) SimLive.mode = SimLive.Mode.NONE;
+		
 		try {
 			ArrayList<Node> nodes = model.getNodes();
 			ArrayList<Element> elements = model.getElements();
@@ -1527,6 +1529,8 @@ public class XML {
 		catch (IOException io) {
 			System.out.println(io.getMessage());
 		}
+		
+		if (SimLive.mode == SimLive.Mode.NONE) SimLive.mode = SimLive.Mode.RESULTS;
 	}
 	
 	private static void convertRigidDeformableToDeformableDeformable() {
