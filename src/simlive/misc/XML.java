@@ -920,7 +920,7 @@ public class XML {
 			Settings.isShowLoads = getBooleanAttribute(XMLsettings, "isShowLoads");
 			//Sim2d.settings.isShowReactions = getBooleanAttribute(XMLsettings, "isShowReactions");
 			
-			SimLive.model.updateModel(true);
+			SimLive.model.updateModel(false);
 			
 			return true;
 
