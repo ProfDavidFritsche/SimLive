@@ -472,11 +472,9 @@ public abstract class Search {
 				Node node = SimLive.model.getNodes().get(elemNodes[0]);
 				double[] coords0 = View.getCoordsWithScaledDisp(node.getID());
 				double radius = 2*SimLive.POINT_MASS_RADIUS/viewport[2]/View.zoom;
-				double[][] intersect = GeomUtility.getIntersectionLineSphere(coords0, radius, modelCoords, lookAt.getColumnPackedCopy());
+				double[] intersect = GeomUtility.getIntersectionLineSphere(coords0, radius, modelCoords, lookAt.getColumnPackedCopy());
 				if (intersect != null) {
-					double zCoord0 = View.modelToScreenCoordinates(intersect[0])[2];
-					double zCoord1 = View.modelToScreenCoordinates(intersect[1])[2];
-					double zCoord = Math.min(zCoord0, zCoord1);
+					double zCoord = View.modelToScreenCoordinates(intersect)[2];
 					if (zCoord < Search.zCoord) {
 						Search.zCoord = zCoord;
 						Search.element = elem;

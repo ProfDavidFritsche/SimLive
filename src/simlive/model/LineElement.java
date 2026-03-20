@@ -256,13 +256,8 @@ public abstract class LineElement extends Element {
 		if (this.getType() == Element.Type.SPRING) {
 			double[] dir = View.getViewDirection(modelCoords2d);
 			double r = 2*SimLive.SPRING_RADIUS/View.getViewport()[2]/View.zoom;
-			double[][] intersect = GeomUtility.getIntersectionLineCylinder(modelCoords2d,
+			return GeomUtility.getIntersectionLineCylinder(modelCoords2d,
 					dir, coords0, Rr.getMatrix(0, 2, 0, 0).getColumnPackedCopy(), r, length);
-			if (intersect != null) {
-				double zCoord0 = View.modelToScreenCoordinates(intersect[0])[2];
-				double zCoord1 = View.modelToScreenCoordinates(intersect[1])[2];
-				return zCoord0 < zCoord1 ? intersect[0] : intersect[1];
-			}
 		}
 		else if (Settings.isShowSections && isSectionValid(SimLive.model.getSections()) &&
 				section.getSectionShape().getType() != SectionShape.Type.DIRECT_INPUT) {

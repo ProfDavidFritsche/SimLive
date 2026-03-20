@@ -260,7 +260,7 @@ public abstract class GeomUtility {
 		return getIntersectionLinePlane(linePoint, lineDir, A, n.getColumnPackedCopy());
 	}
 	
-	public static double[][] getIntersectionLineCylinder(double[] linePoint, double[] lineDir,
+	public static double[] getIntersectionLineCylinder(double[] linePoint, double[] lineDir,
 			double[] cylinderPoint, double[] cylinderDir, double cylinderRadius, double cylinderLength)
 	{	
 		Matrix R = getRotationMatrix(Math.acos(cylinderDir[2]), new double[]{cylinderDir[1], -cylinderDir[0], 0});
@@ -275,16 +275,11 @@ public abstract class GeomUtility {
 		if (p_half*p_half-q < 0) return null;
 		double sqrt = Math.sqrt(p_half*p_half-q);
 		double t1 = -p_half+sqrt;
-		double t2 = -p_half-sqrt;
-		if ((lp[2]+dir[2]*t1 < 0 && lp[2]+dir[2]*t2 < 0) ||
-				(lp[2]+dir[2]*t1 > cylinderLength && lp[2]+dir[2]*t2 > cylinderLength)) return null;
-		double[][] intersect = new double[2][];
-		intersect[0] = lPoint.plus(lDir.times(t1)).getColumnPackedCopy();
-		intersect[1] = lPoint.plus(lDir.times(t2)).getColumnPackedCopy();
-		return intersect;
+		if (lp[2]+dir[2]*t1 < 0 || lp[2]+dir[2]*t1 > cylinderLength) return null;
+		return lPoint.plus(lDir.times(t1)).getColumnPackedCopy();
 	}
 	
-	public static double[][] getIntersectionLineSphere(double[] center, double radius, double[] linePoint, double[] lineDir) {
+	public static double[] getIntersectionLineSphere(double[] center, double radius, double[] linePoint, double[] lineDir) {
         Matrix L = new Matrix(new double[]{linePoint[0]-center[0], linePoint[1]-center[1], linePoint[2]-center[2]}, 3);
         Matrix lDir = new Matrix(lineDir, 3);
         double b = 2*lDir.dotProduct(L);
@@ -293,12 +288,7 @@ public abstract class GeomUtility {
         if (discriminant < 0) {
             return null;
         }
-        else {
-            double t1 = (-b-Math.sqrt(discriminant))/2;
-            double t2 = (-b+Math.sqrt(discriminant))/2;
-            Matrix lPoint = new Matrix(linePoint, 3);
-            return new double[][]{lPoint.plus(lDir.times(t1)).getColumnPackedCopy(),
-            		lPoint.plus(lDir.times(t2)).getColumnPackedCopy()};
-        }
+        double t1 = (-b+Math.sqrt(discriminant))/2;
+        return new Matrix(linePoint, 3).plus(lDir.times(t1)).getColumnPackedCopy();
     }
 }
