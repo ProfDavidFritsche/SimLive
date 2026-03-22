@@ -304,9 +304,11 @@ public class SolutionDialog extends Composite {
 			public void run() {
 				if (!styledText.isDisposed()) {
 					String text = styledText.getText();
-					String subString = Solution.log.substring(text.length());
-					styledText.append(subString);
-					styledText.setTopIndex(styledText.getLineCount()-1);
+					if (text.length() < Solution.log.length()) {
+						String subString = Solution.log.substring(text.length());
+						styledText.append(subString);
+						styledText.setTopIndex(styledText.getLineCount()-1);
+					}
 				}
 			}
 		});
