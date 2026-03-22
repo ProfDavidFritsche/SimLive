@@ -290,7 +290,7 @@ public class SolutionDialog extends Composite {
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {		
 				if (!styledText.isDisposed()) {
-					styledText.setText(Solution.log);
+					if (styledText.getText().isEmpty()) styledText.setText(Solution.log);
 					styledText.append(Solution.errors);
 					styledText.append(Solution.warnings);
 					styledText.setTopIndex(styledText.getLineCount()-1);
@@ -304,17 +304,8 @@ public class SolutionDialog extends Composite {
 			public void run() {
 				if (!styledText.isDisposed()) {
 					String text = styledText.getText();
-					if (!text.isEmpty()) {
-						int beginIndex = text.lastIndexOf("\n", text.length()-3)+1;
-						if (beginIndex == -1) beginIndex = 0;
-						String textLine = text.substring(beginIndex);
-						int index = Solution.log.lastIndexOf(textLine)+textLine.length();
-						String subString = Solution.log.substring(index);
-						styledText.append(subString);
-					}
-					else {
-						styledText.setText(Solution.log);
-					}
+					String subString = Solution.log.substring(text.length());
+					styledText.append(subString);
 					styledText.setTopIndex(styledText.getLineCount()-1);
 				}
 			}
