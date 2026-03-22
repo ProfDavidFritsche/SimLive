@@ -1414,8 +1414,8 @@ public class Increment {
 					Arrays.sort(eigenValues);
 					double omega = Math.sqrt(eigenValues[eigenValues.length-1]);
 					if (elements.get(elem).getStiffnessDamping() > SimLive.string2Double(SimLive.double2String(2.0/omega))) {
-						Solution.warnings.add("Stiffness damping > "+SimLive.double2String(2.0/omega)+" for element \""+
-								elements.get(elem).getTypeString()+" "+Integer.toString(elem+1)+"\".");
+						Solution.warnings += "Stiffness damping > "+SimLive.double2String(2.0/omega)+" for element \""+
+								elements.get(elem).getTypeString()+" "+Integer.toString(elem+1)+"\".\n";
 					}
 					double xi = elements.get(elem).getMassDamping()/(2.0*omega)+elements.get(elem).getStiffnessDamping()*omega/2.0;
 					double critTimeStep = 2.0/omega*(Math.sqrt(xi*xi+1.0)-xi);

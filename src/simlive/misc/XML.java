@@ -988,9 +988,9 @@ public class XML {
 			solution.setD(XMLToMatrix(XMLsolution.getChild("D")));
 			solution.setV(XMLToMatrix(XMLsolution.getChild("V")));
 			
-			Solution.log = XMLToStringList(XMLsolution.getChild("log"));
-			Solution.warnings = XMLToStringList(XMLsolution.getChild("warnings"));
-			Solution.errors = XMLToStringList(XMLsolution.getChild("errors"));
+			Solution.log = getStringAttribute(XMLsolution, "log");
+			Solution.warnings = getStringAttribute(XMLsolution, "warnings");
+			Solution.errors = getStringAttribute(XMLsolution, "errors");
 			SimLive.initPost(solution);
 			
 			return true;
@@ -1505,9 +1505,9 @@ public class XML {
 				matrixToXML(solution.getD(), new org.jdom.Element("D"), XMLsolution);
 				matrixToXML(solution.getV(), new org.jdom.Element("V"), XMLsolution);
 				
-				stringListToXML(Solution.log, new org.jdom.Element("log"), XMLsolution);
-				stringListToXML(Solution.errors, new org.jdom.Element("errors"), XMLsolution);
-				stringListToXML(Solution.warnings, new org.jdom.Element("warnings"), XMLsolution);
+				setStringAttribute(XMLsolution, "log", Solution.log);
+				setStringAttribute(XMLsolution, "errors", Solution.errors);
+				setStringAttribute(XMLsolution, "warnings", Solution.warnings);
 				
 				doc.getRootElement().addContent(XMLsolution);
 			}
@@ -1799,28 +1799,6 @@ public class XML {
 		return null;
 	}
 
-	private static void stringListToXML(ArrayList<String> stringList, org.jdom.Element element, org.jdom.Element parent) {
-		for (int i = 0; i < stringList.size(); i++) {
-			org.jdom.Element entry = new org.jdom.Element("entry");
-			setStringAttribute(entry, "string", stringList.get(i));
-			element.addContent(entry);
-		}
-		parent.addContent(element);
-	}
-	
-	private static ArrayList<String> XMLToStringList(org.jdom.Element element) {
-		ArrayList<String> stringList = new ArrayList<String>();
-		Object[] list = element.getChildren().toArray();
-		
-		for (int i = 0; i < list.length; i++) {
-
-			org.jdom.Element entry = (org.jdom.Element) list[i];
-			
-			stringList.add(getStringAttribute(entry, "string"));
-		}
-		return stringList;
-	}
-	
 	public static String getFilePath() {
 		return filePath;
 	}

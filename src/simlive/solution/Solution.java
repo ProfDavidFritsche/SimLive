@@ -30,9 +30,9 @@ public class Solution {
 	private Matrix D, V;
 	private ConstraintMethod constraintMethod;
 	private int nDofs;
-	public static ArrayList<String> log = new ArrayList<String>();
-	public static ArrayList<String> errors = new ArrayList<String>();
-	public static ArrayList<String> warnings = new ArrayList<String>();
+	public static String log;
+	public static String errors;
+	public static String warnings;
 	protected Model refModel;
 	private int[] dofOfNodeID;
 	public static String[] results = {"Solution Stopped with Errors",
@@ -71,9 +71,9 @@ public class Solution {
 	}
 	
 	public static void resetLog() {
-		log.clear();
-		errors.clear();
-		warnings.clear();
+		log = "";
+		errors = "";
+		warnings = "";
 	}
 	
 	private void initialize() {
@@ -127,11 +127,11 @@ public class Solution {
 		ArrayList<DistributedLoad> distributedLoads = refModel.getDistributedLoads();
 		
 		if (nodes.size() == 0) {
-			errors.add("No node found.");
+			errors += "No node found.\n";
 		}
 		
 		if (materials.size() == 0) {
-			errors.add("No material defined.");
+			errors += "No material defined.\n";
 		}
 		
 		for (int i = 0; i < Element.Type.values().length; i++) {
@@ -141,7 +141,7 @@ public class Solution {
 					LineElement element = (LineElement) elements.get(elem);
 					if (element.getType() == type) {
 						if (!element.isSectionValid(sections)) {
-							errors.add("No section for elements of type \""+element.getTypeString()+"\" defined.");
+							errors += "No section for elements of type \""+element.getTypeString()+"\" defined.\n";
 						}
 						break;
 					}
@@ -166,16 +166,16 @@ public class Solution {
 		}*/
 		
 		if (steps.size() == 0) {
-			errors.add("No step defined.");
+			errors += "No step defined.\n";
 		}		
 		else {
 			for (int s = 0; s < steps.size(); s++) {
 				if (steps.get(s).type == Step.Type.MODAL_ANALYSIS) {
 					if (steps.size() > 1) {
-						errors.add("Modal analysis only possible as single step.");
+						errors += "Modal analysis only possible as single step.\n";
 					}
 					if (refModel.settings.isLargeDisplacement) {
-						errors.add("Modal analysis with large displacement is not possible.");
+						errors += "Modal analysis with large displacement is not possible.\n";
 					}
 					break;
 				}
@@ -186,13 +186,13 @@ public class Solution {
 			if (elements.get(elem).getType() == Element.Type.SPRING) {
 				Spring spring = (Spring) elements.get(elem);
 				if (spring.getStiffness() <= 0.0) {
-					errors.add("Element \""+spring.getTypeString()+" "+Integer.toString(elem+1)+"\" has no stiffness.");
+					errors += "Element \""+spring.getTypeString()+" "+Integer.toString(elem+1)+"\" has no stiffness.\n";
 				}
 			}
 			if (elements.get(elem).isPlaneElement()) {
 				PlaneElement element = (PlaneElement) elements.get(elem);
 				if (element.getThickness() <= 0.0) {
-					errors.add("Element \""+element.getTypeString()+" "+Integer.toString(elem+1)+"\" has no thickness.");
+					errors += "Element \""+element.getTypeString()+" "+Integer.toString(elem+1)+"\" has no thickness.\n";
 				}
 			}
 		}
@@ -200,7 +200,7 @@ public class Solution {
 		if (isWriteMatrixView) {
 			int max_nDofs = 1000;
 			if (nDofs > max_nDofs) {
-				errors.add("Write matrix view for large systems (nDof>"+Integer.toString(max_nDofs)+") is not possible.");
+				errors += "Write matrix view for large systems (nDof>"+Integer.toString(max_nDofs)+") is not possible.\n";
 			}
 		}
 		
@@ -209,7 +209,7 @@ public class Solution {
 				for (int s = 0; s < supports.size(); s++) {
 					if (supports.get(s).isFixedRot()[0] || supports.get(s).isFixedRot()[1] || supports.get(s).isFixedRot()[2]) {
 						if (supports.get(s).getNodes().contains(nodes.get(n))) {
-							warnings.add("Fixed rotation is ignored for node "+Integer.toString(n+1)+".");
+							warnings += "Fixed rotation is ignored for node "+Integer.toString(n+1)+".\n";
 						}
 					}
 				}
@@ -217,13 +217,13 @@ public class Solution {
 					if (loads.get(l).getType() == Load.Type.FORCE && (loads.get(l).getMoment()[0] != 0.0 ||
 							loads.get(l).getMoment()[1] != 0.0 || loads.get(l).getMoment()[2] != 0.0)) {
 						if (loads.get(l).getNodes().contains(nodes.get(n))) {
-							warnings.add("Moment is ignored for node "+Integer.toString(n+1)+".");
+							warnings += "Moment is ignored for node "+Integer.toString(n+1)+".\n";
 						}
 					}
 					if (loads.get(l).getType() == Load.Type.DISPLACEMENT && (loads.get(l).isRotation()[0] ||
 							loads.get(l).isRotation()[1] || loads.get(l).isRotation()[2])) {
 						if (loads.get(l).getNodes().contains(nodes.get(n))) {
-							warnings.add("Rotation is ignored for node "+Integer.toString(n+1)+".");
+							warnings += "Rotation is ignored for node "+Integer.toString(n+1)+".\n";
 						}
 					}
 				}
@@ -233,7 +233,7 @@ public class Solution {
 		for (int c = 0; c < connectors.size(); c++) {
 			if (connectors.get(c).getSet0() == null || connectors.get(c).getSet1() == null ||
 				!connectors.get(c).isCoordsSet()) {
-				errors.add("Connector \""+connectors.get(c).name+"\" is not completely defined.");
+				errors += "Connector \""+connectors.get(c).name+"\" is not completely defined.\n";
 			}
 			else {
 				Element[] elem = new Element[2];
@@ -252,7 +252,7 @@ public class Solution {
 							}
 						}
 						if (n == elementNodes.length) {
-							warnings.add("Connector \""+connectors.get(c).name+"\" is not positioned at node.");
+							warnings += "Connector \""+connectors.get(c).name+"\" is not positioned at node.\n";
 							break;
 						}
 					}
@@ -264,7 +264,7 @@ public class Solution {
 			if (contactPairs.get(c).getSlaveNodes().isEmpty() ||
 				contactPairs.get(c).getMasterSets().isEmpty() ||
 				(Model.twoDimensional && !contactPairs.get(c).hasStoredEdges())) {
-				errors.add("Contact \""+contactPairs.get(c).name+"\" is not completely defined.");
+				errors += "Contact \""+contactPairs.get(c).name+"\" is not completely defined.\n";
 			}
 		}
 		
@@ -272,7 +272,7 @@ public class Solution {
 			TimeTable timeTable = loads.get(l).getTimeTable();
 			for (int i = 1; i < timeTable.getNumberOfRows(); i++) {
 				if (timeTable.getTime(i) <= timeTable.getTime(i-1)) {
-					errors.add("Load \""+loads.get(l).name+"\" has time dependency in wrong order.");
+					errors += "Load \""+loads.get(l).name+"\" has time dependency in wrong order.\n";
 					break;
 				}				
 			}
@@ -282,7 +282,7 @@ public class Solution {
 			TimeTable timeTable = distributedLoads.get(d).getTimeTable();
 			for (int i = 1; i < timeTable.getNumberOfRows(); i++) {
 				if (timeTable.getTime(i) <= timeTable.getTime(i-1)) {
-					errors.add("Distributed Load \""+distributedLoads.get(d).name+"\" has time dependency in wrong order.");
+					errors += "Distributed Load \""+distributedLoads.get(d).name+"\" has time dependency in wrong order.\n";
 					break;
 				}				
 			}
@@ -326,7 +326,7 @@ public class Solution {
 		for (int s = 0; s < refModel.getSteps().size(); s++) {
 			Step step = refModel.getSteps().get(s);
 			
-			log.add("STEP: \""+step.name+"\"");
+			log += "STEP: \""+step.name+"\"\n";
 			dialog.updateLog();
 			
 			switch (step.type) {
@@ -379,9 +379,9 @@ public class Solution {
 		Matrix delta_f_constr = null;
 		double norm0 = 0.0;
 		
-		log.add("STATIC SOLUTION");
+		log += "STATIC SOLUTION\n";
 		dialog.updateLog();
-		log.add("Time step = "+SimLive.double2String(timeStep));
+		log += "Time step = "+SimLive.double2String(timeStep)+"\n";
 		dialog.updateLog();
 		
 		Matrix f_gravity = new Increment(this, 0.0, stepNr).getGravityForce(nDofs, step, null);
@@ -391,7 +391,7 @@ public class Solution {
 			
 			double time = (i-startInc)*timeStep+startTime;
 			
-			log.add("Increment "+i+": Time = "+SimLive.double2String(time));
+			log += "Increment "+i+": Time = "+SimLive.double2String(time)+"\n";
 			dialog.updateLog();
 			
 			increments[i] = new Increment(this, time, stepNr);
@@ -462,11 +462,11 @@ public class Solution {
 					double ratio = norm/norm0;
 					if (norm < SimLive.ZERO_TOL*minElemLength) ratio = 0.0;
 					
-					log.add("     Iteration "+(iter+1)+": Ratio = "+SimLive.double2String(ratio));
+					log += "     Iteration "+(iter+1)+": Ratio = "+SimLive.double2String(ratio)+"\n";
 					dialog.updateLog();
 					
 					if (ratio < CONV_RATIO) {
-						log.add("     Convergence after "+(iter+1)+" iterations.");
+						log += "     Convergence after "+(iter+1)+" iterations.\n";
 						dialog.updateLog();
 						break;
 					}
@@ -524,9 +524,9 @@ public class Solution {
 		int nInc = new Increment(this, 0.0, stepNr).getNumberOfDynamicTimeSteps(nDofs, u_global, step);
 		double timeStep = step.duration/nInc;
 		
-		log.add("DYNAMIC SOLUTION");
+		log += "DYNAMIC SOLUTION\n";
 		dialog.updateLog();
-		log.add("Time step = "+SimLive.double2String(timeStep));
+		log += "Time step = "+SimLive.double2String(timeStep)+"\n";
 		dialog.updateLog();
 		
 		Matrix M_global = new Increment(this, 0.0, stepNr).assembleMassSequential(nDofs);
@@ -613,7 +613,7 @@ public class Solution {
 			/* post increment */
 			if (i%(nInc/step.nIncrements) == 0) {
 				
-				log.add("Increment "+postInc+": Time = "+SimLive.double2String(time));
+				log += "Increment "+postInc+": Time = "+SimLive.double2String(time)+"\n";
 				dialog.updateLog();
 				
 				Matrix G_onlyReaction = increment.getAssembledGMatrix(nDofs, G_support, G_connect.getEmptyCopy(), G_contact.getEmptyCopy(), G_load);
@@ -645,7 +645,7 @@ public class Solution {
 	
 	private boolean modalAnalysis(SolutionDialog dialog) {
 		
-		log.add("MODAL ANALYSIS\nCalculate Matrix...");
+		log += "MODAL ANALYSIS\nCalculate Matrix...\n";
 		dialog.updateLog();
 		
 		Increment increment = new Increment(this, 0.0, 0);
@@ -666,7 +666,7 @@ public class Solution {
 			}
 			Matrix A = M_constr.inverse().times(K_constr);
 			
-			log.add("Calculate Eigenmodes...");
+			log += "Calculate Eigenmodes...\n";
 			dialog.updateLog();
 			
 			EigenvalueDecomposition eig = A.eig(true);
@@ -681,7 +681,7 @@ public class Solution {
 			return solutionError(0, e.getMessage());
 		}
 		
-		log.add("Sort Eigenmodes...");
+		log += "Sort Eigenmodes...\n";
 		dialog.updateLog();
 		
 		/* get full solution for eigenvectors and normalize */
@@ -813,7 +813,7 @@ public class Solution {
 			D.set(i, 0, Math.sqrt(D.get(i, 0)));
 		}
 		
-		log.add(D.getRowDimension()+" Eigenmodes calculated.");
+		log += D.getRowDimension()+" Eigenmodes calculated.\n";
 		dialog.updateLog();
 		
 		return true;
@@ -835,12 +835,12 @@ public class Solution {
 		if (postInc > 1) {
 			nIncrements = postInc - 1;
 			increments = Arrays.copyOf(increments, postInc);
-			errors.add(text + " Results are available.");
+			errors += text + " Results are available.\n";
 		}
 		else {
 			nIncrements = 0;
 			increments = null;
-			errors.add(text);
+			errors += text+"\n";
 		}
 		return false;
 	}

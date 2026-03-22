@@ -32,7 +32,7 @@ public class SolutionDialog extends Composite {
 	private Combo combo;
 	private ProgressBar progressBar;
 	private StyledText styledText;
-	private int logIndex, progressBarInc, progressBarMax;
+	private int progressBarInc, progressBarMax;
 	private final int PROGRESS_BAR = 1000;
 	private Composite resultComposite;
 	private Solution solution = null;
@@ -88,7 +88,7 @@ public class SolutionDialog extends Composite {
 		styledText = new StyledText(this, SWT.V_SCROLL | SWT.BORDER | SWT.READ_ONLY | SWT.WRAP);
 		styledText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		
-		fillLogComplete();
+		setTextToLog();
 	}
 	
 	private Composite getComposite(final Composite parent, final Model model) {		
@@ -203,7 +203,6 @@ public class SolutionDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				styledText.setText("");
-				logIndex = 0;
 				
 				thread = new Thread(new Runnable() {			
 					public void run() {
@@ -247,7 +246,7 @@ public class SolutionDialog extends Composite {
 								public void run() {
 									progressBar.setSelection(0);
 									SimLive.setResultLabel(resultComposite, false, false, false);
-									fillLogComplete();
+									setTextToLog();
 								}
 							});
 							
@@ -274,7 +273,7 @@ public class SolutionDialog extends Composite {
 			}
 			if (increments.size() > 0) {
 				solution.setIncrements(increments.toArray(new Increment[increments.size()]));
-				Solution.errors.add("Stopped by user. " + " Results are available.");
+				Solution.errors += "Stopped by user. " + " Results are available.\n";
 				SimLive.initPost(solution);
 				return true;
 			}
@@ -287,21 +286,13 @@ public class SolutionDialog extends Composite {
 		Sim2d.setResultLabel(null, lblResult, false, false, 32);
 	}*/
 	
-	public void fillLogComplete() {			
+	private void setTextToLog() {			
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {		
-				String str = "";
-				for (int i = 0; i < Solution.log.size(); i++) {
-					str += Solution.log.get(i)+"\n";
-				}
-				for (int i = 0; i < Solution.errors.size(); i++) {
-					str += "ERROR: "+Solution.errors.get(i)+"\n";
-				}
-				for (int i = 0; i < Solution.warnings.size(); i++) {
-					str += "WARNING: "+Solution.warnings.get(i)+"\n";
-				}
 				if (!styledText.isDisposed()) {
-					styledText.setText(str);
+					styledText.setText(Solution.log);
+					styledText.append(Solution.errors);
+					styledText.append(Solution.warnings);
 					styledText.setTopIndex(styledText.getLineCount()-1);
 				}				
 			}
@@ -311,21 +302,19 @@ public class SolutionDialog extends Composite {
 	public void updateLog() {
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				final int logSize = Solution.log.size();
-				if (!styledText.isDisposed() && logSize > logIndex) {
+				if (!styledText.isDisposed()) {
 					String text = styledText.getText();
-					for (int i = logIndex; i < logSize; i++) {
-						text += Solution.log.get(i)+"\n";
+					if (!text.isEmpty()) {
+						int beginIndex = text.lastIndexOf("\n", text.length()-3)+1;
+						if (beginIndex == -1) beginIndex = 0;
+						String textLine = text.substring(beginIndex);
+						int index = Solution.log.lastIndexOf(textLine)+textLine.length();
+						String subString = Solution.log.substring(index);
+						styledText.append(subString);
 					}
-					logIndex = logSize;
-					if (styledText.getTopIndex() > 0) {
-						int index = 0;
-						for (int i = 0; i < styledText.getTopIndex(); i++) {
-							index += styledText.getLine(i).length()+1;
-						}
-						text = text.substring(index);
+					else {
+						styledText.setText(Solution.log);
 					}
-					styledText.setText(text);
 					styledText.setTopIndex(styledText.getLineCount()-1);
 				}
 			}
