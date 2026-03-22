@@ -30,6 +30,7 @@ public class Solution {
 	private Matrix D, V;
 	private ConstraintMethod constraintMethod;
 	private int nDofs;
+	public static String logBuffer;
 	public static String log;
 	public static String errors;
 	public static String warnings;
@@ -71,6 +72,7 @@ public class Solution {
 	}
 	
 	public static void resetLog() {
+		logBuffer = "";
 		log = "";
 		errors = "";
 		warnings = "";
@@ -326,8 +328,7 @@ public class Solution {
 		for (int s = 0; s < refModel.getSteps().size(); s++) {
 			Step step = refModel.getSteps().get(s);
 			
-			log += "STEP: \""+step.name+"\"\n";
-			dialog.updateLog();
+			logBuffer += "STEP: \""+step.name+"\"\n";
 			
 			switch (step.type) {
 			
@@ -379,9 +380,8 @@ public class Solution {
 		Matrix delta_f_constr = null;
 		double norm0 = 0.0;
 		
-		log += "STATIC SOLUTION\n";
-		dialog.updateLog();
-		log += "Time step = "+SimLive.double2String(timeStep)+"\n";
+		logBuffer += "STATIC SOLUTION\n";
+		logBuffer += "Time step = "+SimLive.double2String(timeStep)+"\n";
 		dialog.updateLog();
 		
 		Matrix f_gravity = new Increment(this, 0.0, stepNr).getGravityForce(nDofs, step, null);
@@ -391,7 +391,7 @@ public class Solution {
 			
 			double time = (i-startInc)*timeStep+startTime;
 			
-			log += "Increment "+i+": Time = "+SimLive.double2String(time)+"\n";
+			logBuffer += "Increment "+i+": Time = "+SimLive.double2String(time)+"\n";
 			dialog.updateLog();
 			
 			increments[i] = new Increment(this, time, stepNr);
@@ -462,11 +462,11 @@ public class Solution {
 					double ratio = norm/norm0;
 					if (norm < SimLive.ZERO_TOL*minElemLength) ratio = 0.0;
 					
-					log += "     Iteration "+(iter+1)+": Ratio = "+SimLive.double2String(ratio)+"\n";
+					logBuffer += "     Iteration "+(iter+1)+": Ratio = "+SimLive.double2String(ratio)+"\n";
 					dialog.updateLog();
 					
 					if (ratio < CONV_RATIO) {
-						log += "     Convergence after "+(iter+1)+" iterations.\n";
+						logBuffer += "     Convergence after "+(iter+1)+" iterations.\n";
 						dialog.updateLog();
 						break;
 					}
@@ -524,9 +524,8 @@ public class Solution {
 		int nInc = new Increment(this, 0.0, stepNr).getNumberOfDynamicTimeSteps(nDofs, u_global, step);
 		double timeStep = step.duration/nInc;
 		
-		log += "DYNAMIC SOLUTION\n";
-		dialog.updateLog();
-		log += "Time step = "+SimLive.double2String(timeStep)+"\n";
+		logBuffer += "DYNAMIC SOLUTION\n";
+		logBuffer += "Time step = "+SimLive.double2String(timeStep)+"\n";
 		dialog.updateLog();
 		
 		Matrix M_global = new Increment(this, 0.0, stepNr).assembleMassSequential(nDofs);
@@ -613,7 +612,7 @@ public class Solution {
 			/* post increment */
 			if (i%(nInc/step.nIncrements) == 0) {
 				
-				log += "Increment "+postInc+": Time = "+SimLive.double2String(time)+"\n";
+				logBuffer += "Increment "+postInc+": Time = "+SimLive.double2String(time)+"\n";
 				dialog.updateLog();
 				
 				Matrix G_onlyReaction = increment.getAssembledGMatrix(nDofs, G_support, G_connect.getEmptyCopy(), G_contact.getEmptyCopy(), G_load);
@@ -645,7 +644,7 @@ public class Solution {
 	
 	private boolean modalAnalysis(SolutionDialog dialog) {
 		
-		log += "MODAL ANALYSIS\nCalculate Matrix...\n";
+		logBuffer += "MODAL ANALYSIS\nCalculate Matrix...\n";
 		dialog.updateLog();
 		
 		Increment increment = new Increment(this, 0.0, 0);
@@ -666,7 +665,7 @@ public class Solution {
 			}
 			Matrix A = M_constr.inverse().times(K_constr);
 			
-			log += "Calculate Eigenmodes...\n";
+			logBuffer += "Calculate Eigenmodes...\n";
 			dialog.updateLog();
 			
 			EigenvalueDecomposition eig = A.eig(true);
@@ -681,7 +680,7 @@ public class Solution {
 			return solutionError(0, e.getMessage());
 		}
 		
-		log += "Sort Eigenmodes...\n";
+		logBuffer += "Sort Eigenmodes...\n";
 		dialog.updateLog();
 		
 		/* get full solution for eigenvectors and normalize */
@@ -813,7 +812,7 @@ public class Solution {
 			D.set(i, 0, Math.sqrt(D.get(i, 0)));
 		}
 		
-		log += D.getRowDimension()+" Eigenmodes calculated.\n";
+		logBuffer += D.getRowDimension()+" Eigenmodes calculated.\n";
 		dialog.updateLog();
 		
 		return true;

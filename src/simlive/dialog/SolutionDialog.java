@@ -302,13 +302,12 @@ public class SolutionDialog extends Composite {
 	public void updateLog() {
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				if (!styledText.isDisposed()) {
-					String text = styledText.getText();
-					if (text.length() < Solution.log.length()) {
-						String subString = Solution.log.substring(text.length());
-						styledText.append(subString);
-						styledText.setTopIndex(styledText.getLineCount()-1);
-					}
+				String buffer = Solution.logBuffer;
+				Solution.logBuffer = "";
+				if (!styledText.isDisposed() && !buffer.isEmpty()) {
+					Solution.log += buffer;
+					styledText.append(buffer);
+					styledText.setTopIndex(styledText.getLineCount()-1);
 				}
 			}
 		});
