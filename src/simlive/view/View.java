@@ -3335,10 +3335,6 @@ public class View extends GLCanvas {
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
 	    		lineElementRadius, scaling, Set.View.DEFAULT, zoom, sets0, objects);
 		
-	    if (SimLive.mode == SimLive.Mode.CONTACTS) {
-			connectSets1.clear();
-		}
-	    
 	    /* rigid contacts */
 	    switchSingleDoubleSided(gl2, true);
 	    for (int c = 0; c < SimLive.model.getContactPairs().size(); c++) {
