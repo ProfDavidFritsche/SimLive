@@ -307,7 +307,7 @@ public class SolutionDialog extends Composite {
 					Solution.log += buffer;
 					styledText.append(buffer);
 					styledText.setTopIndex(styledText.getLineCount()-1);
-					Solution.logBuffer = Solution.logBuffer.replaceFirst(buffer, "");
+					Solution.logBuffer = Solution.logBuffer.substring(buffer.length());
 				}
 			}
 		});
