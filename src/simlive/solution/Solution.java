@@ -329,6 +329,7 @@ public class Solution {
 			Step step = refModel.getSteps().get(s);
 			
 			logBuffer += "STEP: \""+step.name+"\"\n";
+			dialog.updateLog();
 			
 			switch (step.type) {
 			
