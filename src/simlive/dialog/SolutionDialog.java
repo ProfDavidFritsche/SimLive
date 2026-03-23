@@ -303,11 +303,11 @@ public class SolutionDialog extends Composite {
 		SimLive.shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				String buffer = Solution.logBuffer;
-				Solution.logBuffer = "";
 				if (!styledText.isDisposed() && !buffer.isEmpty()) {
 					Solution.log += buffer;
 					styledText.append(buffer);
 					styledText.setTopIndex(styledText.getLineCount()-1);
+					Solution.logBuffer = Solution.logBuffer.replaceFirst(buffer, "");
 				}
 			}
 		});
