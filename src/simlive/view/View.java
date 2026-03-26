@@ -3699,8 +3699,7 @@ public class View extends GLCanvas {
 			double[] coords0 = selectedNodes.get(0).getCoords();
 			double[] coords1 = selectedNodes.get(1).getCoords();
 			double[] coords2 = selectedNodes.get(2).getCoords();
-			gl2.glTranslated((coords0[0]+coords1[0]+coords2[0])/3, (coords0[1]+coords1[1]+coords2[1])/3,
-					(coords0[2]+coords1[2]+coords2[2])/3);
+			gl2.glTranslated((coords0[0]+coords1[0])/2, (coords0[1]+coords1[1])/2, (coords0[2]+coords1[2])/2);
 			Matrix R = GeomUtility.getRotationMatrixByThreePoints(coords0, coords1, coords2);
 			gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
 	    	{
