@@ -1377,31 +1377,31 @@ public class View extends GLCanvas {
 					public void widgetSelected(SelectionEvent e) {
 						Matrix R = GeomUtility.getRotationMatrixByThreePoints(selectedNodes.get(0).getCoords(),
 								selectedNodes.get(1).getCoords(), selectedNodes.get(2).getCoords());
-						Matrix axis = new Matrix(Beam.anglesFromRotationMatrix(R), 3);
-						double length = axis.normF();
+						double[] axis = Beam.anglesFromRotationMatrix(R);							
+						double length = Math.sqrt(axis[0]*axis[0]+axis[1]*axis[1]+axis[2]*axis[2]);
 						SimLive.disposeDialogAreas();
 						if (objects.get(0) instanceof Support) {
 							Support support = (Support) objects.get(0);
-							support.setAxis(axis.get(0, 0)/length, 0);
-							support.setAxis(axis.get(1, 0)/length, 1);
-							support.setAxis(axis.get(2, 0)/length, 2);
+							support.setAxis(axis[0]/length, 0);
+							support.setAxis(axis[1]/length, 1);
+							support.setAxis(axis[2]/length, 2);
 							support.setAngle(length*180/Math.PI);
 							SimLive.dialogArea = new SupportDialog(SimLive.compositeLeft, SWT.NONE, support);
 						}
 						if (objects.get(0) instanceof Load) {
 							Load load = (Load) objects.get(0);
-							load.setAxis(axis.get(0, 0)/length, 0);
-							load.setAxis(axis.get(1, 0)/length, 1);
-							load.setAxis(axis.get(2, 0)/length, 2);
+							load.setAxis(axis[0]/length, 0);
+							load.setAxis(axis[1]/length, 1);
+							load.setAxis(axis[2]/length, 2);
 							load.setAngle(length*180/Math.PI);
 							SimLive.disposeDialogAreas();
 							SimLive.dialogArea = new LoadDialog(SimLive.compositeLeft, SWT.NONE, load);
 						}
 						if (objects.get(0) instanceof DistributedLoad) {
 							DistributedLoad load = (DistributedLoad) objects.get(0);
-							load.setAxis(axis.get(0, 0)/length, 0);
-							load.setAxis(axis.get(1, 0)/length, 1);
-							load.setAxis(axis.get(2, 0)/length, 2);
+							load.setAxis(axis[0]/length, 0);
+							load.setAxis(axis[1]/length, 1);
+							load.setAxis(axis[2]/length, 2);
 							load.setAngle(length*180/Math.PI);
 							SimLive.disposeDialogAreas();
 							SimLive.dialogArea = new DistributedLoadDialog(SimLive.compositeLeft, SWT.NONE, load);
