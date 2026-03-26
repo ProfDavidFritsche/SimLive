@@ -68,6 +68,19 @@ public abstract class GeomUtility {
 		}
 	}
 	
+	public static Matrix getRotationMatrixByThreePoints(double[] p0, double[] p1, double[] p2) {
+		Matrix d0 = new Matrix(p1, 3).minus(new Matrix(p0, 3));
+		Matrix d1 = new Matrix(p2, 3).minus(new Matrix(p0, 3));
+		Matrix d2 = d0.crossProduct(d1);
+		if (d2.get(2, 0) < 0) d2 = d1.crossProduct(d0);
+		d1 = d2.crossProduct(d0);
+		Matrix R = new Matrix(3, 3);
+		R.setMatrix(0, 2, 0, 0, d0.times(1.0/d0.normF()));
+		R.setMatrix(0, 2, 1, 1, d1.times(1.0/d1.normF()));
+		R.setMatrix(0, 2, 2, 2, d2.times(1.0/d2.normF()));
+		return R;
+	}
+	
 	public static double[] intersect(double[] p0, double[] p1, double[] q0, double[] q1) {
 		double[] intersectionPoint = new double[2];
 		double[] params = getIntersectionParams(p0[0], p0[1], p1[0], p1[1], q0[0], q0[1], q1[0], q1[1]);
