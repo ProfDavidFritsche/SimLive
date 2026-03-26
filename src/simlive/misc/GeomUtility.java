@@ -72,6 +72,7 @@ public abstract class GeomUtility {
 		Matrix d0 = new Matrix(p1, 3).minus(new Matrix(p0, 3));
 		Matrix d1 = new Matrix(p2, 3).minus(new Matrix(p0, 3));
 		Matrix d2 = d0.crossProduct(d1);
+		if (d2.get(2, 0) < 0) d2 = d1.crossProduct(d0);
 		d1 = d2.crossProduct(d0);
 		Matrix R = new Matrix(3, 3);
 		R.setMatrix(0, 2, 0, 0, d0.times(1.0/d0.normF()));

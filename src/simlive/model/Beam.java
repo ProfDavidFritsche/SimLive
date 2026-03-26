@@ -437,7 +437,6 @@ public class Beam extends LineElement {
 		try {
 			Matrix I = Matrix.identity(3, 3);
 			Matrix gx = (R.minus(I)).times((R.plus(I)).inverse());
-			if (Double.isNaN(gx.get(0, 0))) throw new RuntimeException();
 			Matrix g = new Matrix(3, 1);
 			g.set(0, 0, gx.get(2, 1));
 			g.set(1, 0, gx.get(0, 2));
