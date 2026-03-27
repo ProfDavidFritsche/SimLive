@@ -1369,47 +1369,49 @@ public class View extends GLCanvas {
         ArrayList<Object> objects = SimLive.getModelTreeSelection();
         if (SimLive.mode != Mode .RESULTS && objects.size() == 1 && selectedLabel == null && selectedMeasurement == null) {
         	if ((objects.get(0) instanceof Support || objects.get(0) instanceof AbstractLoad) && selectedNodes.size() == 3) {
-        		new MenuItem(popup, SWT.SEPARATOR);
-				MenuItem newItem1 = new MenuItem(popup, SWT.NONE);
-    			newItem1.setText("Set Coordinate System");
-    			newItem1.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						Matrix R = GeomUtility.getRotationMatrixByThreePoints(selectedNodes.get(0).getCoords(),
-								selectedNodes.get(1).getCoords(), selectedNodes.get(2).getCoords());
-						double[] axis = Beam.anglesFromRotationMatrix(R);							
-						double length = Math.sqrt(axis[0]*axis[0]+axis[1]*axis[1]+axis[2]*axis[2]);
-						SimLive.disposeDialogAreas();
-						if (objects.get(0) instanceof Support) {
-							Support support = (Support) objects.get(0);
-							support.setAxis(axis[0]/length, 0);
-							support.setAxis(axis[1]/length, 1);
-							support.setAxis(axis[2]/length, 2);
-							support.setAngle(length*180/Math.PI);
-							SimLive.dialogArea = new SupportDialog(SimLive.compositeLeft, SWT.NONE, support);
-						}
-						if (objects.get(0) instanceof Load) {
-							Load load = (Load) objects.get(0);
-							load.setAxis(axis[0]/length, 0);
-							load.setAxis(axis[1]/length, 1);
-							load.setAxis(axis[2]/length, 2);
-							load.setAngle(length*180/Math.PI);
+        		Matrix R = GeomUtility.getRotationMatrixByThreePoints(selectedNodes.get(0).getCoords(),
+						selectedNodes.get(1).getCoords(), selectedNodes.get(2).getCoords());
+        		if (R != null) {
+	        		new MenuItem(popup, SWT.SEPARATOR);
+					MenuItem newItem1 = new MenuItem(popup, SWT.NONE);
+	    			newItem1.setText("Set Coordinate System");
+	    			newItem1.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							double[] axis = Beam.anglesFromRotationMatrix(R);							
+							double length = Math.sqrt(axis[0]*axis[0]+axis[1]*axis[1]+axis[2]*axis[2]);
 							SimLive.disposeDialogAreas();
-							SimLive.dialogArea = new LoadDialog(SimLive.compositeLeft, SWT.NONE, load);
+							if (objects.get(0) instanceof Support) {
+								Support support = (Support) objects.get(0);
+								support.setAxis(axis[0]/length, 0);
+								support.setAxis(axis[1]/length, 1);
+								support.setAxis(axis[2]/length, 2);
+								support.setAngle(length*180/Math.PI);
+								SimLive.dialogArea = new SupportDialog(SimLive.compositeLeft, SWT.NONE, support);
+							}
+							if (objects.get(0) instanceof Load) {
+								Load load = (Load) objects.get(0);
+								load.setAxis(axis[0]/length, 0);
+								load.setAxis(axis[1]/length, 1);
+								load.setAxis(axis[2]/length, 2);
+								load.setAngle(length*180/Math.PI);
+								SimLive.disposeDialogAreas();
+								SimLive.dialogArea = new LoadDialog(SimLive.compositeLeft, SWT.NONE, load);
+							}
+							if (objects.get(0) instanceof DistributedLoad) {
+								DistributedLoad load = (DistributedLoad) objects.get(0);
+								load.setAxis(axis[0]/length, 0);
+								load.setAxis(axis[1]/length, 1);
+								load.setAxis(axis[2]/length, 2);
+								load.setAngle(length*180/Math.PI);
+								SimLive.disposeDialogAreas();
+								SimLive.dialogArea = new DistributedLoadDialog(SimLive.compositeLeft, SWT.NONE, load);
+							}
+							deselectAll();
+							SimLive.compositeLeft.layout();
 						}
-						if (objects.get(0) instanceof DistributedLoad) {
-							DistributedLoad load = (DistributedLoad) objects.get(0);
-							load.setAxis(axis[0]/length, 0);
-							load.setAxis(axis[1]/length, 1);
-							load.setAxis(axis[2]/length, 2);
-							load.setAngle(length*180/Math.PI);
-							SimLive.disposeDialogAreas();
-							SimLive.dialogArea = new DistributedLoadDialog(SimLive.compositeLeft, SWT.NONE, load);
-						}
-						deselectAll();
-						SimLive.compositeLeft.layout();
-					}
-				});
+					});
+        		}
 			}
         	if (objects.get(0) instanceof Support && !selectedNodes.isEmpty()) {
 				Support support = (Support) objects.get(0);
@@ -3753,41 +3755,43 @@ public class View extends GLCanvas {
 		
 		/* coordinate system defined by three selected nodes */
 		if ((SimLive.mode == Mode.SUPPORTS || SimLive.mode == Mode.LOADS) && objects.size() == 1 && selectedNodes.size() == 3) {
-			gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-			gl2.glEnable(GL2.GL_LIGHTING);
-			gl2.glPushMatrix();
 			double[] coords0 = selectedNodes.get(0).getCoords();
 			double[] coords1 = selectedNodes.get(1).getCoords();
 			double[] coords2 = selectedNodes.get(2).getCoords();
-			gl2.glTranslated(coords0[0], coords0[1], coords0[2]);
 			Matrix R = GeomUtility.getRotationMatrixByThreePoints(coords0, coords1, coords2);
-			gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
-	    	{
-	    		gl2.glPushMatrix();
-	    		gl2.glRotatef(90, 0, 1, 0);
-	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_RED, 0);
-		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
-						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
-						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
-	    		gl2.glPopMatrix();
-	    		
-	    		gl2.glPushMatrix();
-	    		gl2.glRotatef(-90, 1, 0, 0);
-	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_GREEN, 0);
-		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
-						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
-						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
-	    		gl2.glPopMatrix();
-	    		
-	    		gl2.glPushMatrix();
-	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
-		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
-						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
-						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
-	    		gl2.glPopMatrix();
-	    	}
-	    	gl2.glPopMatrix();
-	    	gl2.glDisable(GL2.GL_LIGHTING);
+			if (R != null) {
+				gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+				gl2.glEnable(GL2.GL_LIGHTING);
+				gl2.glPushMatrix();
+				gl2.glTranslated(coords0[0], coords0[1], coords0[2]);
+				gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
+		    	{
+		    		gl2.glPushMatrix();
+		    		gl2.glRotatef(90, 0, 1, 0);
+		    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_RED, 0);
+			    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
+							(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
+							SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
+		    		gl2.glPopMatrix();
+		    		
+		    		gl2.glPushMatrix();
+		    		gl2.glRotatef(-90, 1, 0, 0);
+		    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_GREEN, 0);
+			    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
+							(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
+							SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
+		    		gl2.glPopMatrix();
+		    		
+		    		gl2.glPushMatrix();
+		    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
+			    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
+							(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
+							SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
+		    		gl2.glPopMatrix();
+		    	}
+		    	gl2.glPopMatrix();
+		    	gl2.glDisable(GL2.GL_LIGHTING);
+			}
 		}
 		
 		/* contact */
