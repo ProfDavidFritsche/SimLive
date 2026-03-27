@@ -1406,6 +1406,7 @@ public class View extends GLCanvas {
 							SimLive.disposeDialogAreas();
 							SimLive.dialogArea = new DistributedLoadDialog(SimLive.compositeLeft, SWT.NONE, load);
 						}
+						deselectAll();
 						SimLive.compositeLeft.layout();
 					}
 				});
@@ -3693,42 +3694,6 @@ public class View extends GLCanvas {
 			renderDistributedLoad(gl2, glu, distributedLoad, time, scaling, nodeRadius, arrowSize, outside, inside, objects);
 		}
 		
-		/* coordinate system defined by three selected nodes */
-		if ((SimLive.mode == Mode.SUPPORTS || SimLive.mode == Mode.LOADS) && objects.size() == 1 && selectedNodes.size() == 3) {
-			gl2.glPushMatrix();
-			double[] coords0 = selectedNodes.get(0).getCoords();
-			double[] coords1 = selectedNodes.get(1).getCoords();
-			double[] coords2 = selectedNodes.get(2).getCoords();
-			gl2.glTranslated((coords0[0]+coords1[0])/2, (coords0[1]+coords1[1])/2, (coords0[2]+coords1[2])/2);
-			Matrix R = GeomUtility.getRotationMatrixByThreePoints(coords0, coords1, coords2);
-			gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
-	    	{
-	    		gl2.glPushMatrix();
-	    		gl2.glRotatef(90, 0, 1, 0);
-	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_RED, 0);
-		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
-						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
-						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
-	    		gl2.glPopMatrix();
-	    		
-	    		gl2.glPushMatrix();
-	    		gl2.glRotatef(-90, 1, 0, 0);
-	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_GREEN, 0);
-		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
-						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
-						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
-	    		gl2.glPopMatrix();
-	    		
-	    		gl2.glPushMatrix();
-	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
-		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
-						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
-						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
-	    		gl2.glPopMatrix();
-	    	}
-	    	gl2.glPopMatrix();
-		}		
-		
 		gl2.glDisable(GL2.GL_LIGHTING);
 		
 		gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
@@ -3785,6 +3750,46 @@ public class View extends GLCanvas {
 				}
 			}
 		}
+		
+		/* coordinate system defined by three selected nodes */
+		if ((SimLive.mode == Mode.SUPPORTS || SimLive.mode == Mode.LOADS) && objects.size() == 1 && selectedNodes.size() == 3) {
+			gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+			gl2.glEnable(GL2.GL_LIGHTING);
+			gl2.glPushMatrix();
+			double[] coords0 = selectedNodes.get(0).getCoords();
+			double[] coords1 = selectedNodes.get(1).getCoords();
+			double[] coords2 = selectedNodes.get(2).getCoords();
+			gl2.glTranslated(coords0[0], coords0[1], coords0[2]);
+			Matrix R = GeomUtility.getRotationMatrixByThreePoints(coords0, coords1, coords2);
+			gl2.glMultMatrixd(getArrayFromRotationMatrix(R, true), 0);
+	    	{
+	    		gl2.glPushMatrix();
+	    		gl2.glRotatef(90, 0, 1, 0);
+	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_RED, 0);
+		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
+						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
+						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
+	    		gl2.glPopMatrix();
+	    		
+	    		gl2.glPushMatrix();
+	    		gl2.glRotatef(-90, 1, 0, 0);
+	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_GREEN, 0);
+		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
+						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
+						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
+	    		gl2.glPopMatrix();
+	    		
+	    		gl2.glPushMatrix();
+	    		gl2.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, SimLive.COLOR_BLUE, 0);
+		    	drawArrow(gl2, glu, SimLive.ARROW_RADIUS_FRACTION*arrowSize,
+						(1f-SimLive.ARROW_HEAD_FRACTION)*arrowSize,
+						SimLive.ARROW_HEAD_FRACTION*arrowSize, false, outside, inside);
+	    		gl2.glPopMatrix();
+	    	}
+	    	gl2.glPopMatrix();
+	    	gl2.glDisable(GL2.GL_LIGHTING);
+		}
+		
 		/* contact */
 		if (SimLive.mode == SimLive.Mode.CONTACTS) {
 			for (int i = 0; i < objects.size(); i++) {
