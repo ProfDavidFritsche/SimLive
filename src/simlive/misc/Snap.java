@@ -21,6 +21,7 @@ public abstract class Snap {
 	public static ContactPair contactPair = null;
 	public static Set set = null;
 	public static Part3d part3d = null;
+	public static boolean gridSnapped = false;
 	private static boolean snapToGrid = false;
 	private static boolean snapToObject = false;
 	
@@ -125,6 +126,7 @@ public abstract class Snap {
 		SimLive.view.labelAtMousePos = null;
 		Snap.snapToGrid = snapToGrid;
 		Snap.snapToObject = snapToObject;
+		Snap.gridSnapped = false;
 		coords2d = View.screenToModelCoordinates(mousePos[0], mousePos[1]);
 		coords2d[2] = 0;
 		coords3d = null;

@@ -375,42 +375,46 @@ public class View extends GLCanvas {
 							SimLive.mode == Mode.PARTS && selectionBox == null &&
 							!isControlKeyPressed)  /*move node*/ {
 						
+						double[] deltaCoords = new double[3];
+						
 						Snap.initData(mousePos, true, true);
 						
-						double[] coords = null;
-						if (Snap.node != null) {
-							coords = Snap.node.getCoords();
+						if (Snap.node != null || Snap.gridSnapped) {
+							double[] coords = Snap.node != null ? Snap.node.getCoords() : Snap.coords2d;
+							deltaCoords[0] = coords[0]-moveNode.getXCoord();
+							deltaCoords[1] = coords[1]-moveNode.getYCoord();
+							deltaCoords[2] = coords[2]-moveNode.getZCoord();
 						}
 						else {
-							coords = Snap.coords2d;
+							int[] viewport = getViewport();
+							double factor = getSizeFactorPerspective(movePoint);
+							deltaCoords[0] = (double) 2*mousePosDelta[0]*factor/viewport[2]/zoom;
+							deltaCoords[1] = -(double) 2*mousePosDelta[1]*factor/viewport[2]/zoom;
+							deltaCoords = R0.times(new Matrix(deltaCoords, 3)).getColumnPackedCopy();
 						}
-						double[] deltaCoords = new double[3];
-						deltaCoords[0] = coords[0]-selectedNodes.get(0).getXCoord();
-						deltaCoords[1] = coords[1]-selectedNodes.get(0).getYCoord();
-						deltaCoords[2] = coords[2]-selectedNodes.get(0).getZCoord();
+						movePoint[0] += deltaCoords[0];
+						movePoint[1] += deltaCoords[1];
+						movePoint[2] += deltaCoords[2];
+						
 						((NodeDialog) SimLive.dialogArea).updateDialog(deltaCoords);				
 					}
 					else if (!selectedParts3d.isEmpty() && selectedParts3d.contains(Snap.part3d) &&
 							SimLive.mode == Mode.PARTS && selectionBox == null &&
 							!isControlKeyPressed /*&& Math.abs(R0.get(2, 2)) == 1.0*/) /* move parts3d */ {
-						Snap.initData(mousePos, false, false);
 						
 						double[] deltaCoords = new double[3];
-						double[] coords = screenToModelCoordinates(mousePosOld[0], mousePosOld[1]);
-						deltaCoords[0] = Snap.coords2d[0]-coords[0];
-						deltaCoords[1] = Snap.coords2d[1]-coords[1];
-						if (perspective) {
-							double d1 = Math.sqrt((cameraRefPos[0]-coords[0])*(cameraRefPos[0]-coords[0])+
-									(cameraRefPos[1]-coords[1])*(cameraRefPos[1]-coords[1])+
-									(cameraRefPos[2]-coords[2])*(cameraRefPos[2]-coords[2]));
-							double d2 = Math.sqrt((movePoint[0]-coords[0])*(movePoint[0]-coords[0])+
-									(movePoint[1]-coords[1])*(movePoint[1]-coords[1])+
-									(movePoint[2]-coords[2])*(movePoint[2]-coords[2]));
-							deltaCoords[0] *= (d1-d2)/d1;
-							deltaCoords[1] *= (d1-d2)/d1;
-							movePoint[0] += deltaCoords[0];
-							movePoint[1] += deltaCoords[1];
-						}
+						
+						Snap.initData(mousePos, false, false);
+						
+						int[] viewport = getViewport();
+						double factor = getSizeFactorPerspective(movePoint);
+						deltaCoords[0] = (double) 2*mousePosDelta[0]*factor/viewport[2]/zoom;
+						deltaCoords[1] = -(double) 2*mousePosDelta[1]*factor/viewport[2]/zoom;
+						deltaCoords = R0.times(new Matrix(deltaCoords, 3)).getColumnPackedCopy();
+						movePoint[0] += deltaCoords[0];
+						movePoint[1] += deltaCoords[1];
+						movePoint[2] += deltaCoords[2];
+						
 						((Part3dDialog) SimLive.dialogArea).updateDialog(deltaCoords);
 					}
 					else if (!selectedSets.isEmpty() && (selectedSets.contains(Snap.set) ||
@@ -420,40 +424,25 @@ public class View extends GLCanvas {
 						
 						double[] deltaCoords = new double[3];
 						
-						if (moveNode == null) {
-							Snap.initData(mousePos, false, false);
-							
-							double[] coords = screenToModelCoordinates(mousePosOld[0], mousePosOld[1]);
-							deltaCoords[0] = Snap.coords2d[0]-coords[0];
-							deltaCoords[1] = Snap.coords2d[1]-coords[1];
-							if (perspective) {
-								double d1 = Math.sqrt((cameraRefPos[0]-coords[0])*(cameraRefPos[0]-coords[0])+
-										(cameraRefPos[1]-coords[1])*(cameraRefPos[1]-coords[1])+
-										(cameraRefPos[2]-coords[2])*(cameraRefPos[2]-coords[2]));
-								double d2 = Math.sqrt((movePoint[0]-coords[0])*(movePoint[0]-coords[0])+
-										(movePoint[1]-coords[1])*(movePoint[1]-coords[1])+
-										(movePoint[2]-coords[2])*(movePoint[2]-coords[2]));
-								deltaCoords[0] *= (d1-d2)/d1;
-								deltaCoords[1] *= (d1-d2)/d1;
-								movePoint[0] += deltaCoords[0];
-								movePoint[1] += deltaCoords[1];
-							}
-						}
-						else {
-							Snap.initData(mousePos, true, true);
-							
-							double[] coords = null;
-							if (Snap.node != null) {
-								coords = Snap.node.getCoords();
-							}
-							else {
-								coords = Snap.coords2d;
-							}
+						Snap.initData(mousePos, moveNode != null, moveNode != null);
+						
+						if (Snap.node != null || Snap.gridSnapped) {
+							double[] coords = Snap.node != null ? Snap.node.getCoords() : Snap.coords2d;
 							deltaCoords[0] = coords[0]-moveNode.getXCoord();
 							deltaCoords[1] = coords[1]-moveNode.getYCoord();
 							deltaCoords[2] = coords[2]-moveNode.getZCoord();
 						}
-						
+						else {
+							int[] viewport = getViewport();
+							double factor = getSizeFactorPerspective(movePoint);
+							deltaCoords[0] = (double) 2*mousePosDelta[0]*factor/viewport[2]/zoom;
+							deltaCoords[1] = -(double) 2*mousePosDelta[1]*factor/viewport[2]/zoom;
+							deltaCoords = R0.times(new Matrix(deltaCoords, 3)).getColumnPackedCopy();
+						}
+						movePoint[0] += deltaCoords[0];
+						movePoint[1] += deltaCoords[1];
+						movePoint[2] += deltaCoords[2];
+																		
 						((PartDialog) SimLive.dialogArea).updateDialog(deltaCoords);
 					}
 					else if (mouseButton == 1 && selectedLabel == null)  /*selection box*/  {
@@ -3856,7 +3845,7 @@ public class View extends GLCanvas {
 		}
 		
 		/* new line element or point mass */
-		if (SimLive.mode == Mode.PARTS && selectionBox == null) {
+		if (SimLive.mode == Mode.PARTS && selectionBox == null && !isMouseDragged) {
 			Node newNode = null;
 			if (Snap.node != null) {
 				newNode = Snap.node;

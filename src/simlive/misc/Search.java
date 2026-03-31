@@ -97,6 +97,7 @@ public abstract class Search {
 			if (length < snapTol) {
 				Snap.coords2d[0] = coordsGridPoint[0];
 				Snap.coords2d[1] = coordsGridPoint[1];
+				Snap.gridSnapped = true;
 				return;
 			}
 			
@@ -112,6 +113,7 @@ public abstract class Search {
 				double scal = diff[0]*norm[0]+diff[1]*norm[1];
 				if (Math.abs(scal) < snapTol) {
 					Snap.coords2d[0] = coordsGridPoint[0];
+					Snap.gridSnapped = true;
 					return;
 				}
 			}
@@ -128,6 +130,7 @@ public abstract class Search {
 				double scal = diff[0]*norm[0]+diff[1]*norm[1];
 				if (Math.abs(scal) < snapTol) {
 					Snap.coords2d[1] = coordsGridPoint[1];
+					Snap.gridSnapped = true;
 					return;
 				}
 			}
