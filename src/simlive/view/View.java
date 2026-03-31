@@ -3845,7 +3845,7 @@ public class View extends GLCanvas {
 		}
 		
 		/* new line element or point mass */
-		if (SimLive.mode == Mode.PARTS && selectionBox == null && !isMouseDragged) {
+		if (SimLive.mode == Mode.PARTS && selectionBox == null && moveNode == null) {
 			Node newNode = null;
 			if (Snap.node != null) {
 				newNode = Snap.node;
