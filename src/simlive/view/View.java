@@ -1740,16 +1740,19 @@ public class View extends GLCanvas {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					if (SimLive.mode == Mode.PARTS) {
-						double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;					
+						double arrowSize = 0.5*SimLive.ARROW_SIZE/getViewport()[3]/zoom;
+						Matrix R = Model.twoDimensional ? Matrix.identity(3, 3) : R0;
 						if (!selectedSets.isEmpty()) {
 							SimLive.dialogArea = new PartDialog(SimLive.compositeLeft,
 									SWT.NONE, selectedSets, SimLive.model.settings);
-							if (copyPart) ((PartDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
+							if (copyPart) ((PartDialog) SimLive.dialogArea).updateDialog(
+									R.times(new Matrix(new double[]{arrowSize, -arrowSize, 0}, 3)).getColumnPackedCopy());
 						}
 						if (!selectedParts3d.isEmpty()) {
 							SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft,
 									SWT.NONE, selectedParts3d, SimLive.model.settings);
-							if (copyPart) ((Part3dDialog) SimLive.dialogArea).updateDialog(new double[]{arrowSize, -arrowSize, 0});
+							if (copyPart) ((Part3dDialog) SimLive.dialogArea).updateDialog(
+									R.times(new Matrix(new double[]{arrowSize, -arrowSize, 0}, 3)).getColumnPackedCopy());
 						}
 						copyPart = false;
 					}
