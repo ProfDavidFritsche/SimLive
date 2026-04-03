@@ -216,9 +216,7 @@ public class Matrix implements Cloneable, java.io.Serializable {
    public double[][] getArrayCopy () {
       double[][] C = new double[m][n];
       for (int i = 0; i < m; i++) {
-         for (int j = 0; j < n; j++) {
-            C[i][j] = A[i][j];
-         }
+         System.arraycopy(A[i], 0, C[i], 0, n);
       }
       return C;
    }
