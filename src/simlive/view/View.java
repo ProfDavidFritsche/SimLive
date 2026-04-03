@@ -248,13 +248,6 @@ public class View extends GLCanvas {
 				if (e.keyCode == SWT.ESC) {
 					deselectAllAndDisposeDialogs();
 				}
-				if (e.keyCode == 49) {
-					R0 = Matrix.identity(3, 3);
-					Matrix R = GeomUtility.getRotationMatrix(3*Math.PI/8, new double[]{R0.get(0, 0), R0.get(0, 1), R0.get(0, 2)});
-					R0 = R0.times(R);
-					R = GeomUtility.getRotationMatrix(Math.PI/4, new double[]{R0.get(2, 0), R0.get(2, 1), R0.get(2, 2)});
-					R0 = R0.times(R);
-				}
 				redraw();
 			}
 		});
