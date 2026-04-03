@@ -944,15 +944,17 @@ public class Solution {
 	private Matrix getMatrix2d(Matrix matrix) {
 		int nDofs = matrix.getRowDimension();
 		Matrix matrixConstr = new Matrix(nDofs-nSuppressedDofs, nDofs-nSuppressedDofs);
-		int[] indices = new int[nDofs-nSuppressedDofs];
-		for (int c = 0, i = 0; i < nDofs; i++) if (i >= suppressedDof.length || !suppressedDof[i]) {
-			indices[c++] = i;
-		}
-		IntStream.range(0, indices.length).parallel().forEach(i -> {
-			for (int j = 0; j < indices.length; j++) {
-				matrixConstr.set(i, j, matrix.get(indices[i], indices[j]));
+		for (int r = 0, i = 0; i < nDofs; i++) {
+			if (i >= suppressedDof.length || !suppressedDof[i]) {
+				for (int c = 0, j = 0; j < nDofs; j++) {
+					if (j >= suppressedDof.length || !suppressedDof[j]) {
+						matrixConstr.set(r, c, matrix.get(i, j));
+						c++;
+					}
+				}
+				r++;
 			}
-		});
+		}
 		return matrixConstr;
 	}
 	
