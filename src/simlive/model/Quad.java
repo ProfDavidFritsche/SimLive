@@ -160,9 +160,9 @@ public class Quad extends PlaneElement {
 		hys.set(0, 11,            -f[1][3]*N.get(1, 7)-f[1][2]*N.get(1, 6));
 		
 		Matrix B = new Matrix(3, 12);
-		B.setMatrix(0, 0, 0, 11, hxr.times(Jinv.get(0, 0)).plus(hxs.times(Jinv.get(0, 1))));
-		B.setMatrix(1, 1, 0, 11, hyr.times(Jinv.get(1, 0)).plus(hys.times(Jinv.get(1, 1))));
-		B.setMatrix(2, 2, 0, 11, hyr.times(Jinv.get(0, 0)).plus(hys.times(Jinv.get(0, 1))).
+		B.setMatrix(0, 0, hxr.times(Jinv.get(0, 0)).plus(hxs.times(Jinv.get(0, 1))));
+		B.setMatrix(1, 0, hyr.times(Jinv.get(1, 0)).plus(hys.times(Jinv.get(1, 1))));
+		B.setMatrix(2, 0, hyr.times(Jinv.get(0, 0)).plus(hys.times(Jinv.get(0, 1))).
 				plus(hxr.times(Jinv.get(1, 0)).plus(hxs.times(Jinv.get(1, 1)))));
 		return B;
 	}
@@ -284,8 +284,8 @@ public class Quad extends PlaneElement {
 		Matrix K_elem = new Matrix(24, 24);
 		for (int n = 0; n < 4; n++) {
 			for (int m = 0; m < 4; m++) {
-				K_elem.setMatrix(n*6, n*6+1, m*6, m*6+1, K_elem_membrane.getMatrix(n*2, n*2+1, m*2, m*2+1));
-				K_elem.setMatrix(n*6+2, n*6+4, m*6+2, m*6+4, K_elem_plate.getMatrix(n*3, n*3+2, m*3, m*3+2));
+				K_elem.setMatrix(n*6, m*6, K_elem_membrane.getMatrix(n*2, n*2+1, m*2, m*2+1));
+				K_elem.setMatrix(n*6+2, m*6+2, K_elem_plate.getMatrix(n*3, n*3+2, m*3, m*3+2));
 			}
 		}
 		
@@ -306,7 +306,7 @@ public class Quad extends PlaneElement {
 			Matrix rn = new Matrix(nodes.get(elementNodes[n]).getCoords(), 3);
 			Matrix rnu = rn.plus(u_elem.getMatrix(n*6, n*6+2, 0, 0));
 			Matrix uloc = RrT.times(rnu.minus(r0u)).minus(R0.transpose().times(rn.minus(r0)));
-			temp.setMatrix(n*6, n*6+2, 0, 0, uloc);
+			temp.setMatrix(n*6, 0, uloc);
 			Matrix Rg = Beam.rotationMatrixFromAngles(u_elem.getMatrix(n*6+3, n*6+5, 0, 0));
 			Matrix Rloc = RrT.times(Rg).times(R0);
 			double[] rloc = Beam.anglesFromRotationMatrix(Rloc);
@@ -332,27 +332,27 @@ public class Quad extends PlaneElement {
 	private Matrix getTransformation() {
 		Matrix R0T = R0.transpose();
 		Matrix T = new Matrix(24, 24);
-		T.setMatrix(0, 2, 0, 2, R0T);
-		T.setMatrix(3, 5, 3, 5, R0T);
-		T.setMatrix(6, 8, 6, 8, R0T);
-		T.setMatrix(9, 11, 9, 11, R0T);
-		T.setMatrix(12, 14, 12, 14, R0T);
-		T.setMatrix(15, 17, 15, 17, R0T);
-		T.setMatrix(18, 20, 18, 20, R0T);
-		T.setMatrix(21, 23, 21, 23, R0T);
+		T.setMatrix(0, 0, R0T);
+		T.setMatrix(3, 3, R0T);
+		T.setMatrix(6, 6, R0T);
+		T.setMatrix(9, 9, R0T);
+		T.setMatrix(12, 12, R0T);
+		T.setMatrix(15, 15, R0T);
+		T.setMatrix(18, 18, R0T);
+		T.setMatrix(21, 21, R0T);
 		return T;
 	}
 	
 	private Matrix getE(Matrix Rr) {
 		Matrix E = new Matrix(24, 24);
-		E.setMatrix(0, 2, 0, 2, Rr);
-		E.setMatrix(3, 5, 3, 5, Rr);
-		E.setMatrix(6, 8, 6, 8, Rr);
-		E.setMatrix(9, 11, 9, 11, Rr);
-		E.setMatrix(12, 14, 12, 14, Rr);
-		E.setMatrix(15, 17, 15, 17, Rr);
-		E.setMatrix(18, 20, 18, 20, Rr);
-		E.setMatrix(21, 23, 21, 23, Rr);		
+		E.setMatrix(0, 0, Rr);
+		E.setMatrix(3, 3, Rr);
+		E.setMatrix(6, 6, Rr);
+		E.setMatrix(9, 9, Rr);
+		E.setMatrix(12, 12, Rr);
+		E.setMatrix(15, 15, Rr);
+		E.setMatrix(18, 18, Rr);
+		E.setMatrix(21, 21, Rr);		
 		return E;
 	}
 	
@@ -368,13 +368,13 @@ public class Quad extends PlaneElement {
 		Matrix I3 = Matrix.identity(3, 3);
 		Matrix A = new Matrix(24, 3);
 		//A.setMatrix(0, 2, 0, 2, Beam.getSkewSymmetricMatrix(RrT.times(r0.minus(r0))));
-		A.setMatrix(3, 5, 0, 2, I3);
-		A.setMatrix(6, 8, 0, 2, Beam.getSkewSymmetricMatrix(RrT.times(r0.minus(r1))));
-		A.setMatrix(9, 11, 0, 2, I3);
-		A.setMatrix(12, 14, 0, 2, Beam.getSkewSymmetricMatrix(RrT.times(r0.minus(r2))));
-		A.setMatrix(15, 17, 0, 2, I3);
-		A.setMatrix(18, 20, 0, 2, Beam.getSkewSymmetricMatrix(RrT.times(r0.minus(r3))));
-		A.setMatrix(21, 23, 0, 2, I3);
+		A.setMatrix(3, 0, I3);
+		A.setMatrix(6, 0, Beam.getSkewSymmetricMatrix(RrT.times(r0.minus(r1))));
+		A.setMatrix(9, 0, I3);
+		A.setMatrix(12, 0, Beam.getSkewSymmetricMatrix(RrT.times(r0.minus(r2))));
+		A.setMatrix(15, 0, I3);
+		A.setMatrix(18, 0, Beam.getSkewSymmetricMatrix(RrT.times(r0.minus(r3))));
+		A.setMatrix(21, 0, I3);
 		
 		Matrix G = getG(nodes, u_elem, RrT);
 		//G.transpose().times(A).print(10, 10); //has to be I3
@@ -414,10 +414,10 @@ public class Quad extends PlaneElement {
 		Matrix F2 = new Matrix(24, 3);
 		for (int i = 0; i < 4; i++) {
 			Matrix niT = Beam.getSkewSymmetricMatrix(f_int.getMatrix(i*6, i*6+2, 0, 0));
-			F1.setMatrix(i*6, i*6+2, 0, 2, niT);
-			F2.setMatrix(i*6, i*6+2, 0, 2, niT);
+			F1.setMatrix(i*6, 0, niT);
+			F2.setMatrix(i*6, 0, niT);
 			Matrix miT = Beam.getSkewSymmetricMatrix(f_int.getMatrix(i*6+3, i*6+5, 0, 0));
-			F2.setMatrix(i*6+3, i*6+5, 0, 2, miT);
+			F2.setMatrix(i*6+3, 0, miT);
 		}
 		
 		Matrix G = getG(nodes, u_elem, RrT);

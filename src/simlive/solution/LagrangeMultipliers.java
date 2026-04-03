@@ -13,9 +13,9 @@ public class LagrangeMultipliers extends ConstraintMethod {
 		int nDofs = G.getColumnDimension();
 		int nLambdas = G.getRowDimension();
 		Matrix matrixConstr = new Matrix(nDofs+nLambdas, nDofs+nLambdas);
-		matrixConstr.setMatrix(0, nDofs-1, 0, nDofs-1, matrix);
-		matrixConstr.setMatrix(nDofs, nDofs+nLambdas-1, 0, nDofs-1, G);
-		matrixConstr.setMatrix(0, nDofs-1, nDofs, nDofs+nLambdas-1, G.transpose());
+		matrixConstr.setMatrix(0, 0, matrix);
+		matrixConstr.setMatrix(nDofs, 0, G);
+		matrixConstr.setMatrix(0, nDofs, G.transpose());
 		return matrixConstr;
 	}
 
@@ -24,8 +24,8 @@ public class LagrangeMultipliers extends ConstraintMethod {
 		int nDofs = rhs.getRowDimension();
 		int nLambdas = g.getRowDimension();
 		Matrix rhsConstr = new Matrix(nDofs+nLambdas, 1);
-		rhsConstr.setMatrix(0, nDofs-1, 0, 0, rhs.plus(C_global));
-		rhsConstr.setMatrix(nDofs, nDofs+nLambdas-1, 0, 0, g);
+		rhsConstr.setMatrix(0, 0, rhs.plus(C_global));
+		rhsConstr.setMatrix(nDofs, 0, g);
 		return rhsConstr;
 	}
 

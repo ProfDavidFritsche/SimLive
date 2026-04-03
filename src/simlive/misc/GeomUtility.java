@@ -75,9 +75,9 @@ public abstract class GeomUtility {
 		if (d2.normF() > SimLive.ZERO_TOL) {
 			d1 = d2.crossProduct(d0);
 			Matrix R = new Matrix(3, 3);
-			R.setMatrix(0, 2, 0, 0, d0.times(1.0/d0.normF()));
-			R.setMatrix(0, 2, 1, 1, d1.times(1.0/d1.normF()));
-			R.setMatrix(0, 2, 2, 2, d2.times(1.0/d2.normF()));
+			R.setMatrix(0, 0, d0.times(1.0/d0.normF()));
+			R.setMatrix(0, 1, d1.times(1.0/d1.normF()));
+			R.setMatrix(0, 2, d2.times(1.0/d2.normF()));
 			return R;
 		}
 		return null;

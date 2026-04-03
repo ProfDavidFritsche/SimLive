@@ -248,6 +248,13 @@ public class View extends GLCanvas {
 				if (e.keyCode == SWT.ESC) {
 					deselectAllAndDisposeDialogs();
 				}
+				if (e.keyCode == 49) {
+					R0 = Matrix.identity(3, 3);
+					Matrix R = GeomUtility.getRotationMatrix(3*Math.PI/8, new double[]{R0.get(0, 0), R0.get(0, 1), R0.get(0, 2)});
+					R0 = R0.times(R);
+					R = GeomUtility.getRotationMatrix(Math.PI/4, new double[]{R0.get(2, 0), R0.get(2, 1), R0.get(2, 2)});
+					R0 = R0.times(R);
+				}
 				redraw();
 			}
 		});
@@ -2983,9 +2990,9 @@ public class View extends GLCanvas {
 			Matrix norm = diff0.crossProduct(diff1);
 			diff1 = norm.crossProduct(diff0);
 			Matrix Rr = new Matrix(3, 3);
-			Rr.setMatrix(0, 2, 0, 0, diff0.times(1.0/diff0.normF()));
-			Rr.setMatrix(0, 2, 1, 1, diff1.times(1.0/diff1.normF()));
-			Rr.setMatrix(0, 2, 2, 2, norm.times(1.0/norm.normF()));
+			Rr.setMatrix(0, 0, diff0.times(1.0/diff0.normF()));
+			Rr.setMatrix(0, 1, diff1.times(1.0/diff1.normF()));
+			Rr.setMatrix(0, 2, norm.times(1.0/norm.normF()));
 			return Rr;
 		}
 	}
@@ -6683,9 +6690,9 @@ public class View extends GLCanvas {
 		double rot = quad.getRigidRotationAngle(Rr);
 		Matrix yDir = norm.crossProduct(Rr.getMatrix(0, 2, 0, 0));
 		Matrix xDir = yDir.crossProduct(norm);
-		R.setMatrix(0, 2, 0, 0, xDir);
-		R.setMatrix(0, 2, 1, 1, yDir);
-		R.setMatrix(0, 2, 2, 2, norm);
+		R.setMatrix(0, 0, xDir);
+		R.setMatrix(0, 1, yDir);
+		R.setMatrix(0, 2, norm);
 		double[] RR = getArrayFromRotationMatrix(R, true);
     	double[] center = new double[3];
     	center[0] = (nodeCoords[0][0]+nodeCoords[1][0]+nodeCoords[2][0]+nodeCoords[3][0])/4.0;
