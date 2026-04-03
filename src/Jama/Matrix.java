@@ -291,10 +291,8 @@ public class Matrix implements Cloneable, java.io.Serializable {
       Matrix X = new Matrix(i1-i0+1,j1-j0+1);
       double[][] B = X.getArray();
       try {
-         for (int i = i0; i <= i1; i++) {
-            for (int j = j0; j <= j1; j++) {
-               B[i-i0][j-j0] = A[i][j];
-            }
+         for (int r = 0; r < X.m; r++) {
+            System.arraycopy(A[r+i0], j0, B[r], 0, X.n);
          }
       } catch(ArrayIndexOutOfBoundsException e) {
          throw new ArrayIndexOutOfBoundsException("Submatrix indices");
@@ -382,20 +380,16 @@ public class Matrix implements Cloneable, java.io.Serializable {
    }
 
    /** Set a submatrix.
-   @param i0   Initial row index
-   @param i1   Final row index
-   @param j0   Initial column index
-   @param j1   Final column index
+   @param i    Row index.
+   @param j    Column index.
    @param X    A(i0:i1,j0:j1)
    @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
 
-   public void setMatrix (int i0, int i1, int j0, int j1, Matrix X) {
+   public void setMatrix (int i, int j, Matrix X) {
       try {
-         for (int i = i0; i <= i1; i++) {
-            for (int j = j0; j <= j1; j++) {
-               A[i][j] = X.get(i-i0,j-j0);
-            }
+         for (int r = 0; r < X.m; r++) {
+            System.arraycopy(X.A[r], 0, A[r+i], j, X.n);
          }
       } catch(ArrayIndexOutOfBoundsException e) {
          throw new ArrayIndexOutOfBoundsException("Submatrix indices");

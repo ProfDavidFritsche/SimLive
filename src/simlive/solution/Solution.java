@@ -589,7 +589,7 @@ public class Solution {
 						Matrix Psi = u_global.getMatrix(dof+3, dof+5, 0, 0);
 						Matrix TInv = Beam.getTInv(Psi);
 						Matrix TDot = Beam.getTDot(Psi, PsiDot);
-						a_constr.setMatrix(dof+3, dof+5, 0, 0, TInv.times(PsiDotDot.minus(TDot.times(PsiDot))));
+						a_constr.setMatrix(dof+3, 0, TInv.times(PsiDotDot.minus(TDot.times(PsiDot))));
 					}
 				}
 			}
@@ -693,7 +693,7 @@ public class Solution {
 			}
 			eigenVector = constraintMethod.getFullSolution(eigenVector, G);
 			double norm = eigenVector.normF();
-			Vnew.setMatrix(0, nDofs-1, i, i, eigenVector.times(1.0/norm));
+			Vnew.setMatrix(0, i, eigenVector.times(1.0/norm));
 		});
 		V = Vnew;
 		
@@ -710,7 +710,7 @@ public class Solution {
 		Matrix Vsort = new Matrix(nDofs, V.getColumnDimension());
 		IntStream.range(0, indices.length).parallel().forEach(i -> {
 			Dsort.set(i, 0, D.get(indices[i], 0));
-			Vsort.setMatrix(0, V.getRowDimension()-1, i, i,
+			Vsort.setMatrix(0, i,
 					V.getMatrix(0, V.getRowDimension()-1, indices[i], indices[i]));
 		});
 		D = Dsort;
@@ -764,7 +764,7 @@ public class Solution {
 		Matrix Vmod = new Matrix(V.getRowDimension(), count);
 		IntStream.range(0, count).parallel().forEach(i -> {
 			Dmod.set(i, 0, D.get(ind[i], 0));
-			Vmod.setMatrix(0, V.getRowDimension()-1, i, i, V.getMatrix(0, V.getRowDimension()-1, ind[i], ind[i]));
+			Vmod.setMatrix(0, i, V.getMatrix(0, V.getRowDimension()-1, ind[i], ind[i]));
 		});
 		D = Dmod;
 		V = Vmod;
@@ -803,7 +803,7 @@ public class Solution {
 				}
 			}
 			D.set(n, 0, lowestFrequency);
-			Vtemp.setMatrix(0, Vtemp.getRowDimension()-1, n, n, V.getMatrix(0, V.getRowDimension()-1, column, column));
+			Vtemp.setMatrix(0, n, V.getMatrix(0, V.getRowDimension()-1, column, column));
 			frequencies.remove(index);
 		}
 		V = Vtemp;
