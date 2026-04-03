@@ -45,9 +45,9 @@ public class Beam extends LineElement {
 		r3 = r3.times(1.0/r3.normF());
 		Matrix r2 = r3.crossProduct(r1);
 		Matrix Rr = new Matrix(3, 3);
-		Rr.setMatrix(0, 0, r1);
-		Rr.setMatrix(0, 1, r2);
-		Rr.setMatrix(0, 2, r3);
+		Rr.setMatrix(0, 2, 0, 0, r1);
+		Rr.setMatrix(0, 2, 1, 1, r2);
+		Rr.setMatrix(0, 2, 2, 2, r3);
 		
 		return Rr;
 	}
@@ -105,26 +105,26 @@ public class Beam extends LineElement {
 		P.set(5, 11, 1);
 		
 		Matrix temp = new Matrix(6, 12);
-		temp.setMatrix(0, 0, G.transpose());
-		temp.setMatrix(3, 0, G.transpose());
+		temp.setMatrix(0, 2, 0, 11, G.transpose());
+		temp.setMatrix(3, 5, 0, 11, G.transpose());
 		
 		return P.minus(temp);
 	}
 	
 	private Matrix getE(Matrix Rr) {
 		Matrix E = new Matrix(12, 12);
-		E.setMatrix(0, 0, Rr);
-		E.setMatrix(3, 3, Rr);
-		E.setMatrix(6, 6, Rr);
-		E.setMatrix(9, 9, Rr);
+		E.setMatrix(0, 2, 0, 2, Rr);
+		E.setMatrix(3, 5, 3, 5, Rr);
+		E.setMatrix(6, 8, 6, 8, Rr);
+		E.setMatrix(9, 11, 9, 11, Rr);
 		
 		return E;
 	}
 	
 	private Matrix getr(Matrix r1) {
 		Matrix r = new Matrix(1, 12);
-		r.setMatrix(0, 0, r1.transpose().times(-1.0));
-		r.setMatrix(0, 6, r1.transpose());
+		r.setMatrix(0, 0, 0, 2, r1.transpose().times(-1.0));
+		r.setMatrix(0, 0, 6, 8, r1.transpose());
 		
 		return r;
 	}
@@ -132,10 +132,10 @@ public class Beam extends LineElement {
 	private Matrix getD(Matrix r1, double length) {
 		Matrix D3 = (Matrix.identity(3, 3).minus(r1.times(r1.transpose()))).times(1.0/length);
 		Matrix D = new Matrix(12, 12);
-		D.setMatrix(0, 0, D3);
-		D.setMatrix(0, 6, D3.times(-1.0));
-		D.setMatrix(6, 0, D3.times(-1.0));
-		D.setMatrix(6, 6, D3);
+		D.setMatrix(0, 2, 0, 2, D3);
+		D.setMatrix(0, 2, 6, 8, D3.times(-1.0));
+		D.setMatrix(6, 8, 0, 2, D3.times(-1.0));
+		D.setMatrix(6, 8, 6, 8, D3);
 		
 		return D;
 	}
@@ -183,8 +183,8 @@ public class Beam extends LineElement {
 		Matrix r = getr(r1);
 		
 		Matrix B = new Matrix(7, 12);
-		B.setMatrix(0, 0, r);
-		B.setMatrix(1, 0, P.times(E.transpose()));
+		B.setMatrix(0, 0, 0, 11, r);
+		B.setMatrix(1, 6, 0, 11, P.times(E.transpose()));
 		
 		return B;
 	}
@@ -361,13 +361,13 @@ public class Beam extends LineElement {
 		a.set(2, 0, 1.0/length*(f_local.get(3, 0)+f_local.get(6, 0)));		
 		
 		Matrix m = new Matrix(6, 1);
-		m.setMatrix(0, 0, f_local.getMatrix(1, 6, 0, 0));
+		m.setMatrix(0, 5, 0, 0, f_local.getMatrix(1, 6, 0, 0));
 		Matrix temp = P.transpose().times(m);
 		Matrix Q = new Matrix(12, 3);
-		Q.setMatrix(0, 0, getSkewSymmetricMatrix(temp.getMatrix(0, 2, 0, 0)));
-		Q.setMatrix(3, 0, getSkewSymmetricMatrix(temp.getMatrix(3, 5, 0, 0)));
-		Q.setMatrix(6, 0, getSkewSymmetricMatrix(temp.getMatrix(6, 8, 0, 0)));
-		Q.setMatrix(9, 0, getSkewSymmetricMatrix(temp.getMatrix(9, 11, 0, 0)));
+		Q.setMatrix(0, 2, 0, 2, getSkewSymmetricMatrix(temp.getMatrix(0, 2, 0, 0)));
+		Q.setMatrix(3, 5, 0, 2, getSkewSymmetricMatrix(temp.getMatrix(3, 5, 0, 0)));
+		Q.setMatrix(6, 8, 0, 2, getSkewSymmetricMatrix(temp.getMatrix(6, 8, 0, 0)));
+		Q.setMatrix(9, 11, 0, 2, getSkewSymmetricMatrix(temp.getMatrix(9, 11, 0, 0)));
 				
 		return D.times(f_local.get(0, 0)).minus(E.times(Q).times(G.transpose()).times(E.transpose())).plus(E.times(G).times(a).times(r));		
 	}
@@ -603,10 +603,10 @@ public class Beam extends LineElement {
 		Matrix R = getR0().transpose();
 		
 		Matrix T = new Matrix(12, 12);
-		T.setMatrix(0, 0, R);
-		T.setMatrix(3, 3, R);
-		T.setMatrix(6, 6, R);
-		T.setMatrix(9, 9, R);
+		T.setMatrix(0, 2, 0, 2, R);
+		T.setMatrix(3, 5, 3, 5, R);
+		T.setMatrix(6, 8, 6, 8, R);
+		T.setMatrix(9, 11, 9, 11, R);
 		
 		return T;
 	}

@@ -159,9 +159,9 @@ public abstract class LineElement extends Element {
 		r3_vec.timesEquals(1.0/length);
 		Matrix r2_vec = r3_vec.crossProduct(r1_vec);
 		Matrix R = new Matrix(3, 3);
-		R.setMatrix(0, 0, r1_vec);
-		R.setMatrix(0, 1, r2_vec);
-		R.setMatrix(0, 2, r3_vec);
+		R.setMatrix(0, 2, 0, 0, r1_vec);
+		R.setMatrix(0, 2, 1, 1, r2_vec);
+		R.setMatrix(0, 2, 2, 2, r3_vec);
 		return R;
 	}
 	

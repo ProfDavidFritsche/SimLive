@@ -67,9 +67,9 @@ public abstract class PlaneElement extends Element {
 		Matrix vz = vx.crossProduct(vy);
 		vy = vz.crossProduct(vx);
 		Matrix Rr = new Matrix(3, 3);
-		Rr.setMatrix(0, 0, vx.times(1.0/vx.normF()));
-		Rr.setMatrix(0, 1, vy.times(1.0/vy.normF()));
-		Rr.setMatrix(0, 2, vz.times(1.0/vz.normF()));
+		Rr.setMatrix(0, 2, 0, 0, vx.times(1.0/vx.normF()));
+		Rr.setMatrix(0, 2, 1, 1, vy.times(1.0/vy.normF()));
+		Rr.setMatrix(0, 2, 2, 2, vz.times(1.0/vz.normF()));
 		return Rr;
 	}
 	
@@ -89,9 +89,9 @@ public abstract class PlaneElement extends Element {
 		Matrix vz = vx.crossProduct(vy);
 		vy = vz.crossProduct(vx);
 		R0 = new Matrix(3, 3);
-		R0.setMatrix(0, 0, vx.times(1.0/vx.normF()));
-		R0.setMatrix(0, 1, vy.times(1.0/vy.normF()));
-		R0.setMatrix(0, 2, vz.times(1.0/vz.normF()));
+		R0.setMatrix(0, 2, 0, 0, vx.times(1.0/vx.normF()));
+		R0.setMatrix(0, 2, 1, 1, vy.times(1.0/vy.normF()));
+		R0.setMatrix(0, 2, 2, 2, vz.times(1.0/vz.normF()));
 	}
 	
 	protected abstract Matrix getKelem(ArrayList<Node> nodes);

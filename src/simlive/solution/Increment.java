@@ -1183,10 +1183,16 @@ public class Increment {
 	public Matrix getAssembledGMatrix(int nDofs, Matrix G_support, Matrix G_connect, Matrix G_contact, Matrix G_load) {
 		Matrix G = new Matrix(G_support.getRowDimension() + G_connect.getRowDimension() +
 				G_contact.getRowDimension() + G_load.getRowDimension(), nDofs);
-		G.setMatrix(0, 0, G_support);
-		G.setMatrix(G_support.getRowDimension(), 0, G_connect);
-		G.setMatrix(G_support.getRowDimension()+G_connect.getRowDimension(), 0, G_contact);
-		G.setMatrix(G_support.getRowDimension()+G_connect.getRowDimension()+G_contact.getRowDimension(), 0, G_load);
+		G.setMatrix(0, G_support.getRowDimension()-1, 0, nDofs-1, G_support);
+		G.setMatrix(G_support.getRowDimension(),
+				G_support.getRowDimension()+G_connect.getRowDimension()-1,
+				0, nDofs-1, G_connect);
+		G.setMatrix(G_support.getRowDimension()+G_connect.getRowDimension(),
+				G_support.getRowDimension()+G_connect.getRowDimension()+G_contact.getRowDimension()-1,
+				0, nDofs-1, G_contact);
+		G.setMatrix(G_support.getRowDimension()+G_connect.getRowDimension()+G_contact.getRowDimension(),
+				G_support.getRowDimension()+G_connect.getRowDimension()+G_contact.getRowDimension()+G_load.getRowDimension()-1,
+				0, nDofs-1, G_load);
 		return G;
 	}
 	
@@ -1194,11 +1200,11 @@ public class Increment {
 		Matrix g = new Matrix(G.getRowDimension(), 1);
 		if (g.getRowDimension() >= g_load.getRowDimension()+g_contact.getRowDimension()+g_connect.getRowDimension()) {
 			g.setMatrix(g.getRowDimension()-g_load.getRowDimension()-g_contact.getRowDimension()-g_connect.getRowDimension(),
-					0, g_connect);
+					g.getRowDimension()-1-g_load.getRowDimension()-g_contact.getRowDimension(), 0, 0, g_connect);
 			g.setMatrix(g.getRowDimension()-g_load.getRowDimension()-g_contact.getRowDimension(),
-					0, g_contact);
+					g.getRowDimension()-1-g_load.getRowDimension(), 0, 0, g_contact);
 			g.setMatrix(g.getRowDimension()-g_load.getRowDimension(),
-					0, g_load);
+					g.getRowDimension()-1, 0, 0, g_load);
 		}
 		return g;
 	}
@@ -1341,7 +1347,7 @@ public class Increment {
 					Matrix ROld = Beam.rotationMatrixFromAngles(rotVecOld);
 					Matrix deltaR = Beam.rotationMatrixFromAngles(delta_rotVec);
 					Matrix rotVecNew = new Matrix(Beam.anglesFromRotationMatrix(deltaR.times(ROld)), 3);
-					u_global_new.setMatrix(dof+3, 0, rotVecNew);
+					u_global_new.setMatrix(dof+3, dof+5, 0, 0, rotVecNew);
 				}
 			}
 		}
@@ -1878,8 +1884,8 @@ public class Increment {
 	
 	private Matrix addRowToMatrix(Matrix matrix, Matrix row) {
 		Matrix newMatrix = new Matrix(matrix.getRowDimension()+1, matrix.getColumnDimension());
-		newMatrix.setMatrix(0, 0, matrix);
-		newMatrix.setMatrix(matrix.getRowDimension(), 0, row);
+		newMatrix.setMatrix(0, matrix.getRowDimension()-1, 0, matrix.getColumnDimension()-1, matrix);
+		newMatrix.setMatrix(matrix.getRowDimension(), matrix.getRowDimension(), 0, matrix.getColumnDimension()-1, row);
 		return newMatrix;
 	}
 	
