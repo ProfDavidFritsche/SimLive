@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import Jama.Matrix;
 import simlive.SimLive;
+import simlive.SimLive.Mode;
 import simlive.solution.Increment;
 import simlive.solution.Solution;
 
@@ -435,17 +436,19 @@ public class Beam extends LineElement {
 	
 	public static double[] anglesFromRotationMatrix(Matrix R) {
 		try {
-			if (R.get(0, 0) < -1+SimLive.ZERO_TOL) {
-				double angle = Math.atan2(R.get(1, 2), R.get(1, 1))/2;
-				return new double[]{0, Math.cos(angle)*Math.PI, Math.sin(angle)*Math.PI};
-			}
-			if (R.get(1, 1) < -1+SimLive.ZERO_TOL) {
-				double angle = Math.atan2(R.get(0, 2), R.get(2, 2))/2;
-				return new double[]{Math.cos(angle)*Math.PI, 0, Math.sin(angle)*Math.PI};
-			}
-			if (R.get(2, 2) < -1+SimLive.ZERO_TOL) {
-				double angle = Math.atan2(R.get(0, 1), R.get(0, 0))/2;
-				return new double[]{Math.cos(angle)*Math.PI, Math.sin(angle)*Math.PI, 0};
+			if (SimLive.mode != Mode.SOLUTION) {
+				if (R.get(0, 0) < -1+SimLive.ZERO_TOL) {
+					double angle = Math.atan2(R.get(1, 2), R.get(1, 1))/2;
+					return new double[]{0, Math.cos(angle)*Math.PI, Math.sin(angle)*Math.PI};
+				}
+				if (R.get(1, 1) < -1+SimLive.ZERO_TOL) {
+					double angle = Math.atan2(R.get(0, 2), R.get(2, 2))/2;
+					return new double[]{Math.cos(angle)*Math.PI, 0, Math.sin(angle)*Math.PI};
+				}
+				if (R.get(2, 2) < -1+SimLive.ZERO_TOL) {
+					double angle = Math.atan2(R.get(0, 1), R.get(0, 0))/2;
+					return new double[]{Math.cos(angle)*Math.PI, Math.sin(angle)*Math.PI, 0};
+				}
 			}
 			Matrix I = Matrix.identity(3, 3);
 			Matrix gx = (R.minus(I)).times((R.plus(I)).inverse());
