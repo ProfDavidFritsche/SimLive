@@ -3479,6 +3479,7 @@ public class View extends GLCanvas {
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
 	    		lineElementRadius, scaling, Set.View.PINNED, zoom, selectedSets, objects);
 	    
+	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);		
 	    /* edges */
 	    if (Model.twoDimensional && SimLive.mode == SimLive.Mode.CONTACTS) {
 	    	for (int c = 0; c < objects.size(); c++) {
