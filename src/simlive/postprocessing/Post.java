@@ -1,5 +1,6 @@
 package simlive.postprocessing;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 import Jama.Matrix;
 import simlive.SimLive;
@@ -471,7 +472,7 @@ public class Post {
 	public double[][] calculateDisplacement(int component /* 0: total, 1: x, 2: y, 3: z */) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		double[][] disp = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			disp[i] = new double[nodes.size()];
 			
 			for (int node = 0; node < nodes.size(); node++) {
@@ -483,14 +484,14 @@ public class Post {
 					disp[i][node] = d[component-1];
 				}
 			}
-		}
+		});
 		return disp;
 	}
 	
 	public double[][] calculateAcceleration(int component /* 0: total, 1: x, 2: y, 3: z */) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		double[][] acc = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			acc[i] = new double[nodes.size()];
 				
 			for (int node = 0; node < nodes.size(); node++) {
@@ -502,14 +503,14 @@ public class Post {
 					acc[i][node] = a[component-1];
 				}
 			}
-		}
+		});
 		return acc;
 	}
 	
 	public double[][] calculateVelocity(int component /* 0: total, 1: x, 2: y, 3: z */) {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		double[][] vel = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			vel[i] = new double[nodes.size()];
 				
 			for (int node = 0; node < nodes.size(); node++) {
@@ -521,7 +522,7 @@ public class Post {
 					vel[i][node] = v[component-1];
 				}
 			}
-		}
+		});
 		return vel;
 	}
 	
@@ -529,7 +530,7 @@ public class Post {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		Matrix[][][] strain = new Matrix[solution.getNumberOfIncrements()+1][elements.size()][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			Matrix u_global = solution.getIncrement(i).get_u_global();
 			for (int elem = 0; elem < elements.size(); elem++) {
 				if (elements.get(elem).isPlaneElement()) {
@@ -544,7 +545,7 @@ public class Post {
 					}
 				}
 			}
-		}
+		});
 		return strain;
 	}
 	
@@ -552,7 +553,7 @@ public class Post {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		double[][] principalStrain = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			principalStrain[i] = new double[nodes.size()];
 			int[] count = new int[nodes.size()];
 			for (int elem = 0; elem < elements.size(); elem++) {
@@ -583,7 +584,7 @@ public class Post {
 					principalStrain[i][n] /= count[n];
 				}
 			}
-		}
+		});
 		return principalStrain;
 	}
 	
@@ -591,7 +592,7 @@ public class Post {
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		double[][][][] vectors = new double[solution.getNumberOfIncrements()+1][][][];
 		
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			vectors[i] = new double[elements.size()][4][2];
 			
 			for (int elem = 0; elem < elements.size(); elem++) {
@@ -621,7 +622,7 @@ public class Post {
 					}
 				}
 			}
-		}
+		});
 		return vectors;
 	}
 
@@ -629,7 +630,7 @@ public class Post {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		double[][] equivalentStrain = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			equivalentStrain[i] = new double[nodes.size()];
 			int[] count = new int[nodes.size()];
 			Matrix u_global = solution.getIncrement(i).get_u_global();
@@ -661,7 +662,7 @@ public class Post {
 					equivalentStrain[i][n] /= count[n];
 				}
 			}
-		}
+		});
 		return equivalentStrain;
 	}
 	
@@ -669,7 +670,7 @@ public class Post {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		Matrix[][][] stress = new Matrix[solution.getNumberOfIncrements()+1][elements.size()][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			Matrix u_global = solution.getIncrement(i).get_u_global();
 			for (int elem = 0; elem < elements.size(); elem++) {
 				if (elements.get(elem).isPlaneElement()) {
@@ -684,7 +685,7 @@ public class Post {
 					}
 				}
 			}
-		}
+		});
 		return stress;
 	}
 	
@@ -692,7 +693,7 @@ public class Post {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		double[][] principalStress = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			principalStress[i] = new double[nodes.size()];
 			int[] count = new int[nodes.size()];
 			for (int elem = 0; elem < elements.size(); elem++) {
@@ -723,7 +724,7 @@ public class Post {
 					principalStress[i][n] /= count[n];
 				}
 			}
-		}
+		});
 		return principalStress;
 	}
 	
@@ -731,7 +732,7 @@ public class Post {
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		double[][][][] vectors = new double[solution.getNumberOfIncrements()+1][][][];
 		
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			vectors[i] = new double[elements.size()][4][2];
 			
 			for (int elem = 0; elem < elements.size(); elem++) {
@@ -761,7 +762,7 @@ public class Post {
 					}
 				}
 			}
-		}
+		});
 		return vectors;
 	}
 	
@@ -769,7 +770,7 @@ public class Post {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		double[][] eqvStress = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			eqvStress[i] = new double[nodes.size()];
 			int[] count = new int[nodes.size()];
 			for (int elem = 0; elem < elements.size(); elem++) {
@@ -806,7 +807,7 @@ public class Post {
 					eqvStress[i][n] /= count[n];
 				}
 			}
-		}
+		});
 		return eqvStress;
 	}
 	
@@ -814,7 +815,7 @@ public class Post {
 		ArrayList<Node> nodes = solution.getRefModel().getNodes();
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		double[][] thickening = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			thickening[i] = new double[nodes.size()];
 			int[] count = new int[nodes.size()];
 			Matrix u_global = solution.getIncrement(i).get_u_global();
@@ -836,7 +837,7 @@ public class Post {
 			for (int n = 0; n < nodes.size(); n++) {
 				if (count[n] > 0) thickening[i][n] /= count[n];
 			}
-		}
+		});
 		return thickening;
 	}
 	
@@ -845,7 +846,7 @@ public class Post {
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		ArrayList<DistributedLoad> distributedLoads = solution.getRefModel().getDistributedLoads();
 		double[][] forces = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			forces[i] = new double[elements.size()*2];
 			Matrix u_global = solution.getIncrement(i).get_u_global();
 			
@@ -915,14 +916,14 @@ public class Post {
 					}
 				}
 			}
-		}
+		});
 		return forces;
 	}
 	
 	public double[][] calculateSpringDeflection() {
 		ArrayList<Element> elements = solution.getRefModel().getElements();
 		double[][] deflections = new double[solution.getNumberOfIncrements()+1][];
-		for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+		IntStream.range(0, solution.getNumberOfIncrements()+1).parallel().forEach(i -> {
 			deflections[i] = new double[elements.size()*2];
 			Matrix u_global = solution.getIncrement(i).get_u_global();
 			
@@ -949,7 +950,7 @@ public class Post {
 					}
 				}
 			}
-		}
+		});
 		return deflections;
 	}
 
