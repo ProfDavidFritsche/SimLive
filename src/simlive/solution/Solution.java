@@ -664,7 +664,7 @@ public class Solution {
 				M_constr = getMatrix2d(M_constr);
 				K_constr = getMatrix2d(K_constr);
 			}
-			Matrix A = M_constr.inverse().times(K_constr);
+			Matrix A = M_constr.inverse().timesBand(K_constr);
 			
 			logBuffer += "Calculate Eigenmodes...\n";
 			dialog.updateLog();
