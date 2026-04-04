@@ -183,9 +183,7 @@ public class Matrix implements Cloneable, java.io.Serializable {
       Matrix X = new Matrix(m,n);
       double[][] C = X.getArray();
       for (int i = 0; i < m; i++) {
-         for (int j = 0; j < n; j++) {
-            C[i][j] = A[i][j];
-         }
+         System.arraycopy(A[i], 0, C[i], 0, n);
       }
       return X;
    }
@@ -739,70 +737,13 @@ public class Matrix implements Cloneable, java.io.Serializable {
       }
       Matrix X = new Matrix(m,B.n);
       double[][] C = X.getArray();
-      int[] startA = new int[m];
-      int[] endA = new int[m];
-      int[] startB = new int[B.n];
-      int[] endB = new int[B.n];
-      for (int j = 0; j < m; j++) {
-         while (startA[j] < n && A[j][startA[j]] == 0.0) {
-            startA[j]++;
-         }
-         if (startA[j] < n) {
-            endA[j] = n-1;
-            while (endA[j] > startA[j] && A[j][endA[j]] == 0.0) {
-               endA[j]--;
-            }
-         }
-      }
       for (int j = 0; j < B.n; j++) {
-         while (startB[j] < n && B.A[startB[j]][j] == 0.0) {
-            startB[j]++;
-         }
-         if (startB[j] < n) {
-            endB[j] = n-1;
-            while (endB[j] > startB[j] && B.A[endB[j]][j] == 0.0) {
-               endB[j]--;
-            }
-         }
-      }
-      for (int j = 0; j < B.n; j++) if (startB[j] < n) {
-         for (int i = 0; i < m; i++) if (startA[i] < n) {
+         for (int i = 0; i < m; i++) {
             double s = 0;
-            int start = Math.max(startA[i], startB[j]);
-            int end = Math.min(endA[i], endB[j]);
-            for (int k = start; k <= end; k++) {
+            for (int k = 0; k < n; k++) {
                s += A[i][k]*B.A[k][j];
             }
             C[i][j] = s;
-         }
-      }
-      return X;
-   }
-
-   /** Linear algebraic matrix multiplication, A' * A
-   @return     Matrix product, A' * A
-   */
-
-   public Matrix transposeTimesItself () {
-      Matrix X = new Matrix(n,n);
-      int[] NumberNonZeroIndices = new int[n];
-      int[][] NonZeroIndices = new int[n][m];
-      for (int c = 0; c < n; c++) {
-         for (int r = 0; r < m; r++) {
-            if (A[r][c] != 0.0) {
-               NonZeroIndices[c][NumberNonZeroIndices[c]++] = r;
-            }
-         }
-      }
-      for (int c = 0; c < n; c++) if (NumberNonZeroIndices[c] > 0) {
-         for (int r = 0; r < c+1; r++) if (NumberNonZeroIndices[r] > 0) {
-            double s = 0;
-            for (int index = 0; index < NumberNonZeroIndices[c]; index++) {
-               int r1 = NonZeroIndices[c][index];
-               s += A[r1][r]*A[r1][c];
-            }
-            X.A[r][c] = s;
-            if (r != c) X.A[c][r] = s;
          }
       }
       return X;

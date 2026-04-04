@@ -25,7 +25,31 @@ public class PenaltyMethod extends ConstraintMethod {
 	
 	@Override
 	public Matrix getConstrainedMatrix(Matrix matrix, Matrix G) {
-		return matrix.plus(G.transposeTimesItself().times(getPenaltyValue(matrix)));
+		double penalty = getPenaltyValue(matrix);
+		Matrix X = matrix.copy();
+		int m = G.getRowDimension();
+		int n = G.getColumnDimension();
+	    int[] NumberNonZeroIndices = new int[n];
+	    int[][] NonZeroIndices = new int[n][m];
+    	for (int c = 0; c < n; c++) {
+    		for (int r = 0; r < m; r++) {
+    			if (G.get(r, c) != 0.0) {
+    				NonZeroIndices[c][NumberNonZeroIndices[c]++] = r;
+    			}
+    		}
+    	}
+	    for (int c = 0; c < n; c++) if (NumberNonZeroIndices[c] > 0) {
+	    	for (int r = 0; r < c+1; r++) if (NumberNonZeroIndices[r] > 0) {
+	    		double s = 0;
+	            for (int index = 0; index < NumberNonZeroIndices[c]; index++) {
+	            	int r1 = NonZeroIndices[c][index];
+	            	s += G.get(r1, r)*G.get(r1, c)*penalty;
+	            }
+	            X.set(r, c, X.get(r, c)+s);
+	            if (r != c) X.set(c, r, X.get(c, r)+s);
+	        }
+	    }
+		return X;
 	}
 
 	@Override
