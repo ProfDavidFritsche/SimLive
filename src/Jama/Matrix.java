@@ -749,58 +749,6 @@ public class Matrix implements Cloneable, java.io.Serializable {
       return X;
    }
    
-   /** Linear algebraic matrix multiplication, A * B
-   @param B    another matrix
-   @return     Matrix product, A * B
-   @exception  IllegalArgumentException Matrix inner dimensions must agree.
-   */
-
-   public Matrix timesBand (Matrix B) {
-      if (B.m != n) {
-         throw new IllegalArgumentException("Matrix inner dimensions must agree.");
-      }
-      Matrix X = new Matrix(m,B.n);
-      double[][] C = X.getArray();
-      int[] startA = new int[m];
-      int[] endA = new int[m];
-      int[] startB = new int[B.n];
-      int[] endB = new int[B.n];
-      for (int j = 0; j < m; j++) {
-         while (startA[j] < n && A[j][startA[j]] == 0.0) {
-            startA[j]++;
-         }
-         if (startA[j] < n) {
-            endA[j] = n-1;
-            while (endA[j] > startA[j] && A[j][endA[j]] == 0.0) {
-               endA[j]--;
-            }
-         }
-      }
-      for (int j = 0; j < B.n; j++) {
-         while (startB[j] < n && B.A[startB[j]][j] == 0.0) {
-            startB[j]++;
-         }
-         if (startB[j] < n) {
-            endB[j] = n-1;
-            while (endB[j] > startB[j] && B.A[endB[j]][j] == 0.0) {
-               endB[j]--;
-            }
-         }
-      }
-      for (int j = 0; j < B.n; j++) if (startB[j] < n) {
-         for (int i = 0; i < m; i++) if (startA[i] < n) {
-            double s = 0;
-            int start = Math.max(startA[i], startB[j]);
-            int end = Math.min(endA[i], endB[j]);
-            for (int k = start; k <= end; k++) {
-               s += A[i][k]*B.A[k][j];
-            }
-            C[i][j] = s;
-         }
-      }
-      return X;
-   }
-
    /** LU Decomposition
    @return     LUDecomposition
    @see LUDecomposition
