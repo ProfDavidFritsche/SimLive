@@ -186,6 +186,8 @@ public class Contact {
 			return;
 		}
 		
+		boolean calledFromDynamic = u_global == u_global0;
+		
 		/* do search for all slave nodes */
 		Stream<Node> stream = slaveNodes.parallelStream();
 		stream.forEach(slaveNode -> {
@@ -365,7 +367,7 @@ public class Contact {
 				}
 				
 				if ((contacts[slaveNodeID] == null && maxPenetration > -forwardTol) ||
-					(contacts[slaveNodeID] != null && ((maxPenetration > -forwardTol && contactForce <= 0.0 && C_global != null) ||
+					(contacts[slaveNodeID] != null && (((calledFromDynamic || maxPenetration > -forwardTol) && contactForce <= 0.0 && C_global != null) ||
 					 noSeparation))) {
 					
 					double[] shapeFunctionValues = null;
@@ -392,6 +394,8 @@ public class Contact {
 	
 	private static void search2d(Contact[] contacts, ArrayList<ContactPair> contactPairs,
 			Solution solution, Matrix u_global, Matrix u_global0, Matrix C_global) {
+		
+		boolean calledFromDynamic = u_global == u_global0;
 		
 		/* do search for all slave nodes */
 		Stream<Node> stream = slaveNodes.parallelStream();
@@ -498,7 +502,7 @@ public class Contact {
 					contactForce = C_global.get(dofNode, 0)*edgeNormal0[0]+C_global.get(dofNode+1, 0)*edgeNormal0[1];
 				}
 				if ((contacts[slaveNodeID] == null && maxPenetration > -forwardTol) ||
-						(contacts[slaveNodeID] != null && ((maxPenetration > -forwardTol && contactForce <= 0.0 && C_global != null) ||
+						(contacts[slaveNodeID] != null && (((calledFromDynamic || maxPenetration > -forwardTol) && contactForce <= 0.0 && C_global != null) ||
 						 noSeparation))) {
 					
 					double[] shapeFunctionValues = null;
