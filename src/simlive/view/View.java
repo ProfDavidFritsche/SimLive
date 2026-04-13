@@ -5215,8 +5215,8 @@ public class View extends GLCanvas {
 				sectionShapeType == SectionShape.Type.HOLLOW_RECTANGLE;
 		for (int i = 0; i < lineDivisions+1; i++) {
 			gl2.glPushMatrix();
+			t = i/(double) lineDivisions;
 			gl2.glTranslated(t*length, y, z);
-			t = (i+1)/(double) lineDivisions;
 			boolean start, end;
 			if (existing) {
 				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || Settings.isShowEdges);
@@ -5229,15 +5229,15 @@ public class View extends GLCanvas {
 	    	if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
 				Beam beam = (Beam) element;
 	    		double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(beam.getID());
-				double[] disp = beam.getBendingDispInCoRotatedFrame(t, angles);
-    			double deltaY = disp[0]*scaling-y;
-    			double deltaZ = disp[1]*scaling-z;
-    			double[] axis = new double[3];
-    			axis[1] = -deltaZ;
-    			axis[2] = deltaY;
-    			double sectionLength = Math.sqrt(deltaL*deltaL+deltaY*deltaY+deltaZ*deltaZ);
-    			double angle = Math.acos(deltaL/sectionLength);
-    			double[] R1 = getArrayFromRotationMatrix(GeomUtility.getRotationMatrix(angle, axis), true);
+				double[] shapeFunctionDerivatives = new double[2];
+    			shapeFunctionDerivatives[0] = 3*t*t-4*t+1;
+    			shapeFunctionDerivatives[1] = 3*t*t-2*t;
+    			Matrix angles0 = new Matrix(angles[0], 3).times(shapeFunctionDerivatives[0]).
+    					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
+    			angles0.set(0, 0, 0);
+    			double factor = angles0.normF();
+    			if (factor > 0) factor = SimLive.model.settings.isLargeDisplacement ? scaling : Math.atan(scaling*factor)/factor;
+				double[] R1 = getArrayFromRotationMatrix(Beam.rotationMatrixFromAngles(angles0.times(factor)), true);
     			gl2.glMultMatrixd(R1, 0);
     			gl2.glRotated((angles[1][0]-angles[0][0])*t*scaling*180.0/Math.PI, 1, 0, 0);
     			Matrix R = new Matrix(getModelViewMatrix(), 4);
@@ -5248,7 +5248,9 @@ public class View extends GLCanvas {
     			}
     			if (start && shading) startN = R.getMatrix(0, 2, 0, 0).times(-1).getColumnPackedCopy();
     			if (end && shading) endN = R.getMatrix(0, 2, 0, 0).getColumnPackedCopy();
-    			y = disp[0]*scaling;
+    			t = (i+1)/(double) lineDivisions;
+    			double[] disp = beam.getBendingDispInCoRotatedFrame(t, angles);
+				y = disp[0]*scaling;
 				z = disp[1]*scaling;
 			}
 			else {
@@ -5482,15 +5484,14 @@ public class View extends GLCanvas {
 			
 			double t = 0.0, y = 0.0, z = 0.0;
 			int lineDivisions = getLineDivisions(element);
-			double deltaL = length/(double) lineDivisions;
 			double[][] p0 = new double[lineDivisions+1][3];
 			double[][] p1 = new double[lineDivisions+1][3];
 			double[] v = new double[lineDivisions+1];
-			for (int i = 1; i < lineDivisions+2; i++) {
-				p0[i-1][0] = t*length;
-				p0[i-1][1] = y;
-				p0[i-1][2] = z;
+			for (int i = 0; i < lineDivisions+1; i++) {
 				t = i/(double) lineDivisions;
+				p0[i][0] = t*length;
+				p0[i][1] = y;
+				p0[i][2] = z;
 				
 				double[] disp = new double[2];
 				Matrix RR = Matrix.identity(3, 3);
@@ -5498,27 +5499,30 @@ public class View extends GLCanvas {
 					Beam beam = (Beam) element;
 					
 					double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(beam.getID());
-					disp = beam.getBendingDispInCoRotatedFrame(t, angles);
-	    			double deltaY = disp[0]*scaling-y;
-	    			double deltaZ = disp[1]*scaling-z;
-	    			double[] axis = new double[3];
-	    			axis[1] = -deltaZ;
-	    			axis[2] = deltaY;
-	    			double angle = Math.atan(Math.sqrt(deltaY*deltaY+deltaZ*deltaZ)/deltaL);
-	    			Matrix R1 = GeomUtility.getRotationMatrix(angle, axis);
+					double[] shapeFunctionDerivatives = new double[2];
+	    			shapeFunctionDerivatives[0] = 3*t*t-4*t+1;
+	    			shapeFunctionDerivatives[1] = 3*t*t-2*t;
+	    			Matrix angles0 = new Matrix(angles[0], 3).times(shapeFunctionDerivatives[0]).
+	    					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
+	    			angles0.set(0, 0, 0);
+	    			double factor = angles0.normF();
+	    			if (factor > 0) factor = SimLive.model.settings.isLargeDisplacement ? scaling : Math.atan(scaling*factor)/factor;
+					Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
 	    			Matrix R2 = GeomUtility.getRotationMatrixX((t-1.0/(double) lineDivisions)*(angles[1][0]-angles[0][0])*scaling);
 					RR = R1.times(R2);
+					t = (i+1)/(double) lineDivisions;
+					disp = beam.getBendingDispInCoRotatedFrame(t, angles);
 				}
 				
 				if (SimLive.post.isCurvePlotSwitchOrientation()) {
 					RR = RR.times(GeomUtility.getRotationMatrixX(Math.PI/2.0));
 				}
 				
-				v[i-1] = value0+(value1-value0)*(t-1/(double) lineDivisions);
+				v[i] = value0+(value1-value0)*(t-1/(double) lineDivisions);
 				
-				p1[i-1][0] = p0[i-1][0]+RR.get(0, 1)*v[i-1];
-				p1[i-1][1] = p0[i-1][1]+RR.get(1, 1)*v[i-1];
-				p1[i-1][2] = p0[i-1][2]+RR.get(2, 1)*v[i-1];
+				p1[i][0] = p0[i][0]+RR.get(0, 1)*v[i];
+				p1[i][1] = p0[i][1]+RR.get(1, 1)*v[i];
+				p1[i][2] = p0[i][2]+RR.get(2, 1)*v[i];
 				
 				if (element.getType() == Element.Type.BEAM) {
 	    			y = disp[0]*scaling;
@@ -5593,29 +5597,17 @@ public class View extends GLCanvas {
 		Matrix Rr = new Matrix(View.Rr[element.getID()]);
 		
 		if (element.getType() == Element.Type.BEAM) {
-			int[] elemNodes = element.getElementNodes();
-			double[] coords0 = getCoordsWithScaledDisp(elemNodes[0]);
-			double[] coords1 = getCoordsWithScaledDisp(elemNodes[1]);
-			double[] diff = new double[3];
-			diff[0] = coords1[0]-coords0[0];
-			diff[1] = coords1[1]-coords0[1];
-			diff[2] = coords1[2]-coords0[2];
-			double length = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
-			int lineDivisions = getLineDivisions(element);
-			double deltaL = length/(double) lineDivisions;
 			Beam beam = (Beam) element;
 			double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(beam.getID());
-			double[] disp = beam.getBendingDispInCoRotatedFrame(t, angles);
-			double y = disp[0]*scaling;
-			double z = disp[1]*scaling;
-			disp = beam.getBendingDispInCoRotatedFrame(t+1.0/(double) lineDivisions, SimLive.post.getPostIncrement().getAnglesBeam(beam.getID()));
-			double deltaY = disp[0]*scaling-y;
-			double deltaZ = disp[1]*scaling-z;
-			double[] axis = new double[3];
-			axis[1] = -deltaZ;
-			axis[2] = deltaY;
-			double angle = Math.atan(Math.sqrt(deltaY*deltaY+deltaZ*deltaZ)/deltaL);
-			Matrix R1 = GeomUtility.getRotationMatrix(angle, axis);
+			double[] shapeFunctionDerivatives = new double[2];
+			shapeFunctionDerivatives[0] = 3*t*t-4*t+1;
+			shapeFunctionDerivatives[1] = 3*t*t-2*t;
+			Matrix angles0 = new Matrix(angles[0], 3).times(shapeFunctionDerivatives[0]).
+					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
+			angles0.set(0, 0, 0);
+			double factor = angles0.normF();
+			if (factor > 0) factor = SimLive.model.settings.isLargeDisplacement ? scaling : Math.atan(scaling*factor)/factor;
+			Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
 			Matrix R2 = GeomUtility.getRotationMatrixX(t*(angles[1][0]-angles[0][0])*scaling);
 			Rr = Rr.times(R1).times(R2);
 		}
