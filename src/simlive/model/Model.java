@@ -1240,13 +1240,9 @@ public class Model implements DeepEqualsInterface {
 	
 	private void refineSubSets(Set set) {
 		if (!set.getSets().isEmpty()) {
-			ArrayList<Element> elements = new ArrayList<Element>();
 			for (int s = 0; s < set.getSets().size(); s++) {
 				refineSubSets(set.getSets().get(s));
-				elements.addAll(set.getSets().get(s).getElements());
 			}
-			set.getElements().clear();
-			set.getElements().addAll(elements);
 		}
 		else {
 			for (int e = set.getElements().size()-1; e >-1 ; e--) {			
