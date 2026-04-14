@@ -5237,9 +5237,9 @@ public class View extends GLCanvas {
     			angles0.set(0, 0, 0);
     			double factor = angles0.normF();
     			if (factor > 0) factor = SimLive.model.settings.isLargeDisplacement ? scaling : Math.atan(scaling*factor)/factor;
-				double[] R1 = getArrayFromRotationMatrix(Beam.rotationMatrixFromAngles(angles0.times(factor)), true);
-    			gl2.glMultMatrixd(R1, 0);
-    			gl2.glRotated((angles[1][0]-angles[0][0])*t*scaling*180.0/Math.PI, 1, 0, 0);
+				Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
+				Matrix R2 = GeomUtility.getRotationMatrixX((angles[1][0]-angles[0][0])*t*scaling);
+    			gl2.glMultMatrixd(getArrayFromRotationMatrix(R1.times(R2), true), 0);
     			Matrix R = new Matrix(getModelViewMatrix(), 4);
     			Matrix RR = shading ? R.getMatrix(0, 2, 0, 2) : null;
     			for (int k = 0; k < P.length; k++) {
@@ -5508,7 +5508,7 @@ public class View extends GLCanvas {
 	    			double factor = angles0.normF();
 	    			if (factor > 0) factor = SimLive.model.settings.isLargeDisplacement ? scaling : Math.atan(scaling*factor)/factor;
 					Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
-	    			Matrix R2 = GeomUtility.getRotationMatrixX((t-1.0/(double) lineDivisions)*(angles[1][0]-angles[0][0])*scaling);
+	    			Matrix R2 = GeomUtility.getRotationMatrixX(t*(angles[1][0]-angles[0][0])*scaling);
 					RR = R1.times(R2);
 					t = (i+1)/(double) lineDivisions;
 					disp = beam.getBendingDispInCoRotatedFrame(t, angles);
