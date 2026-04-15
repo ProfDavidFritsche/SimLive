@@ -5236,7 +5236,7 @@ public class View extends GLCanvas {
     					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
     			angles0.set(0, 0, 0);
     			double factor = angles0.normF();
-    			if (factor > 0) factor = SimLive.model.settings.isLargeDisplacement ? scaling : Math.atan(scaling*factor)/factor;
+    			if (factor > 0) factor = Math.atan(scaling*Math.tan(factor))/factor;
 				Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
 				Matrix R2 = GeomUtility.getRotationMatrixX((angles[1][0]-angles[0][0])*t*scaling);
     			gl2.glMultMatrixd(getArrayFromRotationMatrix(R1.times(R2), true), 0);
@@ -5506,7 +5506,7 @@ public class View extends GLCanvas {
 	    					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
 	    			angles0.set(0, 0, 0);
 	    			double factor = angles0.normF();
-	    			if (factor > 0) factor = SimLive.model.settings.isLargeDisplacement ? scaling : Math.atan(scaling*factor)/factor;
+	    			if (factor > 0) factor = Math.atan(scaling*Math.tan(factor))/factor;
 					Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
 	    			Matrix R2 = GeomUtility.getRotationMatrixX(t*(angles[1][0]-angles[0][0])*scaling);
 					RR = R1.times(R2);
@@ -5606,7 +5606,7 @@ public class View extends GLCanvas {
 					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
 			angles0.set(0, 0, 0);
 			double factor = angles0.normF();
-			if (factor > 0) factor = SimLive.model.settings.isLargeDisplacement ? scaling : Math.atan(scaling*factor)/factor;
+			if (factor > 0) factor = Math.atan(scaling*Math.tan(factor))/factor;
 			Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
 			Matrix R2 = GeomUtility.getRotationMatrixX(t*(angles[1][0]-angles[0][0])*scaling);
 			Rr = Rr.times(R1).times(R2);
@@ -6137,17 +6137,9 @@ public class View extends GLCanvas {
 						rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
 					}
 					Matrix rot0 = new Matrix(new double[]{rotX, rotY, rotZ}, 3);
-					double factor = 0;
-		    		if (SimLive.model.settings.isLargeDisplacement) {
-		    			factor = SimLive.post.getScaling();
-		    		}
-		    		else {
-		    			factor = rot0.normF();
-		    			if (factor > 0) {
-			    			factor = Math.atan(SimLive.post.getScaling()*factor)/factor;
-			    		}
-		    		}
-		    		Matrix Rg = Beam.rotationMatrixFromAngles(rot0.times(factor));
+					double factor = rot0.normF();
+					if (factor > 0) factor = Math.atan(SimLive.post.getScaling()*Math.tan(factor))/factor;
+					Matrix Rg = Beam.rotationMatrixFromAngles(rot0.times(factor));
 					R = Rg.times(R);
 				}
 			}
@@ -6265,16 +6257,8 @@ public class View extends GLCanvas {
 		    		Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
 		    		int id = SimLive.post.getSolution().getDofOfNodeID(load.referenceNode.getID());
 		    		Matrix rot = u_global.getMatrix(id+3, id+5, 0, 0);
-		    		double factor = 0;
-		    		if (SimLive.model.settings.isLargeDisplacement) {
-		    			factor = scaling;
-		    		}
-		    		else {
-		    			factor = rot.normF();
-		    			if (factor > 0) {
-			    			factor = Math.atan(scaling*factor)/factor;
-			    		}
-		    		}
+		    		double factor = rot.normF();
+		    		if (factor > 0) factor = Math.atan(scaling*Math.tan(factor))/factor;
 		    		R = R.times(Beam.rotationMatrixFromAngles(rot.times(factor)).transpose());
 		    	}
 		    	double[] RR = getArrayFromRotationMatrix(R, false);
@@ -6477,17 +6461,9 @@ public class View extends GLCanvas {
 				    		Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
 				    		int id = SimLive.post.getSolution().getDofOfNodeID(distributedLoad.referenceNode.getID());
 				    		Matrix rot = u_global.getMatrix(id+3, id+5, 0, 0);
-				    		double factor = 0;
-				    		if (SimLive.model.settings.isLargeDisplacement) {
-				    			factor = scaling;
-				    		}
-				    		else {
-				    			factor = rot.normF();
-				    			if (factor > 0) {
-					    			factor = Math.atan(scaling*factor)/factor;
-					    		}
-				    		}
-				    		R = R.times(Beam.rotationMatrixFromAngles(rot.times(factor)).transpose());
+				    		double factor = rot.normF();
+				    		if (factor > 0) factor = Math.atan(scaling*Math.tan(factor))/factor;
+					    	R = R.times(Beam.rotationMatrixFromAngles(rot.times(factor)).transpose());
 				    	}
 						double[] RR = getArrayFromRotationMatrix(R, false);
 				    	//gl2.glMultMatrixd(RR.getRowPackedCopy(), 0);
