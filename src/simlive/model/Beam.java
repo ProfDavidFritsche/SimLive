@@ -5,7 +5,6 @@ import java.util.Arrays;
 import Jama.Matrix;
 import simlive.SimLive;
 import simlive.SimLive.Mode;
-import simlive.postprocessing.Post;
 import simlive.solution.Increment;
 import simlive.solution.Solution;
 
@@ -687,36 +686,13 @@ public class Beam extends LineElement {
 		return values;
 	}
 	
-	public double[][] getScaledAnglesInCoRotatedFrame(Post post, Matrix Rr) {
-		double[][] angles = new double[2][3];
-		Element refModelElem = post.getSolution().getRefModel().getElements().get(id);
-		Matrix u_elem = refModelElem.globalToLocalVector(post.getPostIncrement().get_u_global());
-		Matrix a0 = u_elem.getMatrix(3, 5, 0, 0);
-		Matrix a1 = u_elem.getMatrix(9, 11, 0, 0);
-		double scaling = SimLive.post.getScaling();
-		if (!SimLive.model.settings.isLargeDisplacement) {
-			for (int i = 0; i < 3; i++) {
-				a0.set(i, 0, Math.atan(a0.get(i, 0)));
-				a1.set(i, 0, Math.atan(a1.get(i, 0)));
-			}
-		}
-		a0.timesEquals(scaling);
-		a1.timesEquals(scaling);
-		Matrix R_local = Rr.transpose().times(rotationMatrixFromAngles(a0)).times(R0);
-		angles[0] = anglesFromRotationMatrix(R_local);
-		R_local = Rr.transpose().times(rotationMatrixFromAngles(a1)).times(R0);
-		angles[1] = anglesFromRotationMatrix(R_local);
-		
-		return angles;
-	}
-	
-	public double[] interpolateScaledAnglesInCoRotatedFrame(double t, double[][] angles) {
+	public double[] interpolateAnglesInCoRotatedFrame(double t, double[][] angles) {
 		double h0 = 3*t*t-4*t+1;
 		double h1 = 3*t*t-2*t;
 		return new double[]{t*(angles[1][0]-angles[0][0]), h0*angles[0][1]+h1*angles[1][1], h0*angles[0][2]+h1*angles[1][2]};
 	}
 	
-	public double[][] getAngularValuesInCoRotatedFrame(Increment increment, Matrix Rr, int val /* 0 - angle, 1 - angularVel, 2 - angularAcc */) {
+	public double[][] getAngularValuesInCoRotatedFrame(Increment increment, double scaling, Matrix Rr, int val /* 0 - angle, 1 - angularVel, 2 - angularAcc */) {
 		double[][] angles = new double[2][3];
 		if (increment != null) {
 			Element refModelElem = increment.getSolution().getRefModel().getElements().get(id);
@@ -739,6 +715,8 @@ public class Beam extends LineElement {
 						a1.set(i, 0, Math.atan(a1.get(i, 0)));
 					}
 				}
+				a0.timesEquals(scaling);
+				a1.timesEquals(scaling);
 				Matrix R_local = Rr.transpose().times(rotationMatrixFromAngles(a0)).times(R0);
 				angles[0] = anglesFromRotationMatrix(R_local);
 				R_local = Rr.transpose().times(rotationMatrixFromAngles(a1)).times(R0);

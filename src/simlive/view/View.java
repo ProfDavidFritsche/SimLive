@@ -5228,8 +5228,8 @@ public class View extends GLCanvas {
 			}
 	    	if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
 				Beam beam = (Beam) element;
-				double[][] angles = beam.getScaledAnglesInCoRotatedFrame(SimLive.post, Rr);
-				Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateScaledAnglesInCoRotatedFrame(t, angles), 3));
+				double[][] angles = beam.getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr, 0);
+				Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateAnglesInCoRotatedFrame(t, angles), 3));
 	    		gl2.glMultMatrixd(getArrayFromRotationMatrix(R1, true), 0);
     			Matrix R = new Matrix(getModelViewMatrix(), 4);
     			Matrix RR = shading ? R.getMatrix(0, 2, 0, 2) : null;
@@ -5490,8 +5490,8 @@ public class View extends GLCanvas {
 				if (element.getType() == Element.Type.BEAM) {
 					Beam beam = (Beam) element;
 					
-					double[][] angles = beam.getScaledAnglesInCoRotatedFrame(SimLive.post, Rr);
-					RR = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateScaledAnglesInCoRotatedFrame(t, angles), 3));
+					double[][] angles = beam.getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr, 0);
+					RR = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateAnglesInCoRotatedFrame(t, angles), 3));
 		    		t = (i+1)/(double) lineDivisions;
 					disp = beam.getBendingDispInCoRotatedFrame(t, angles);
 				}
@@ -5580,8 +5580,8 @@ public class View extends GLCanvas {
 		
 		if (element.getType() == Element.Type.BEAM) {
 			Beam beam = (Beam) element;
-			double[][] angles = beam.getScaledAnglesInCoRotatedFrame(SimLive.post, Rr);
-			Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateScaledAnglesInCoRotatedFrame(t, angles), 3));
+			double[][] angles = beam.getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr, 0);
+			Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateAnglesInCoRotatedFrame(t, angles), 3));
     		Rr = Rr.times(R1);
 		}
 		

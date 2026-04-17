@@ -1362,9 +1362,9 @@ public class Increment {
 				double length = beam.getCurrentLength(SimLive.model.getNodes(), u_elem);
 				Matrix r1 = beam.getr1(SimLive.model.getNodes(), u_elem, length);
 				this.Rr_beam[e] = beam.getRr(u_elem, r1);
-				this.angles[e] = beam.getAngularValuesInCoRotatedFrame(this, this.Rr_beam[e], 0);
-				this.angularVel[e] = beam.getAngularValuesInCoRotatedFrame(this, this.Rr_beam[e], 1);
-				this.angularAcc[e] = beam.getAngularValuesInCoRotatedFrame(this, this.Rr_beam[e], 2);
+				this.angles[e] = beam.getAngularValuesInCoRotatedFrame(this, 1, this.Rr_beam[e], 0);
+				this.angularVel[e] = beam.getAngularValuesInCoRotatedFrame(this, 1, this.Rr_beam[e], 1);
+				this.angularAcc[e] = beam.getAngularValuesInCoRotatedFrame(this, 1, this.Rr_beam[e], 2);
 			}
 		}
 	}
