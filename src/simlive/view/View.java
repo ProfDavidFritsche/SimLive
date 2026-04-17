@@ -3554,14 +3554,15 @@ public class View extends GLCanvas {
 							double[] coords1 = getCoordsWithScaledDisp(elemNodes[1]);
 							gl2.glPushMatrix();
 							gl2.glTranslated(0.5*(coords0[0]+coords1[0]), 0.5*(coords0[1]+coords1[1]), 0.5*(coords0[2]+coords1[2]));
-							double[] R = getArrayFromRotationMatrix(new Matrix(View.Rr[element.getID()]), true);
+							Matrix Rr = new Matrix(View.Rr[element.getID()]);
+							double[] R = getArrayFromRotationMatrix(Rr, true);
 							gl2.glMultMatrixd(R, 0);
 					    	if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
 					    		Beam beam = (Beam) element;
-					    		double[] disp = beam.getBendingDispInCoRotatedFrame(0.5, SimLive.post.getPostIncrement().getAnglesBeam(beam.getID()));
-					    		gl2.glTranslated(0, disp[0]*scaling, disp[1]*scaling);
-					    		double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(element.getID());
-					    		gl2.glRotated((angles[1][0]-angles[0][0])*0.5*scaling*180.0/Math.PI, 1, 0, 0);
+					    		double[][] angles = beam.getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr, 0);
+					    		double[] disp = beam.getBendingDispInCoRotatedFrame(0.5, angles);
+					    		gl2.glTranslated(0, disp[0], disp[1]);
+					    		gl2.glRotated((angles[1][0]-angles[0][0])*0.5*180.0/Math.PI, 1, 0, 0);
 					    	}
 							
 							{
