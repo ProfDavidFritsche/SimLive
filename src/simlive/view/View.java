@@ -5228,18 +5228,9 @@ public class View extends GLCanvas {
 			}
 	    	if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
 				Beam beam = (Beam) element;
-	    		double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(beam.getID());
-				double[] shapeFunctionDerivatives = new double[2];
-    			shapeFunctionDerivatives[0] = 3*t*t-4*t+1;
-    			shapeFunctionDerivatives[1] = 3*t*t-2*t;
-    			Matrix angles0 = new Matrix(angles[0], 3).times(shapeFunctionDerivatives[0]).
-    					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
-    			angles0.set(0, 0, 0);
-    			double factor = angles0.normF();
-    			if (factor > 0) factor = Math.atan(scaling*Math.tan(factor))/factor;
-				Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
-				Matrix R2 = GeomUtility.getRotationMatrixX((angles[1][0]-angles[0][0])*t*scaling);
-    			gl2.glMultMatrixd(getArrayFromRotationMatrix(R1.times(R2), true), 0);
+				double[][] angles = beam.getScaledAnglesInCoRotatedFrame(SimLive.post, Rr);
+				Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateScaledAnglesInCoRotatedFrame(t, angles), 3));
+	    		gl2.glMultMatrixd(getArrayFromRotationMatrix(R1, true), 0);
     			Matrix R = new Matrix(getModelViewMatrix(), 4);
     			Matrix RR = shading ? R.getMatrix(0, 2, 0, 2) : null;
     			for (int k = 0; k < P.length; k++) {
@@ -5250,8 +5241,8 @@ public class View extends GLCanvas {
     			if (end && shading) endN = R.getMatrix(0, 2, 0, 0).getColumnPackedCopy();
     			t = (i+1)/(double) lineDivisions;
     			double[] disp = beam.getBendingDispInCoRotatedFrame(t, angles);
-				y = disp[0]*scaling;
-				z = disp[1]*scaling;
+				y = disp[0];
+				z = disp[1];
 			}
 			else {
 				Matrix R = new Matrix(getModelViewMatrix(), 4);
@@ -5479,7 +5470,8 @@ public class View extends GLCanvas {
 			double length = Math.sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]);
 			gl2.glPushMatrix();
 			gl2.glTranslated(coords0[0], coords0[1], coords0[2]);
-			double[] R = getArrayFromRotationMatrix(new Matrix(View.Rr[element.getID()]), true);
+			Matrix Rr = new Matrix(View.Rr[element.getID()]);
+			double[] R = getArrayFromRotationMatrix(Rr, true);
 			gl2.glMultMatrixd(R, 0);
 			
 			double t = 0.0, y = 0.0, z = 0.0;
@@ -5498,19 +5490,9 @@ public class View extends GLCanvas {
 				if (element.getType() == Element.Type.BEAM) {
 					Beam beam = (Beam) element;
 					
-					double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(beam.getID());
-					double[] shapeFunctionDerivatives = new double[2];
-	    			shapeFunctionDerivatives[0] = 3*t*t-4*t+1;
-	    			shapeFunctionDerivatives[1] = 3*t*t-2*t;
-	    			Matrix angles0 = new Matrix(angles[0], 3).times(shapeFunctionDerivatives[0]).
-	    					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
-	    			angles0.set(0, 0, 0);
-	    			double factor = angles0.normF();
-	    			if (factor > 0) factor = Math.atan(scaling*Math.tan(factor))/factor;
-					Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
-	    			Matrix R2 = GeomUtility.getRotationMatrixX(t*(angles[1][0]-angles[0][0])*scaling);
-					RR = R1.times(R2);
-					t = (i+1)/(double) lineDivisions;
+					double[][] angles = beam.getScaledAnglesInCoRotatedFrame(SimLive.post, Rr);
+					RR = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateScaledAnglesInCoRotatedFrame(t, angles), 3));
+		    		t = (i+1)/(double) lineDivisions;
 					disp = beam.getBendingDispInCoRotatedFrame(t, angles);
 				}
 				
@@ -5525,8 +5507,8 @@ public class View extends GLCanvas {
 				p1[i][2] = p0[i][2]+RR.get(2, 1)*v[i];
 				
 				if (element.getType() == Element.Type.BEAM) {
-	    			y = disp[0]*scaling;
-					z = disp[1]*scaling;
+	    			y = disp[0];
+					z = disp[1];
 				}
 			}
 			
@@ -5598,18 +5580,9 @@ public class View extends GLCanvas {
 		
 		if (element.getType() == Element.Type.BEAM) {
 			Beam beam = (Beam) element;
-			double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(beam.getID());
-			double[] shapeFunctionDerivatives = new double[2];
-			shapeFunctionDerivatives[0] = 3*t*t-4*t+1;
-			shapeFunctionDerivatives[1] = 3*t*t-2*t;
-			Matrix angles0 = new Matrix(angles[0], 3).times(shapeFunctionDerivatives[0]).
-					plus(new Matrix(angles[1], 3).times(shapeFunctionDerivatives[1]));
-			angles0.set(0, 0, 0);
-			double factor = angles0.normF();
-			if (factor > 0) factor = Math.atan(scaling*Math.tan(factor))/factor;
-			Matrix R1 = Beam.rotationMatrixFromAngles(angles0.times(factor));
-			Matrix R2 = GeomUtility.getRotationMatrixX(t*(angles[1][0]-angles[0][0])*scaling);
-			Rr = Rr.times(R1).times(R2);
+			double[][] angles = beam.getScaledAnglesInCoRotatedFrame(SimLive.post, Rr);
+			Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateScaledAnglesInCoRotatedFrame(t, angles), 3));
+    		Rr = Rr.times(R1);
 		}
 		
 		if (SimLive.post.isCurvePlotSwitchOrientation()) {
