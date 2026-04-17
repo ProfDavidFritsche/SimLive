@@ -657,7 +657,7 @@ public class Beam extends LineElement {
 	public double[] interpolateNodeKinematicValues(double t, Increment increment, int val) {
 		double[][] xyzVal = new double[2][3];
 		double[][] phiVal = new double[2][3];
-		Matrix u_elem = globalToLocalVector(increment.get_u_global());
+		Matrix u_elem = increment.getSolution().getRefModel().getElements().get(id).globalToLocalVector(increment.get_u_global());
 		double length = getCurrentLength(SimLive.model.getNodes(), u_elem);
 		Matrix r1 = getr1(SimLive.model.getNodes(), u_elem, length);
 		Matrix Rr = getRr(u_elem, r1);
