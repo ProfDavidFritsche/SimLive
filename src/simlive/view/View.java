@@ -158,6 +158,7 @@ public class View extends GLCanvas {
 	public boolean[] isOutlineNode;
 	public boolean[] isCornerNode;
 	
+	public static double[][][] beamAngles = null;
 	public static double[][][] Rr = null;
 	public static double[] deltaL = null;
 	public static double[][] nodeNormals = null;
@@ -3024,6 +3025,7 @@ public class View extends GLCanvas {
 	private void storeMeshDataElements(double scaling) {
 		Rr = new double[SimLive.model.getElements().size()][][];
 		deltaL = new double[SimLive.model.getElements().size()];
+		beamAngles = new double[SimLive.model.getElements().size()][][];
 		if (SimLive.mode == Mode.RESULTS) {
 			Matrix u_global = SimLive.post.getPostIncrement().get_u_global();
 			for (int e = 0; e < SimLive.model.getElements().size(); e++) {
@@ -3034,8 +3036,8 @@ public class View extends GLCanvas {
 					Matrix r1 = lineElement.getr1(SimLive.post.getSolution().getRefModel().getNodes(), u_elem, currentLength);
 					if (lineElement.getType() == Element.Type.BEAM) {
 						Matrix Rr_matrix = ((Beam) lineElement).getRr(u_elem, r1);
-						double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(lineElement.getID());
-						Rr_matrix = Rr_matrix.times(GeomUtility.getRotationMatrixX(angles[0][0]*scaling));
+						beamAngles[e] = ((Beam) lineElement).getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr_matrix, 0);
+						Rr_matrix = Rr_matrix.times(GeomUtility.getRotationMatrixX(beamAngles[e][0][0]));
 						Rr[e] = Rr_matrix.getArray();
 					}
 					else {
@@ -3559,7 +3561,7 @@ public class View extends GLCanvas {
 							gl2.glMultMatrixd(R, 0);
 					    	if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
 					    		Beam beam = (Beam) element;
-					    		double[][] angles = beam.getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr, 0);
+					    		double[][] angles = beamAngles[beam.getID()];
 					    		double[] disp = beam.getBendingDispInCoRotatedFrame(0.5, angles);
 					    		gl2.glTranslated(0, disp[0], disp[1]);
 					    		gl2.glRotated((angles[1][0]-angles[0][0])*0.5*180.0/Math.PI, 1, 0, 0);
@@ -5229,7 +5231,7 @@ public class View extends GLCanvas {
 			}
 	    	if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
 				Beam beam = (Beam) element;
-				double[][] angles = beam.getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr, 0);
+				double[][] angles = beamAngles[beam.getID()];
 				Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateAnglesInCoRotatedFrame(t, angles), 3));
 	    		gl2.glMultMatrixd(getArrayFromRotationMatrix(R1, true), 0);
     			Matrix R = new Matrix(getModelViewMatrix(), 4);
@@ -5491,7 +5493,7 @@ public class View extends GLCanvas {
 				if (element.getType() == Element.Type.BEAM) {
 					Beam beam = (Beam) element;
 					
-					double[][] angles = beam.getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr, 0);
+					double[][] angles = beamAngles[beam.getID()];
 					RR = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateAnglesInCoRotatedFrame(t, angles), 3));
 		    		t = (i+1)/(double) lineDivisions;
 					disp = beam.getBendingDispInCoRotatedFrame(t, angles);
@@ -5581,7 +5583,7 @@ public class View extends GLCanvas {
 		
 		if (element.getType() == Element.Type.BEAM) {
 			Beam beam = (Beam) element;
-			double[][] angles = beam.getAngularValuesInCoRotatedFrame(SimLive.post.getPostIncrement(), scaling, Rr, 0);
+			double[][] angles = beamAngles[beam.getID()];
 			Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateAnglesInCoRotatedFrame(t, angles), 3));
     		Rr = Rr.times(R1);
 		}

@@ -36,8 +36,6 @@ public class Increment {
 	private Matrix[] M_elem, K_elem;
 	private Matrix M_global, K_global, f_ext, f_int, u_global, v_global, a_global,
 			G, r_global, K_constr, M_constr, delta_f_constr;
-	private Matrix[] Rr_beam;
-	private double[][][] angles, angularVel, angularAcc;
 	private double time;
 	private int stepNr;
 	
@@ -1351,22 +1349,6 @@ public class Increment {
 		this.v_global = v_global;
 		this.a_global = a_global;
 		this.r_global = r_global;
-		this.Rr_beam = new Matrix[solution.getRefModel().getElements().size()];
-		this.angles = new double[solution.getRefModel().getElements().size()][][];
-		this.angularVel = new double[solution.getRefModel().getElements().size()][][];
-		this.angularAcc = new double[solution.getRefModel().getElements().size()][][];
-		for (int e = 0; e < solution.getRefModel().getElements().size(); e++) {
-			if (solution.getRefModel().getElements().get(e).getType() == Element.Type.BEAM) {
-				Beam beam = (Beam) solution.getRefModel().getElements().get(e);
-				Matrix u_elem = beam.globalToLocalVector(u_global);
-				double length = beam.getCurrentLength(SimLive.model.getNodes(), u_elem);
-				Matrix r1 = beam.getr1(SimLive.model.getNodes(), u_elem, length);
-				this.Rr_beam[e] = beam.getRr(u_elem, r1);
-				this.angles[e] = beam.getAngularValuesInCoRotatedFrame(this, 1, this.Rr_beam[e], 0);
-				this.angularVel[e] = beam.getAngularValuesInCoRotatedFrame(this, 1, this.Rr_beam[e], 1);
-				this.angularAcc[e] = beam.getAngularValuesInCoRotatedFrame(this, 1, this.Rr_beam[e], 2);
-			}
-		}
 	}
 	
 	public void setResultsForMatrixView(Matrix[] K_elem, Matrix[] M_elem,
@@ -1775,16 +1757,9 @@ public class Increment {
 				Matrix R0 = lineElement.getR0();
 				Matrix Rr = new Matrix(View.Rr[elemID]);
 				if (lineElement.getType() == Element.Type.BEAM) {
-					double scaling = SimLive.post.getScaling();
-					double[][] angles = this.angles[elemID];
-					double f2d = (t-1.0)*(3.0*t-1.0);
-					double f5d = t*(3.0*t-2.0);
-					double[] rot = new double[3];
-					rot[0] = (angles[1][0]-angles[0][0])*t*scaling;
-					rot[1] = Math.atan((f2d*angles[0][1]+f5d*angles[1][1])*scaling);
-					rot[2] = Math.atan((f2d*angles[0][2]+f5d*angles[1][2])*scaling);
-					Matrix R = Beam.rotationMatrixFromAngles(new Matrix(rot, 3));
-					Rr = Rr.times(R);
+					double[][] angles = View.beamAngles[elemID];
+					Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(((Beam) lineElement).interpolateAnglesInCoRotatedFrame(t, angles), 3));
+					Rr = Rr.times(R1);
 				}
 				return Rr.times(R0.transpose());
 			}
@@ -1856,22 +1831,6 @@ public class Increment {
 			reactions[2] = r_global.get(dof+2, 0);
 		}
 		return reactions;
-	}
-	
-	public Matrix getRrBeam(int e) {
-		return Rr_beam[e];
-	}
-	
-	public double[][] getAnglesBeam(int e) {
-		return angles[e];
-	}
-	
-	public double[][] getAngularVelBeam(int e) {
-		return angularVel[e];
-	}
-	
-	public double[][] getAngularAccBeam(int e) {
-		return angularAcc[e];
 	}
 	
 	private Matrix addRowToMatrix(Matrix matrix, Matrix row) {

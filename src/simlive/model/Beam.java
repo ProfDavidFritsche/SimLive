@@ -657,20 +657,23 @@ public class Beam extends LineElement {
 	public double[] interpolateNodeKinematicValues(double t, Increment increment, int val) {
 		double[][] xyzVal = new double[2][3];
 		double[][] phiVal = new double[2][3];
-		Matrix Rr = increment.getRrBeam(id);
+		Matrix u_elem = globalToLocalVector(increment.get_u_global());
+		double length = getCurrentLength(SimLive.model.getNodes(), u_elem);
+		Matrix r1 = getr1(SimLive.model.getNodes(), u_elem, length);
+		Matrix Rr = getRr(u_elem, r1);
 		
 		switch (val) {
 			case 0:	xyzVal[0] = increment.getDisplacement(elementNodes[0]);
 					xyzVal[1] = increment.getDisplacement(elementNodes[1]);
-					phiVal = increment.getAnglesBeam(id);
+					phiVal = getAngularValuesInCoRotatedFrame(increment, 1, Rr, 0);
 					break;
 			case 1:	xyzVal[0] = increment.getAcceleration(elementNodes[0]);
 					xyzVal[1] = increment.getAcceleration(elementNodes[1]);
-					phiVal = increment.getAngularAccBeam(id);
+					phiVal = getAngularValuesInCoRotatedFrame(increment, 1, Rr, 2);
 					break;
 			case 2:	xyzVal[0] = increment.getVelocity(elementNodes[0]);
 					xyzVal[1] = increment.getVelocity(elementNodes[1]);
-					phiVal = increment.getAngularVelBeam(id);
+					phiVal = getAngularValuesInCoRotatedFrame(increment, 1, Rr, 1);
 					break;
 		}
 		double[] values = new double[3];

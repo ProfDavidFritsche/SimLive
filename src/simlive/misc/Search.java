@@ -503,12 +503,10 @@ public abstract class Search {
 					int lineDivisions = SimLive.view.getLineDivisions(beam);
 		    		for (int i = 1; i < lineDivisions+1; i++) {
 		    			Matrix Rr = new Matrix(View.Rr[beam.getID()]);
-		    			double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(beam.getID());
+		    			double[][] angles = View.beamAngles[beam.getID()];
 		    			double x1 = i/(double) lineDivisions;	
 	    				double[] disp = beam.getBendingDispInCoRotatedFrame(x1, angles);
-						disp[0] *= SimLive.post.getScaling();
-						disp[1] *= SimLive.post.getScaling();						
-	    				Matrix d1 = Rr.times(new Matrix(new double[]{x1*length0, disp[0], disp[1]}, 3)).plus(p0);		    			
+						Matrix d1 = Rr.times(new Matrix(new double[]{x1*length0, disp[0], disp[1]}, 3)).plus(p0);		    			
 	    				Matrix dir1 = d1.minus(d0);
 						double sectionLength = dir1.normF();
 						dir1.timesEquals(1.0/sectionLength);

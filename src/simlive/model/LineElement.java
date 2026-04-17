@@ -188,11 +188,11 @@ public abstract class LineElement extends Element {
 		double[] dispB = new double[3];
 		if (SimLive.mode == Mode.RESULTS && getType() == Type.BEAM) {
 			Matrix Rr = new Matrix(View.Rr[id]);
-			double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(id);
+			double[][] angles = View.beamAngles[id];
 			double[] dispBLoc = ((Beam) this).getBendingDispInCoRotatedFrame(t, angles);
-			dispB[0] = (Rr.get(0, 1)*dispBLoc[0]+Rr.get(0, 2)*dispBLoc[1])*SimLive.post.getScaling();
-			dispB[1] = (Rr.get(1, 1)*dispBLoc[0]+Rr.get(1, 2)*dispBLoc[1])*SimLive.post.getScaling();
-			dispB[2] = (Rr.get(2, 1)*dispBLoc[0]+Rr.get(2, 2)*dispBLoc[1])*SimLive.post.getScaling();
+			dispB[0] = (Rr.get(0, 1)*dispBLoc[0]+Rr.get(0, 2)*dispBLoc[1]);
+			dispB[1] = (Rr.get(1, 1)*dispBLoc[0]+Rr.get(1, 2)*dispBLoc[1]);
+			dispB[2] = (Rr.get(2, 1)*dispBLoc[0]+Rr.get(2, 2)*dispBLoc[1]);
 		}
 		double[] q0 = View.getCoordsWithScaledDisp(elementNodes[0]);
 		double[] q1 = View.getCoordsWithScaledDisp(elementNodes[1]);
@@ -264,31 +264,20 @@ public abstract class LineElement extends Element {
 			
 			double[][] P = section.getSectionPoints();
 				
-			double t = 0.0, y = 0.0, z = 0.0;
+			double t = 0.0;
 			int lineDivisions = SimLive.view.getLineDivisions(this);
 			double[][][] p = new double[lineDivisions+1][P.length][];
-			double deltaL = length/(double) lineDivisions;
 			for (int i = 0; i < lineDivisions+1; i++) {
 				t = i/(double) lineDivisions;
 				if (getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
 					Beam beam = (Beam) this;
-		    		double[][] angles = SimLive.post.getPostIncrement().getAnglesBeam(beam.getID());
+		    		double[][] angles = View.beamAngles[beam.getID()];
 					double[] disp = beam.getBendingDispInCoRotatedFrame(t, angles);
-	    			double deltaY = disp[0]*SimLive.post.getScaling()-y;
-	    			double deltaZ = disp[1]*SimLive.post.getScaling()-z;
-	    			double[] axis = new double[3];
-	    			axis[1] = -deltaZ;
-	    			axis[2] = deltaY;
-	    			double sectionLength = Math.sqrt(deltaL*deltaL+deltaY*deltaY+deltaZ*deltaZ);
-	    			double angle = Math.acos(deltaL/sectionLength);
-	    			Matrix R1 = GeomUtility.getRotationMatrix(angle, axis);
-	    			Matrix Rx = GeomUtility.getRotationMatrixX(2*angles[1][0]*t*SimLive.post.getScaling());
+					Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateAnglesInCoRotatedFrame(t, angles), 3));
 	    			for (int k = 0; k < P.length; k++) {
-						p[i][k] = Rr.times(R1.times(Rx.times(new Matrix(P[k], 3))).plus(new Matrix(new double[]{t*length, y, z}, 3))).plus(
+						p[i][k] = Rr.times(R1.times(new Matrix(P[k], 3)).plus(new Matrix(new double[]{t*length, disp[0], disp[1]}, 3))).plus(
 								new Matrix(new double[]{coords0[0], coords0[1], coords0[2]}, 3)).getColumnPackedCopy();
 	    			}
-	    			y = disp[0]*SimLive.post.getScaling();
-					z = disp[1]*SimLive.post.getScaling();
 				}
 				else {
 					for (int k = 0; k < P.length; k++) {
