@@ -245,28 +245,21 @@ public class PlotSettingsDialog extends Composite {
 			slider_1.addSelectionListener(new SelectionAdapter() {
 			 	@Override
 			 	public void widgetSelected(SelectionEvent e) {
-			 		double value = sliderToValue(slider_1.getSelection());
-					post.setPrincipalVectorScaling(value);
-					slider_1.setToolTipText(SimLive.double2String(value*100.0)+"%");
+			 		post.setPrincipalVectorScaling(
+							Math.pow(2.0, (slider_1.getSelection()-(slider_1.getMaximum()-slider_1.getThumb())/2.0)/slider_1.getPageIncrement()));
+					slider_1.setToolTipText(SimLive.double2String(post.getPrincipalVectorScaling()*100.0)+"%");
 					SimLive.view.redraw();
 			 	}
 			});
 			slider_1.setThumb(10);
 			slider_1.setPageIncrement(10);
-			slider_1.setMaximum(100+slider_1.getThumb());
+			slider_1.setMaximum(120+slider_1.getThumb());
 			slider_1.setMinimum(0);
-			slider_1.setSelection((int) valueToSlider(post.getPrincipalVectorScaling()));
-			slider_1.setToolTipText(SimLive.double2String(sliderToValue(slider_1.getSelection())*100.0)+"%");
+			slider_1.setSelection((int) 
+					(Math.log(post.getPrincipalVectorScaling())/Math.log(2.0)*slider_1.getPageIncrement()+(slider_1.getMaximum()-slider_1.getThumb())/2.0));
+			slider_1.setToolTipText(SimLive.double2String(post.getPrincipalVectorScaling()*100.0)+"%");
 		}
 
-	}
-	
-	private double sliderToValue(double value) {
-		return Math.pow(2.0, (value-50.0)/10.0);
-	}
-	
-	private double valueToSlider(double value) {
-		return Math.log(value)/Math.log(2.0)*10.0+50.0;
 	}
 	
 	@Override
