@@ -2234,7 +2234,7 @@ public class View extends GLCanvas {
 			ContactPair contactPair = (ContactPair) object;
 			for (int e = 0; e < contactPair.getOutline().size(); e++) {
 				Rod edge = (Rod) contactPair.getOutline().get(e);
-				if (isEdgeInBox(contactPair, edge, bCoords)) {
+				if (!selectedEdges.contains(edge) && isEdgeInBox(contactPair, edge, bCoords)) {
 					selectedEdges.add(edge);
 				}
 			}
@@ -5418,7 +5418,7 @@ public class View extends GLCanvas {
 			}
 	    	else if (scalarPlot != null) {
 				gl2.glDisable(GL2.GL_LIGHTING);
-				double value = scalarPlot.getValueForLineElement(element, t, SimLive.post.getPostIncrementID());
+				double value = scalarPlot.getValueForLineElement(element, t/nCoils, SimLive.post.getPostIncrementID());
 				gl2.glColor3fv(scalarPlot.getColor(value, SimLive.post.getNumberOfColors()), 0);
 			}
 			
