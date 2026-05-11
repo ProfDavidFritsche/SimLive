@@ -6113,8 +6113,11 @@ public class View extends GLCanvas {
 						rotZ = ((PlaneElement) e0).interpolateNodeValues(shapeFunctionValues0, rot[2]);
 					}
 					Matrix rot0 = new Matrix(new double[]{rotX, rotY, rotZ}, 3);
-					double factor = rot0.normF();
-					if (factor > 0) factor = Math.atan(SimLive.post.getScaling()*Math.tan(factor))/factor;
+					double factor = 1;
+					if (!SimLive.post.getSolution().getRefModel().settings.isLargeDisplacement) {
+						factor = rot0.normF();
+						if (factor > 0) factor = Math.atan(SimLive.post.getScaling()*Math.tan(factor))/factor;
+					}
 					Matrix Rg = Beam.rotationMatrixFromAngles(rot0.times(factor));
 					R = Rg.times(R);
 				}
