@@ -528,7 +528,6 @@ public class SimLive {
 				});
 				new MenuItem(menu, SWT.SEPARATOR);
 				MenuItem menuItem_importControl = new MenuItem(menu, SWT.NONE);
-				menuItem_importControl.setEnabled(mode != Mode.RESULTS);
 				menuItem_importControl.setText("Import Control...");
 				menuItem_importControl.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -547,6 +546,7 @@ public class SimLive {
 								messageBox.setText("Error");
 						        messageBox.setMessage("Import failed.");
 						        messageBox.open();
+						        reselectTabAndTree();
 							}
 							else {
 								MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION);
