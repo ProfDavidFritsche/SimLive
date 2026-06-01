@@ -821,7 +821,7 @@ public class View extends GLCanvas {
 						}
 						
 						if (e.button == 1 && !labelAdded && SimLive.select != Select.DISTANCE && SimLive.select != Select.ANGLE &&
-								selectedLabel == null && selectedMeasurement == null &&
+								SimLive.select != Select.LABEL && selectedLabel == null && selectedMeasurement == null &&
 								side == Side.NONE) {
 							
 							{
