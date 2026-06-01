@@ -546,7 +546,14 @@ public class SimLive {
 								messageBox.setText("Error");
 						        messageBox.setMessage("Import failed.");
 						        messageBox.open();
-						        reselectTabAndTree();
+						        if (mode == Mode.RESULTS) {
+						        	reselectTabAndTree();
+						        	tabFolderModel.setSelection(2);
+						        	tabFolderModel.notifyListeners(SWT.Selection, new Event());
+						        }
+						        else {
+						        	reselectTabAndTree();
+						        }
 							}
 							else {
 								MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION);
