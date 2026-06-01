@@ -547,9 +547,9 @@ public class SimLive {
 						        messageBox.setMessage("Import failed.");
 						        messageBox.open();
 						        if (mode == Mode.RESULTS) {
-						        	reselectTabAndTree();
-						        	tabFolderModel.setSelection(2);
-						        	tabFolderModel.notifyListeners(SWT.Selection, new Event());
+						        	mode = Mode.NONE;
+						        	model.updateModel(true);
+						        	mode = Mode.RESULTS;				        	
 						        }
 						        else {
 						        	reselectTabAndTree();
