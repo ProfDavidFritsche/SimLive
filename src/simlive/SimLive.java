@@ -541,7 +541,10 @@ public class SimLive {
 							if (!XML.importControlToModel(fileDialog.getFilterPath(), 
 									System.getProperty("file.separator")+fileDialog.getFileName())) {
 								model = oldModel;
-						        
+								for (int l = 0; l < view.labels.size(); l++) {
+						        	view.labels.get(l).updateElement();
+						        }
+								
 								MessageBox messageBox = new MessageBox(shell, SWT.ERROR);
 								messageBox.setText("Error");
 						        messageBox.setMessage("Import failed.");

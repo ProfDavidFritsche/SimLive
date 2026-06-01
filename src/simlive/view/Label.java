@@ -88,6 +88,12 @@ public class Label {
 		setPolygon(screenCoords, maxWidth, halfHeight);
 	}
 	
+	public void updateElement() {
+		if (element != null) {
+			element = SimLive.model.getElements().get(element.getID());
+		}
+	}
+	
 	public void updateText() {
 		if (element != null) {
 			if (SimLive.mode != Mode.RESULTS || SimLive.post.getScalarPlot() == null) {
