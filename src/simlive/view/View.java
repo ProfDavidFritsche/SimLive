@@ -219,10 +219,10 @@ public class View extends GLCanvas {
 		addMouseWheelListener(new MouseWheelListener() {
 			public void mouseScrolled(MouseEvent arg0) {
 				if (arg0.count > 0) /* zoom in */ {
-					zoomIn();
+					zoomIn(mousePos[0]-getSize().x/2, mousePos[1]-getSize().y/2);
 				}
 				else /* zoom out */ {
-					zoomOut();
+					zoomOut(mousePos[0]-getSize().x/2, mousePos[1]-getSize().y/2);
 				}
 				redraw();
 			}
@@ -1810,7 +1810,9 @@ public class View extends GLCanvas {
 		return null;
 	}
 	
-	public void zoomIn() {
+	public void zoomIn(double x, double y) {
+		move[0] -= (x - move[0]) * (SimLive.ZOOM_FACTOR - 1.0);
+		move[1] -= (y - move[1]) * (SimLive.ZOOM_FACTOR - 1.0);
 		if (perspective) {
 			double dist = Math.sqrt((cameraRefPos[0]-rotPoint[0])*(cameraRefPos[0]-rotPoint[0])+
     				(cameraRefPos[1]-rotPoint[1])*(cameraRefPos[1]-rotPoint[1])+
@@ -1834,7 +1836,9 @@ public class View extends GLCanvas {
 		}
 	}
 	
-	public void zoomOut() {
+	public void zoomOut(double x, double y) {
+		move[0] -= (x - move[0]) * (1.0/SimLive.ZOOM_FACTOR - 1.0);
+		move[1] -= (y - move[1]) * (1.0/SimLive.ZOOM_FACTOR - 1.0);
 		if (perspective) {
 			double dist = Math.sqrt((cameraRefPos[0]-rotPoint[0])*(cameraRefPos[0]-rotPoint[0])+
     				(cameraRefPos[1]-rotPoint[1])*(cameraRefPos[1]-rotPoint[1])+

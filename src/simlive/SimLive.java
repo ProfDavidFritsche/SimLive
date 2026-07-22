@@ -683,7 +683,7 @@ public class SimLive {
 				menuItem_zoomIn.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						view.zoomIn();
+						view.zoomIn(0, 0);
 						view.redraw();
 					}
 				});
@@ -692,7 +692,7 @@ public class SimLive {
 				menuItem_zoomOut.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						view.zoomOut();
+						view.zoomOut(0, 0);
 						view.redraw();
 					}
 				});
