@@ -1811,8 +1811,9 @@ public class View extends GLCanvas {
 	}
 	
 	public void zoomIn(double x, double y) {
-		move[0] -= (x - move[0]) * (SimLive.ZOOM_FACTOR - 1.0);
-		move[1] -= (y - move[1]) * (SimLive.ZOOM_FACTOR - 1.0);
+		double div = perspective ? (2.0-SimLive.ZOOM_FACTOR) : 1;
+		move[0] -= (x - move[0]) * (SimLive.ZOOM_FACTOR - 1.0) / div;
+		move[1] -= (y - move[1]) * (SimLive.ZOOM_FACTOR - 1.0) / div;
 		if (perspective) {
 			double dist = Math.sqrt((cameraRefPos[0]-rotPoint[0])*(cameraRefPos[0]-rotPoint[0])+
     				(cameraRefPos[1]-rotPoint[1])*(cameraRefPos[1]-rotPoint[1])+
