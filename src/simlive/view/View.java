@@ -1811,19 +1811,18 @@ public class View extends GLCanvas {
 	}
 	
 	public void zoomIn(double x, double y) {
-		double div = perspective ? (2.0-SimLive.ZOOM_FACTOR) : 1;
-		move[0] -= (x - move[0]) * (SimLive.ZOOM_FACTOR - 1.0) / div;
-		move[1] -= (y - move[1]) * (SimLive.ZOOM_FACTOR - 1.0) / div;
+		move[0] -= (x - move[0]) * (SimLive.ZOOM_FACTOR - 1.0);
+		move[1] -= (y - move[1]) * (SimLive.ZOOM_FACTOR - 1.0);
 		if (perspective) {
 			double dist = Math.sqrt((cameraRefPos[0]-rotPoint[0])*(cameraRefPos[0]-rotPoint[0])+
     				(cameraRefPos[1]-rotPoint[1])*(cameraRefPos[1]-rotPoint[1])+
     				(cameraRefPos[2]-rotPoint[2])*(cameraRefPos[2]-rotPoint[2]));
 			double nearClip = Settings.meshSize/100.0;
 			Matrix dir = R0.getMatrix(0, 2, 2, 2);
-			if (dist - (SimLive.ZOOM_FACTOR - 1.0)*dist > nearClip) {
-				cameraRefPos[0] = cameraRefPos[0] - (SimLive.ZOOM_FACTOR - 1.0)*dir.get(0, 0)*dist;
-				cameraRefPos[1] = cameraRefPos[1] - (SimLive.ZOOM_FACTOR - 1.0)*dir.get(1, 0)*dist;
-				cameraRefPos[2] = cameraRefPos[2] - (SimLive.ZOOM_FACTOR - 1.0)*dir.get(2, 0)*dist;
+			if (dist + (1.0/SimLive.ZOOM_FACTOR - 1.0)*dist > nearClip) {
+				cameraRefPos[0] = cameraRefPos[0] + (1.0/SimLive.ZOOM_FACTOR - 1.0)*dir.get(0, 0)*dist;
+				cameraRefPos[1] = cameraRefPos[1] + (1.0/SimLive.ZOOM_FACTOR - 1.0)*dir.get(1, 0)*dist;
+				cameraRefPos[2] = cameraRefPos[2] + (1.0/SimLive.ZOOM_FACTOR - 1.0)*dir.get(2, 0)*dist;
 			}
 			else {
 				//stop camera at nearClip
