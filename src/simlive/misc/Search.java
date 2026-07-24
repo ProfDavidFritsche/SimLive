@@ -36,7 +36,7 @@ public abstract class Search {
 	
 	public static Node getNodeAtPoint(int[] point, boolean isMouseDragged, Node moveNode) {
 		Search.node = null;
-		Search.zCoord = Double.MAX_VALUE;
+		Search.zCoord = 1.0;
 		// sets: 1st sets by selected node, 2nd selected sets, 3rd remaining sets
 		// isMouseDragged: only remaining sets
 		ArrayList<Set> sets = new ArrayList<Set>();
@@ -139,7 +139,7 @@ public abstract class Search {
 	
 	public static Element getElementAtPoint(boolean skipSelectedAndPinned, int[] point, int[] projectedPoint) {
 		Search.element = null;
-		Search.zCoord = Double.MAX_VALUE;
+		Search.zCoord = 1.0;
 		int[] viewport = View.getViewport();
 		double[] q = View.screenToModelCoordinates(point[0], point[1]);
 		Matrix q0 = new Matrix(new double[]{q[0], q[1], q[2]}, 3);
@@ -161,7 +161,7 @@ public abstract class Search {
 	}
 	
 	public static Element getSelectedOrPinnedElementAtPoint(int[] point, int[] projectedPoint) {
-		Search.zCoord = Double.MAX_VALUE;
+		Search.zCoord = 1.0;
 		int[] viewport = View.getViewport();
 		double[] q = View.screenToModelCoordinates(point[0], point[1]);
 		Matrix q0 = new Matrix(new double[]{q[0], q[1], q[2]}, 3);
@@ -204,7 +204,7 @@ public abstract class Search {
 	public static Part3d getPart3dAtPoint(int[] point) {
 		Search.part3d = null;
 		Search.facet3d = null;
-		//Search.zCoord = Double.MAX_VALUE;
+		//Search.zCoord = 1.0;
 		ArrayList<Part3d> parts3d = new ArrayList<Part3d>();
 		parts3d.addAll(SimLive.model.getParts3d());
 		parts3d.removeAll(SimLive.view.getSelectedParts3d());
