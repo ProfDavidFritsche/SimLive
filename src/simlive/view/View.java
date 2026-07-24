@@ -298,9 +298,10 @@ public class View extends GLCanvas {
 					Snap.initData(mousePos, false, false);
 				}				
 				if (mouseButton == 3)  /*move view*/  {
+					double factor = movePoint != null ? getSizeFactorPerspective(movePoint) : 1;
 					Snap.initData(mousePos, false, false);
-					move[0] += mousePosDelta[0];
-					move[1] += mousePosDelta[1];
+					move[0] += mousePosDelta[0]*factor;
+					move[1] += mousePosDelta[1]*factor;
 				}
 				if (mouseButton == 1 && selectionBox == null) /* move label */ {
 					if (selectedLabel != null) {
