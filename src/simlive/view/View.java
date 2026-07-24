@@ -1150,7 +1150,7 @@ public class View extends GLCanvas {
 				if (Snap.node != null && Snap.node.getID() <= Model.maxUsedNodeID) {
 					moveNode = Snap.node;
 				}
-				movePoint = Snap.coords3d;
+				if (Snap.coords3d != null) System.arraycopy(Snap.coords3d, 0, movePoint, 0, 3);
 				
 				mouseDown[0] = mousePos[0];
 				mouseDown[1] = mousePos[1];
