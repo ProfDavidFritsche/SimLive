@@ -64,7 +64,7 @@ public abstract class Snap {
 			}
 			
 			/* text to labelAtMousePos and statusBar */
-			if (!SimLive.view.isAnimationRunning() && !isMouseDragged && View.side == Side.NONE &&
+			if (!isMouseDragged && View.side == Side.NONE &&
 					SimLive.view.selectedLabel == null && SimLive.view.selectedMeasurement == null) {
 				String[] strArray = new String[2];
 				if (node != null && set != null) {
@@ -106,13 +106,11 @@ public abstract class Snap {
 			snapToGrid(mousePos);
 		}
 		
-		if (!SimLive.view.isAnimationRunning()) {
-			if (coords3d != null && !isMouseDragged) {
-				coordsToStatusBar(coords3d);
-			}
-			else {
-				coordsToStatusBar(coords2d);
-			}
+		if (coords3d != null && !isMouseDragged) {
+			coordsToStatusBar(coords3d);
+		}
+		else {
+			coordsToStatusBar(coords2d);
 		}
 	}
 	
