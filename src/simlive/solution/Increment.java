@@ -239,7 +239,9 @@ public class Increment {
 						if (fricForce > stickingForce) {
 							fricForce = stickingForce;
 						}
-						contacts[c].setSticking(false);
+						else {
+							contacts[c].setSticking(false);
+						}
 						
 						fricDir[0] = -v_tang[0]/v_tangential;
 						fricDir[1] = -v_tang[1]/v_tangential;
