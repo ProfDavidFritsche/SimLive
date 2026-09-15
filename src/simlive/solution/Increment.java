@@ -235,7 +235,7 @@ public class Increment {
 										
 					// from slip
 					if (v_tangential > SimLive.ZERO_TOL) {
-						double stickingForce = M_global.get(dof_n, dof_n)*v_tangential/timeStep;
+						double stickingForce = M_global.get(dof_n, dof_n)*v_tangential/(2.0*timeStep);
 						if (fricForce > stickingForce) {
 							fricForce = stickingForce;
 						}
