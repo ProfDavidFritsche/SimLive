@@ -19,7 +19,10 @@ import simlive.model.ContactPair.Type;
 public class Contact {
 	
 	private Element masterElement;
-	private double[] shapeFunctionValues;
+	private double[] r;
+	private double t;
+	private double[] contactPoint;
+	private double[] slip;
 	private double penetration;
 	private double[] norm;
 	private double frictionCoefficient;
@@ -29,13 +32,14 @@ public class Contact {
 	private static ArrayList<ArrayList<Integer[]>> edges;
 	private boolean isDeformableDeformable;
 
-	public Contact(Element masterElement, double penetration, double[] norm, double frictionCoefficient, double[] shapeFunctionValues, boolean isDeformableDeformable) {
+	public Contact(Element masterElement, double penetration, double[] norm, double frictionCoefficient, double[] contactPoint, double[] slip, boolean isDeformableDeformable) {
 		this.masterElement = masterElement;
 		this.penetration = penetration;
 		this.norm = norm;
 		this.frictionCoefficient = frictionCoefficient;
 		this.isSticking = true;
-		this.shapeFunctionValues = shapeFunctionValues;
+		this.contactPoint = contactPoint;
+		this.slip = slip;
 		this.isDeformableDeformable = isDeformableDeformable;
 	}
 
@@ -62,9 +66,80 @@ public class Contact {
 	public void setSticking(boolean isSticking) {
 		this.isSticking = isSticking;
 	}
+	
+	private double[] getContactPoint(Solution solution, Matrix u_global) {
+		if (isDeformableDeformable) {
+			int[] elemNodes = masterElement.getElementNodes();
+			if (!Model.twoDimensional) {			
+				double[] px = new double[elemNodes.length];
+				double[] py = new double[elemNodes.length];
+				Matrix u_elem = masterElement.globalToLocalVector(u_global);
+				Matrix Rr = ((PlaneElement) masterElement).getRr(solution.getRefModel().getNodes(), u_elem);
+				Matrix c0 = new Matrix(solution.getRefModel().getNodes().get(elemNodes[0]).getCoords(), 3);
+				c0.plusEquals(u_elem.getMatrix(0, 2, 0, 0));
+				for (int n = 1; n < elemNodes.length; n++) {
+					Matrix c = new Matrix(solution.getRefModel().getNodes().get(elemNodes[n]).getCoords(), 3);
+					c.plusEquals(u_elem.getMatrix(n*6, n*6+2, 0, 0));
+					c = Rr.transpose().times(c.minus(c0));
+					px[n] = c.get(0, 0);
+					py[n] = c.get(1, 0);
+				}
+				double[] shapeFunctionValues = ((PlaneElement) masterElement).getShapeFunctionValues(r[0], r[1]);
+				double[] localCoords = new double[3];
+				localCoords[0] = ((PlaneElement) masterElement).interpolateNodeValues(shapeFunctionValues, px);
+				localCoords[1] = ((PlaneElement) masterElement).interpolateNodeValues(shapeFunctionValues, py);
+			    return c0.plus(Rr.times(new Matrix(localCoords, 3))).getColumnPackedCopy();
+			}
+			else {
+				Matrix c0 = new Matrix(solution.getRefModel().getNodes().get(elemNodes[0]).getCoords(), 3);
+				int dof = solution.getDofOfNodeID(elemNodes[0]);
+				c0.plusEquals(u_global.getMatrix(dof, dof+2, 0, 0));
+				Matrix c1 = new Matrix(solution.getRefModel().getNodes().get(elemNodes[1]).getCoords(), 3);
+				dof = solution.getDofOfNodeID(elemNodes[1]);
+				c1.plusEquals(u_global.getMatrix(dof, dof+2, 0, 0));
+				return c0.plus(c1.minus(c0).times(t)).getColumnPackedCopy();
+			}
+		}
+		else {
+			return contactPoint;
+		}
+	}
+	
+	private void setR(Solution solution, double[] contactPoint, Matrix u_global) {
+		if (isDeformableDeformable) {
+			int[] elemNodes = masterElement.getElementNodes();			
+			double[] px = new double[elemNodes.length];
+			double[] py = new double[elemNodes.length];
+			Matrix u_elem = masterElement.globalToLocalVector(u_global);
+			Matrix Rr = ((PlaneElement) masterElement).getRr(solution.getRefModel().getNodes(), u_elem);
+			Matrix c0 = new Matrix(solution.getRefModel().getNodes().get(elemNodes[0]).getCoords(), 3);
+			c0.plusEquals(u_elem.getMatrix(0, 2, 0, 0));
+			for (int n = 1; n < elemNodes.length; n++) {
+				Matrix c = new Matrix(solution.getRefModel().getNodes().get(elemNodes[n]).getCoords(), 3);
+				c.plusEquals(u_elem.getMatrix(n*6, n*6+2, 0, 0));
+				c = Rr.transpose().times(c.minus(c0));
+				px[n] = c.get(0, 0);
+				py[n] = c.get(1, 0);
+			}
+			double[] p = Rr.transpose().times(new Matrix(contactPoint, 3).minus(c0)).getColumnPackedCopy();
+			r = ((PlaneElement) masterElement).getLocalFromGlobalCoordinates(p, px, py);
+		}
+	}
 
-	public double[] getShapeFunctionValues() {
-		return shapeFunctionValues;
+	private void setT(double t) {
+		this.t = t;
+	}
+	
+	public double[] getR() {
+		return r;
+	}
+	
+	public double getT() {
+		return t;
+	}
+	
+	public double[] getSlip() {
+		return slip;
 	}
 	
 	public boolean isDeformableDeformable() {
@@ -368,17 +443,28 @@ public class Contact {
 					(contacts[slaveNodeID] != null && ((contactForce <= 0.0 && C_global != null) ||
 					 noSeparation))) {
 					
-					double[] shapeFunctionValues = null;
-					if (isDeformableDeformable) {
-						if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking && contacts[slaveNodeID].getMasterElement() == masterElement0) {
-							shapeFunctionValues = contacts[slaveNodeID].getShapeFunctionValues();
+					if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking) {
+						double[] contactPoint = contacts[slaveNodeID].getContactPoint(solution, u_global);
+						Matrix s = new Matrix(coords, 3).minus(new Matrix(contactPoint, 3));
+						Matrix norm0 = new Matrix(masterNormals0, 3);
+						Matrix dir0 = new Matrix(new double[]{1, 0, 0}, 3).crossProduct(norm0);
+						if (dir0.normF() < SimLive.ZERO_TOL) {
+							dir0 = new Matrix(new double[]{0, 1, 0}, 3).crossProduct(norm0);
 						}
-						else {
-							double[] r = ((PlaneElement) masterElement0).getLocalFromGlobalCoordinates(coords);
-							shapeFunctionValues = ((PlaneElement) masterElement0).getShapeFunctionValues(r[0], r[1]);
-						}
+						Matrix dir1 = norm0.crossProduct(dir0);
+						dir0.timesEquals(1.0/dir0.normF());
+						dir1.timesEquals(1.0/dir1.normF());
+						double[] slip = new double[2];
+						slip[0] = s.dotProduct(dir0);
+						slip[1] = s.dotProduct(dir1);
+						contacts[slaveNodeID].slip = slip;
+						contacts[slaveNodeID].penetration = maxPenetration;
+						contacts[slaveNodeID].norm = masterNormals0;
 					}
-					contacts[slaveNodeID] = new Contact(masterElement0, maxPenetration, masterNormals0, frictionCoefficient, shapeFunctionValues, isDeformableDeformable);
+					else {
+						contacts[slaveNodeID] = new Contact(masterElement0, maxPenetration, masterNormals0, frictionCoefficient, coords, new double[2], isDeformableDeformable);
+						contacts[slaveNodeID].setR(solution, coords, u_global);
+					}
 				}
 				else {
 					contacts[slaveNodeID] = null;
@@ -501,16 +587,28 @@ public class Contact {
 						(contacts[slaveNodeID] != null && ((contactForce <= 0.0 && C_global != null) ||
 						 noSeparation))) {
 					
-					double[] shapeFunctionValues = null;
-					if (isDeformableDeformable) {
-						if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking && contacts[slaveNodeID].getMasterElement() == masterElement0) {
-							shapeFunctionValues = contacts[slaveNodeID].getShapeFunctionValues();
+					if (contacts[slaveNodeID] != null && contacts[slaveNodeID].isSticking) {
+						double[] contactPoint = contacts[slaveNodeID].getContactPoint(solution, u_global);
+						Matrix s = new Matrix(coords, 3).minus(new Matrix(contactPoint, 3));
+						Matrix norm0 = new Matrix(edgeNormal0, 3);
+						Matrix dir0 = new Matrix(new double[]{1, 0, 0}, 3).crossProduct(norm0);
+						if (dir0.normF() < SimLive.ZERO_TOL) {
+							dir0 = new Matrix(new double[]{0, 1, 0}, 3).crossProduct(norm0);
 						}
-						else {
-							shapeFunctionValues = ((LineElement) masterElement0).getShapeFunctionValues(edgeT);
-						}
+						Matrix dir1 = norm0.crossProduct(dir0);
+						//dir0.timesEquals(1.0/dir0.normF());
+						dir1.timesEquals(1.0/dir1.normF());
+						double[] slip = new double[2];
+						//slip[0] = s.dotProduct(dir0);
+						slip[1] = s.dotProduct(dir1);
+						contacts[slaveNodeID].slip = slip;
+						contacts[slaveNodeID].penetration = maxPenetration;
+						contacts[slaveNodeID].norm = edgeNormal0;
 					}
-					contacts[slaveNodeID] = new Contact(masterElement0, maxPenetration, edgeNormal0, frictionCoefficient, shapeFunctionValues, isDeformableDeformable);
+					else {
+						contacts[slaveNodeID] = new Contact(masterElement0, maxPenetration, edgeNormal0, frictionCoefficient, coords, new double[2], isDeformableDeformable);
+						contacts[slaveNodeID].setT(edgeT);
+					}					
 				}
 				else {
 					contacts[slaveNodeID] = null;

@@ -168,7 +168,9 @@ public class Increment {
 		for (int c = 0; c < contacts.length; c++) {
 			if (contacts[c] != null) {
 				Element masterElement = contacts[c].getMasterElement();
-				double[] shapeFunctionValues = contacts[c].getShapeFunctionValues();
+				double[] shapeFunctionValues = contacts[c].isDeformableDeformable() ? !Model.twoDimensional ?
+					((PlaneElement) masterElement).getShapeFunctionValues(contacts[c].getR()[0], contacts[c].getR()[1]) :
+					((LineElement) masterElement).getShapeFunctionValues(contacts[c].getT()) : null;
 				
 				int[] element_nodes = masterElement.getElementNodes();
 				int dof_n = solution.getDofOfNodeID(c);
@@ -234,8 +236,7 @@ public class Increment {
 					double v_tangential = Math.sqrt(v_tang[0]*v_tang[0]+v_tang[1]*v_tang[1]+v_tang[2]*v_tang[2]);
 										
 					// from slip
-					if (v_tangential > SimLive.ZERO_TOL) {
-						fricForce = Math.min(fricForce, M_global.get(dof_n, dof_n)*v_tangential/(2.0*timeStep));
+					if (fricForce < M_global.get(dof_n, dof_n)*v_tangential/(2.0*timeStep)) {
 						contacts[c].setSticking(false);
 						
 						fricDir[0] = -v_tang[0]/v_tangential;
@@ -663,7 +664,9 @@ public class Increment {
 		for (int c = 0; c < contacts.length; c++) {
 			if (contacts[c] != null) {
 				Element masterElement = contacts[c].getMasterElement();
-				double[] shapeFunctionValues = contacts[c].getShapeFunctionValues();
+				double[] shapeFunctionValues = contacts[c].isDeformableDeformable() ? !Model.twoDimensional ?
+					((PlaneElement) masterElement).getShapeFunctionValues(contacts[c].getR()[0], contacts[c].getR()[1]) :
+					((LineElement) masterElement).getShapeFunctionValues(contacts[c].getT()) : null;
 				
 				Matrix G_row = new Matrix(1, nDofs);
 				int[] element_nodes = masterElement.getElementNodes();
@@ -694,6 +697,8 @@ public class Increment {
 						dir0 = new Matrix(new double[]{0, 1, 0}, 3).crossProduct(norm0);
 					}
 					Matrix dir1 = norm0.crossProduct(dir0);
+					dir0.timesEquals(1.0/dir0.normF());
+					dir1.timesEquals(1.0/dir1.normF());
 					
 					int refDof = solution.getDofOfNodeID(c);
 					
@@ -1164,9 +1169,14 @@ public class Increment {
 				g_row.set(0, 0, penetration);
 				g = addRowToMatrix(g, g_row);
 				if (contacts[c].isSticking()) {
-					g_row = new Matrix(1, 1);
-					if (!Model.twoDimensional) g = addRowToMatrix(g, g_row);
-					g = addRowToMatrix(g, g_row);
+					if (!Model.twoDimensional) {
+						Matrix g_row0 = new Matrix(1, 1);
+						g_row0.set(0, 0, contacts[c].getSlip()[0]);
+						g = addRowToMatrix(g, g_row0);
+					}
+					Matrix g_row1 = new Matrix(1, 1);
+					g_row1.set(0, 0, contacts[c].getSlip()[1]);
+					g = addRowToMatrix(g, g_row1);
 				}
 			}
 		}
