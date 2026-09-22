@@ -4940,33 +4940,23 @@ public class View extends GLCanvas {
 	private void renderPlaneElementOrientation(GL2 gl2, GLU glu, Element element, double arrowSize, float[] uniColor,
 			GLUquadric inside, GLUquadric outside, ContactPair contactPair) {
 		double halfThickness = contactPair != null ? 0 : ((PlaneElement) element).getThickness()/2.0;
-		double[] center = new double[3];
+		double[] center = null;
 		int[] elemNodes = element.getElementNodes();
-		double[][] coords = new double[elemNodes.length][];
-		for (int i = 0; i < elemNodes.length; i++) {
-			coords[i] = contactPair != null ?
-					contactPair.getRigidNodes().get(elemNodes[i]).getCoords() :
-					View.getCoordsWithScaledDisp(elemNodes[i]);
-			center[0] += coords[i][0];
-			center[1] += coords[i][1];
-			center[2] += coords[i][2];
+		if (contactPair == null) {
+			center = elemNodes.length > 3 ?
+					((PlaneElement) element).getGlobalFromLocalCoordinates(0, 0) :
+					((PlaneElement) element).getGlobalFromLocalCoordinates(1.0/3.0, 1.0/3.0);
 		}
-		center[0] /= elemNodes.length;
-		center[1] /= elemNodes.length;
-		center[2] /= elemNodes.length;
-		Matrix R = contactPair != null ? ((PlaneElement) element).getR0() : new Matrix(Rr[element.getID()]);
-		if (elemNodes.length > 3) {
-			double[] n = new double[]{R.get(0, 2), R.get(1, 2), R.get(2, 2)};
-			center = GeomUtility.getIntersectionLinePlane(center, n, coords[0], coords[1], coords[3]);
-			Matrix Rt = R.transpose();
-			double[] c0 = Rt.times(new Matrix(coords[0], 3)).getColumnPackedCopy();
-			double[] c1 = Rt.times(new Matrix(coords[1], 3)).getColumnPackedCopy();
-			double[] c2 = Rt.times(new Matrix(coords[3], 3)).getColumnPackedCopy();
-			double[] c = Rt.times(new Matrix(center, 3)).getColumnPackedCopy();
-			if (!GeomUtility.isPointInTriangle(c0, c1, c2, c, null)) {
-				center = GeomUtility.getIntersectionLinePlane(center, n, coords[1], coords[2], coords[3]);
+		else {
+			center = new double[3];
+			for (int i = 0; i < elemNodes.length; i++) {
+				double[] coords = contactPair.getRigidNodes().get(elemNodes[i]).getCoords();
+				center[0] += coords[0]/elemNodes.length;
+				center[1] += coords[1]/elemNodes.length;
+				center[2] += coords[2]/elemNodes.length;
 			}
 		}
+		Matrix R = contactPair != null ? ((PlaneElement) element).getR0() : new Matrix(Rr[element.getID()]);
 		gl2.glPushMatrix();
 		gl2.glTranslated(center[0]+R.get(0, 2)*halfThickness, center[1]+R.get(1, 2)*halfThickness,
 				center[2]+R.get(2, 2)*halfThickness);

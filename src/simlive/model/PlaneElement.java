@@ -279,9 +279,12 @@ public abstract class PlaneElement extends Element {
 		catch (Exception e) {
 			Rr = R0;
 		}
-		Matrix c0 = new Matrix(View.getCoordsWithScaledDisp(elementNodes[0]), 3);
+		double[][] nodeCoords = new double[elementNodes.length][];
+		nodeCoords[0] = View.getCoordsWithScaledDisp(elementNodes[0]);
+		Matrix c0 = new Matrix(nodeCoords[0], 3);
 		for (int n = 1; n < elementNodes.length; n++) {
-			Matrix c = new Matrix(View.getCoordsWithScaledDisp(elementNodes[n]), 3);
+			nodeCoords[n] = View.getCoordsWithScaledDisp(elementNodes[n]);
+			Matrix c = new Matrix(nodeCoords[n], 3);
 			c = Rr.transpose().times(c.minus(c0));
 			px[n] = c.get(0, 0);
 			py[n] = c.get(1, 0);
@@ -292,7 +295,17 @@ public abstract class PlaneElement extends Element {
 		localCoords[0] = interpolateNodeValues(shapeFunctionValues, px);
 		localCoords[1] = interpolateNodeValues(shapeFunctionValues, py);
 		localCoords[2] = interpolateNodeValues(shapeFunctionValues, pz);
-		return c0.plus(Rr.times(new Matrix(localCoords, 3))).getColumnPackedCopy();
+		double[] coords = c0.plus(Rr.times(new Matrix(localCoords, 3))).getColumnPackedCopy();
+		if (elementNodes.length > 3 && Math.abs(r) < 1.0 && Math.abs(s) < 1.0) {
+			double[] n = new double[]{Rr.get(0, 2), Rr.get(1, 2), Rr.get(2, 2)};			
+			if (GeomUtility.isPointInTriangle3d(nodeCoords[0], nodeCoords[1], nodeCoords[3], coords)) {
+				coords = GeomUtility.getIntersectionLinePlane(coords, n, nodeCoords[0], nodeCoords[1], nodeCoords[3]);
+			}
+			else {
+				coords = GeomUtility.getIntersectionLinePlane(coords, n, nodeCoords[1], nodeCoords[2], nodeCoords[3]);
+			}
+		}
+		return coords;
 	}
 	
 	public double[] getLocalFromGlobalCoordinates(double[] p) {
