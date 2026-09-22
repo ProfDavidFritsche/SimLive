@@ -271,6 +271,7 @@ public abstract class PlaneElement extends Element {
 	public double[] getGlobalFromLocalCoordinates(double r, double s) {
 		double[] px = new double[elementNodes.length];
 		double[] py = new double[elementNodes.length];
+		double[] pz = new double[elementNodes.length];
 		Matrix Rr = null;
 		try {
 			Rr = new Matrix(View.Rr[id]);
@@ -284,12 +285,14 @@ public abstract class PlaneElement extends Element {
 			c = Rr.transpose().times(c.minus(c0));
 			px[n] = c.get(0, 0);
 			py[n] = c.get(1, 0);
+			pz[n] = c.get(2, 0);
 		}
 		double[] shapeFunctionValues = getShapeFunctionValues(r, s);
 		double[] localCoords = new double[3];
 		localCoords[0] = interpolateNodeValues(shapeFunctionValues, px);
 		localCoords[1] = interpolateNodeValues(shapeFunctionValues, py);
-	    return c0.plus(Rr.times(new Matrix(localCoords, 3))).getColumnPackedCopy();
+		localCoords[2] = interpolateNodeValues(shapeFunctionValues, pz);
+		return c0.plus(Rr.times(new Matrix(localCoords, 3))).getColumnPackedCopy();
 	}
 	
 	public double[] getLocalFromGlobalCoordinates(double[] p) {
