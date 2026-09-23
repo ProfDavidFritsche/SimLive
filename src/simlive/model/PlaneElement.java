@@ -296,9 +296,9 @@ public abstract class PlaneElement extends Element {
 		localCoords[1] = interpolateNodeValues(shapeFunctionValues, py);
 		localCoords[2] = interpolateNodeValues(shapeFunctionValues, pz);
 		double[] coords = c0.plus(Rr.times(new Matrix(localCoords, 3))).getColumnPackedCopy();
-		if (elementNodes.length > 3 && Math.abs(r) < 1.0 && Math.abs(s) < 1.0) {
+		if (elementNodes.length > 3) {
 			double[] n = new double[]{Rr.get(0, 2), Rr.get(1, 2), Rr.get(2, 2)};			
-			if (GeomUtility.isPointInTriangle3d(nodeCoords[0], nodeCoords[1], nodeCoords[3], coords)) {
+			if (r < -s) {
 				coords = GeomUtility.getIntersectionLinePlane(coords, n, nodeCoords[0], nodeCoords[1], nodeCoords[3]);
 			}
 			else {
@@ -390,25 +390,25 @@ public abstract class PlaneElement extends Element {
 		}
 		double[] dir = View.getViewDirection(modelCoords2d);
 		if (dir[0]*norm[0]+dir[1]*norm[1]+dir[2]*norm[2] > 0.0) {
-			double[] intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coordsTop[0], coordsTop[1], coordsTop[2]);
-			if (GeomUtility.isPointInTriangle3d(coordsTop[0], coordsTop[1], coordsTop[2], intersect)) {
+			double[] intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coordsTop[0], coordsTop[1], coordsTop[elementNodes.length-1]);
+			if (GeomUtility.isPointInTriangle3d(coordsTop[0], coordsTop[1], coordsTop[elementNodes.length-1], intersect)) {
 				return intersect;
 			}
 			if (elementNodes.length > 3) {
-				intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coordsTop[0], coordsTop[2], coordsTop[3]);
-				if (GeomUtility.isPointInTriangle3d(coordsTop[0], coordsTop[2], coordsTop[3], intersect)) {
+				intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coordsTop[1], coordsTop[2], coordsTop[3]);
+				if (GeomUtility.isPointInTriangle3d(coordsTop[1], coordsTop[2], coordsTop[3], intersect)) {
 					return intersect;
 				}
 			}
 		}
 		else {
-			double[] intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coordsBottom[0], coordsBottom[1], coordsBottom[2]);
-			if (GeomUtility.isPointInTriangle3d(coordsBottom[0], coordsBottom[1], coordsBottom[2], intersect)) {
+			double[] intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coordsBottom[0], coordsBottom[1], coordsBottom[elementNodes.length-1]);
+			if (GeomUtility.isPointInTriangle3d(coordsBottom[0], coordsBottom[1], coordsBottom[elementNodes.length-1], intersect)) {
 				return intersect;
 			}
 			if (elementNodes.length > 3) {
-				intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coordsBottom[0], coordsBottom[2], coordsBottom[3]);
-				if (GeomUtility.isPointInTriangle3d(coordsBottom[0], coordsBottom[2], coordsBottom[3], intersect)) {
+				intersect = GeomUtility.getIntersectionLinePlane(modelCoords2d, dir, coordsBottom[1], coordsBottom[2], coordsBottom[3]);
+				if (GeomUtility.isPointInTriangle3d(coordsBottom[1], coordsBottom[2], coordsBottom[3], intersect)) {
 					return intersect;
 				}
 			}
