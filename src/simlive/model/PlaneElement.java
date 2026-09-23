@@ -296,7 +296,7 @@ public abstract class PlaneElement extends Element {
 		localCoords[1] = interpolateNodeValues(shapeFunctionValues, py);
 		localCoords[2] = interpolateNodeValues(shapeFunctionValues, pz);
 		double[] coords = c0.plus(Rr.times(new Matrix(localCoords, 3))).getColumnPackedCopy();
-		if (elementNodes.length > 3) {
+		if (elementNodes.length > 3 && Math.abs(r) < 1.0 && Math.abs(s) < 1.0) {
 			double[] n = new double[]{Rr.get(0, 2), Rr.get(1, 2), Rr.get(2, 2)};			
 			if (GeomUtility.isPointInTriangle3d(nodeCoords[0], nodeCoords[1], nodeCoords[3], coords)) {
 				coords = GeomUtility.getIntersectionLinePlane(coords, n, nodeCoords[0], nodeCoords[1], nodeCoords[3]);
