@@ -141,12 +141,13 @@ public class Beam extends LineElement {
 		return D;
 	}
 	
-	public static Matrix getTInv(Matrix Psi) {
+	public static Matrix getT(Matrix Psi) {
 		double psi = Psi.normF();
 		if (psi > 0.0) {
-			double f1 = (psi/2.0)/Math.tan(psi/2.0);
+			double f1 = Math.sin(psi)/psi;
+			double f2 = Math.sin(psi/2.0)/(psi/2.0);
 			Matrix u = Psi.times(1.0/psi);
-			return Matrix.identity(3, 3).times(f1).plus(u.times(u.transpose()).times(1.0-f1)).minus(getSkewSymmetricMatrix(Psi).times(0.5));
+			return Matrix.identity(3, 3).times(f1).plus(u.times(u.transpose()).times(1.0-f1)).minus(getSkewSymmetricMatrix(Psi).times(0.5*f2*f2));
 		}
 		else {
 			return Matrix.identity(3, 3);
