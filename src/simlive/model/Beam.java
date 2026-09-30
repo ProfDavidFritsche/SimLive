@@ -155,27 +155,10 @@ public class Beam extends LineElement {
 	}
 	
 	public static Matrix getTDot(Matrix Psi, Matrix PsiDot) {
-		double psi = Psi.normF();
-		if (psi > 0.0) {
-			double f1 = Math.cos(psi)/psi;
-			double f2 = Math.sin(psi)/(psi*psi);
-			double f3 = Math.sin(psi/2.0)/(psi/2.0);
-			double a1 = f1-f2;
-			double a2 = 1.0/psi-f2;
-			double a3 = 3.0*f2-f1-2.0/psi;
-			double a4 = 1.0/psi*f3*f3-f2;
-			double a5 = -0.5*f3*f3;
-			Matrix e = Psi.times(1.0/psi);
-			double dotProduct = PsiDot.dotProduct(e);
-			return Matrix.identity(3, 3).times(dotProduct*a1).plus(
-					PsiDot.times(e.transpose()).plus(e.times(PsiDot.transpose())).times(a2)).plus(
-					e.times(e.transpose()).times(dotProduct*a3)).plus(
-					getSkewSymmetricMatrix(Psi).times(dotProduct*a4)).plus(
-					getSkewSymmetricMatrix(PsiDot).times(a5));
-		}
-		else {
-			return getSkewSymmetricMatrix(PsiDot).times(-0.5);
-		}
+		Matrix Psi_x = Beam.getSkewSymmetricMatrix(Psi);
+		Matrix PsiDot_x = Beam.getSkewSymmetricMatrix(PsiDot);
+		return PsiDot_x.times(-0.5).plus(
+				PsiDot_x.times(Psi_x).plus(Psi_x.times(PsiDot_x)).times(1.0/6.0));
 	}
 	
 	private Matrix getBMatrix(Matrix u_elem, Matrix Rr, Matrix r1, double length) {

@@ -589,7 +589,7 @@ public class Solution {
 						Matrix Psi = u_global.getMatrix(dof+3, dof+5, 0, 0);
 						Matrix T = Beam.getT(Psi);						
 						Matrix TDot = Beam.getTDot(Psi, PsiDot);
-						a_constr.setMatrix(dof+3, 0, T.times(PsiDotDot).minus(TDot.times(PsiDot)));
+						a_constr.setMatrix(dof+3, 0, T.times(PsiDotDot).plus(TDot.times(PsiDot)));
 					}
 				}
 			}
