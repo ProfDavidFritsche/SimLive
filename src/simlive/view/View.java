@@ -2858,31 +2858,20 @@ public class View extends GLCanvas {
 	public void startAnimation() {
 		Timer timer = new Timer();
 		animation = new TimerTask() {			
-			double incrementID;
+			double incrementID = SimLive.post.getPostIncrementID();
 			public void run() {
 				if (!SimLive.shell.isDisposed()) {
 					SimLive.shell.getDisplay().syncExec(new Runnable() {
 						public void run() {
 							if (isAnimationRunning()) {
-								if ((int) incrementID != SimLive.post.getPostIncrementID()) {
-									incrementID = SimLive.post.getPostIncrementID();
-								}
-								if (SimLive.post.isReverseAnimation()) {
-									if (SimLive.post.getPostIncrementID() == SimLive.post.getSolution().getNumberOfIncrements()) {
-										backwards = true;
-									}
-									if (SimLive.post.getPostIncrementID() == 0) {
-										backwards = false;
-									}
-								}
 								if (backwards) {
 									incrementID -= SimLive.post.getAnimationSpeed();
-									SimLive.post.previousPostIncrementID(incrementID);
 								}
 								else {
 									incrementID += SimLive.post.getAnimationSpeed();
-									SimLive.post.nextPostIncrementID(incrementID);
 								}
+								incrementID = SimLive.post.nextPostIncrementID(incrementID);
+								
 								((ResultsDialog) SimLive.dialogArea).setSliderValue(SimLive.post.getPostIncrementID());
 								SimLive.post.updateMinMaxLabels();
 								redraw();

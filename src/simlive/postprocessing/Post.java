@@ -241,17 +241,24 @@ public class Post {
 		this.postIncrementID = postIncrementID;
 	}
 
-	public void nextPostIncrementID(double incrementID) {
-		if (incrementID-animationSpeed == solution.getNumberOfIncrements()) {
-			postIncrementID = 0;
+	public double nextPostIncrementID(double incrementID) {
+		postIncrementID = (int) incrementID;
+		if (postIncrementID > solution.getNumberOfIncrements()) {
+			if (isReverseAnimation) {
+				postIncrementID = solution.getNumberOfIncrements();
+				SimLive.view.backwards = !SimLive.view.backwards;				
+			}
+			else {
+				postIncrementID = 0;				
+			}
+			return postIncrementID;
 		}
-		else {
-			postIncrementID = Math.min((int) incrementID, solution.getNumberOfIncrements());
+		if (incrementID < 0) {
+			postIncrementID = 1;
+			SimLive.view.backwards = !SimLive.view.backwards;
+			return postIncrementID;
 		}
-	}
-	
-	public void previousPostIncrementID(double incrementID) {
-		postIncrementID = Math.max((int) incrementID, 0);
+		return incrementID;
 	}
 	
 	public Increment getPostIncrement() {
