@@ -2864,13 +2864,13 @@ public class View extends GLCanvas {
 					SimLive.shell.getDisplay().syncExec(new Runnable() {
 						public void run() {
 							if (isAnimationRunning()) {
+								double delta = Math.min(SimLive.post.getAnimationSpeed(), SimLive.post.getSolution().getNumberOfIncrements());
 								if (backwards) {
-									incrementID -= SimLive.post.getAnimationSpeed();
+									incrementID = SimLive.post.nextPostIncrementID(incrementID-delta);
 								}
 								else {
-									incrementID += SimLive.post.getAnimationSpeed();
+									incrementID = SimLive.post.nextPostIncrementID(incrementID+delta);
 								}
-								incrementID = SimLive.post.nextPostIncrementID(incrementID);
 								
 								((ResultsDialog) SimLive.dialogArea).setSliderValue(SimLive.post.getPostIncrementID());
 								SimLive.post.updateMinMaxLabels();
