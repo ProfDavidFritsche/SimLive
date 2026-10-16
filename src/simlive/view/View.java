@@ -3284,15 +3284,12 @@ public class View extends GLCanvas {
 					connectParts3d.addAll(((Connector3d) objects.get(i)).getParts3d());
 				}
 			}
-			connectParts3d.removeAll(selectedParts3d);
 		}
 		
 		for (int p = 0; p < SimLive.model.getParts3d().size(); p++) {
 	    	Part3d part3d = SimLive.model.getParts3d().get(p);
-	    	if (!connectParts3d.contains(part3d)) {
-		    	switchSingleDoubleSided(gl2, part3d.doubleSided);
-				renderPart3d(gl2, part3d, scaling, selectedParts3d.contains(part3d), false, false);
-	    	}
+	    	switchSingleDoubleSided(gl2, part3d.doubleSided);
+			renderPart3d(gl2, part3d, scaling, selectedParts3d.contains(part3d), connectParts3d.contains(part3d), false);
 	    }
 		gl2.glEnable(GL2.GL_LIGHTING);
 		switchSingleDoubleSided(gl2, false);
@@ -3366,15 +3363,13 @@ public class View extends GLCanvas {
 		}
 		
 		ArrayList<Set> defaultSets = new ArrayList<Set>();
-		ArrayList<Set> pinnedAndConnectedSets = new ArrayList<Set>();
+		ArrayList<Set> pinnedSets = new ArrayList<Set>();
 		for (int s = 0; s < SimLive.model.getSets().size(); s++) {
 			Set set = SimLive.model.getSets().get(s);
 			if (set.view == Set.View.DEFAULT ||
 					(set.view == Set.View.HIDDEN && selectedSets.contains(set))) defaultSets.add(set);
-			if (set.view == Set.View.PINNED) pinnedAndConnectedSets.add(set);
+			if (set.view == Set.View.PINNED) pinnedSets.add(set);
 		}
-		pinnedAndConnectedSets.addAll(connectSets0);
-		pinnedAndConnectedSets.addAll(connectSets1);
 		defaultSets.removeAll(connectSets0);
 		defaultSets.removeAll(connectSets1);
 		
@@ -3480,10 +3475,9 @@ public class View extends GLCanvas {
     	gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
     	for (int p = 0; p < connectParts3d.size(); p++) {
 	    	Part3d part3d = connectParts3d.get(p);
-	    	switchSingleDoubleSided(gl2, part3d.doubleSided);
-			renderPart3d(gl2, part3d, scaling, false, true, false);
+	    	renderPart3d(gl2, part3d, scaling, false, true, true);
 	    }
-    	switchSingleDoubleSided(gl2, false);
+    	gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
     	for (int p = 0; p < selectedParts3d.size(); p++) {
 	    	Part3d part3d = selectedParts3d.get(p);
 	    	renderPart3d(gl2, part3d, scaling, false, false, true);
@@ -3492,12 +3486,16 @@ public class View extends GLCanvas {
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
     	/* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
-	    		lineElementRadius, scaling, zoom, pinnedAndConnectedSets, objects, false);
+	    		lineElementRadius, scaling, zoom, pinnedSets, objects, false);
 	    
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	    /* sets */
+	    ArrayList<Set> outlineSets = new ArrayList<Set>();
+	    outlineSets.addAll(selectedSets);
+	    outlineSets.addAll(connectSets0);
+	    outlineSets.addAll(connectSets1);	    
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
-	    		lineElementRadius, scaling, zoom, selectedSets, objects, true);
+	    		lineElementRadius, scaling, zoom, outlineSets, objects, true);
 	    
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);		
 	    /* edges */
@@ -4580,8 +4578,9 @@ public class View extends GLCanvas {
     			viewDir = R0.times(R).getMatrix(0, 2, 2, 2).getColumnPackedCopy();
     		}
     		gl2.glDisable(GL2.GL_LIGHTING);
-    		setLineColorAndWidth(gl2, onlyOutline);
-	    	for (int f = 0; f < part3d.getNrFacets(); f++) {
+    		setLineColorAndWidth(gl2, SimLive.COLOR_SELECTION, onlyOutline);
+    		if (connected && onlyOutline) gl2.glColor3fv(SimLive.COLOR_DARK_RED, 0);
+			for (int f = 0; f < part3d.getNrFacets(); f++) {
 	    		int[] facet = part3d.getFacet(f).getIndices();
 	    		if (perspective) {
 	    			viewDir[0] = cameraRefPos[0]-vertexCoords[facet[0]][0];
@@ -4672,7 +4671,7 @@ public class View extends GLCanvas {
 			edgeNormal[i][2] = diff[0]*top[i][1]-diff[1]*top[i][0];
 		}
 		gl2.glDisable(GL2.GL_LIGHTING);
-		setLineColorAndWidth(gl2, onlyOutline);
+		setLineColorAndWidth(gl2, uniColor, onlyOutline);
 		for (int i = 0; i < elemNodes.length; i++) {
     		int j = (i+1)%elemNodes.length;
 			boolean outline = SimLive.contains(outlineEdge[elemNodes[i]], elemNodes[j]) ||
@@ -5139,9 +5138,11 @@ public class View extends GLCanvas {
     	}
 	}
 	
-	private void setLineColorAndWidth(GL2 gl2, boolean onlyOutline) {
+	private void setLineColorAndWidth(GL2 gl2, float[] uniColor, boolean onlyOutline) {
 		if (onlyOutline) {
-			gl2.glColor3fv(SimLive.COLOR_DARK_SELECTION, 0);
+			if (uniColor == SimLive.COLOR_SELECTION) gl2.glColor3fv(SimLive.COLOR_DARK_SELECTION, 0);
+			if (uniColor == SimLive.COLOR_RED) gl2.glColor3fv(SimLive.COLOR_DARK_RED, 0);
+			if (uniColor == SimLive.COLOR_BLUE) gl2.glColor3fv(SimLive.COLOR_DARK_BLUE, 0);
 			gl2.glLineWidth(2);
 		}
 		else {
@@ -5165,7 +5166,7 @@ public class View extends GLCanvas {
 			gl2.glTranslated(coords[0], coords[1], coords[2]);
 			if (scalarPlot != null || uniColor != null) {
 				gl2.glDisable(GL2.GL_LIGHTING);
-				setLineColorAndWidth(gl2, onlyOutline);
+				setLineColorAndWidth(gl2, uniColor, onlyOutline);
 				drawSphereOutline(gl2, SimLive.POINT_MASS_RADIUS*2.0/width/zoom, coords);
 				if (uniColor != null) {
 					if (existing) gl2.glColor3fv(uniColor, 0);
@@ -5360,7 +5361,7 @@ public class View extends GLCanvas {
 	    	}
     		
     		gl2.glDisable(GL2.GL_LIGHTING);
-    		setLineColorAndWidth(gl2, onlyOutline);
+    		setLineColorAndWidth(gl2, uniColor, onlyOutline);
     		if (!cylindric) {
     			drawLineElementSectionOutline(gl2, element, p[i], p[i+1], deltaL, start, end);
     		}
@@ -5432,7 +5433,7 @@ public class View extends GLCanvas {
 			
 			gl2.glPushMatrix();
 			gl2.glRotated(-90, 0, 1, 0);
-			setLineColorAndWidth(gl2, onlyOutline);
+			setLineColorAndWidth(gl2, uniColor, onlyOutline);
 			gl2.glDisable(GL2.GL_LIGHTING);
 			drawCylinderOutline(gl2, lineElementRadius/2.0, sliceLength);
 			gl2.glEnable(GL2.GL_LIGHTING);
