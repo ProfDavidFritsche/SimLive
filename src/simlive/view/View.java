@@ -3362,20 +3362,20 @@ public class View extends GLCanvas {
     		gl2.glEnable(GL2.GL_LIGHTING);
 		}
 		
-		ArrayList<Set> selectedAndDefaultSets = new ArrayList<Set>();
 		ArrayList<Set> pinnedAndConnectedSets = new ArrayList<Set>();
 		for (int s = 0; s < SimLive.model.getSets().size(); s++) {
 			Set set = SimLive.model.getSets().get(s);
-			if (set.view == Set.View.DEFAULT) selectedAndDefaultSets.add(set);
 			if (set.view == Set.View.PINNED) pinnedAndConnectedSets.add(set);
 		}
-		selectedAndDefaultSets.addAll(selectedSets);
 		pinnedAndConnectedSets.addAll(connectSets0);
 		pinnedAndConnectedSets.addAll(connectSets1);
+		ArrayList<Set> defaultSets = new ArrayList<Set>();
+		defaultSets.addAll(SimLive.model.getSets());
+		defaultSets.removeAll(pinnedAndConnectedSets);
 		
 		/* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
-	    		lineElementRadius, scaling, zoom, selectedAndDefaultSets, objects, false);
+	    		lineElementRadius, scaling, zoom, defaultSets, objects, false);
 		
 	    /* rigid contacts */
 	    switchSingleDoubleSided(gl2, true);
