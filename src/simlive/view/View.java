@@ -3364,6 +3364,10 @@ public class View extends GLCanvas {
 		
 		ArrayList<Set> defaultSets = new ArrayList<Set>();
 		ArrayList<Set> pinnedAndConnectedSets = new ArrayList<Set>();
+		for (int s = 0; s < selectedSets.size(); s++) {
+			Set set = selectedSets.get(s);
+			if (set.view == Set.View.HIDDEN) defaultSets.add(set);
+		}
 		for (int s = 0; s < SimLive.model.getSets().size(); s++) {
 			Set set = SimLive.model.getSets().get(s);
 			if (set.view == Set.View.DEFAULT) defaultSets.add(set);
