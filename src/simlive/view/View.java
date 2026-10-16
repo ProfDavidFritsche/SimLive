@@ -3284,12 +3284,15 @@ public class View extends GLCanvas {
 					connectParts3d.addAll(((Connector3d) objects.get(i)).getParts3d());
 				}
 			}
+			connectParts3d.removeAll(selectedParts3d);
 		}
 		
 		for (int p = 0; p < SimLive.model.getParts3d().size(); p++) {
 	    	Part3d part3d = SimLive.model.getParts3d().get(p);
-	    	switchSingleDoubleSided(gl2, part3d.doubleSided);
-			renderPart3d(gl2, part3d, scaling, selectedParts3d.contains(part3d), false, false);
+	    	if (!connectParts3d.contains(part3d)) {
+		    	switchSingleDoubleSided(gl2, part3d.doubleSided);
+				renderPart3d(gl2, part3d, scaling, selectedParts3d.contains(part3d), false, false);
+	    	}
 	    }
 		gl2.glEnable(GL2.GL_LIGHTING);
 		switchSingleDoubleSided(gl2, false);

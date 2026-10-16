@@ -62,6 +62,7 @@ public class Part3d implements DeepEqualsInterface {
 	
 	public Result deepEquals(Object obj, Result result) {
 		Part3d part3d = (Part3d) obj;
+		if (this.id != part3d.id) return Result.RECALC;
 		for (int i = 0; i < vertices.length; i++) {
 			result = this.vertices[i].deepEquals(part3d.vertices[i], result);
 		}
@@ -69,7 +70,6 @@ public class Part3d implements DeepEqualsInterface {
 			result = this.facets[i].deepEquals(part3d.facets[i], result);
 		}
 		result = this.subTree.deepEquals(part3d.subTree, result);
-		if (this.id != part3d.id) return Result.RECALC;
 		//do check to have it in model history
 		if (this.render != part3d.render && result != Result.RECALC) result = Result.CHANGE;
 		if (this.doubleSided != part3d.doubleSided && result != Result.RECALC) result = Result.CHANGE;
