@@ -4580,7 +4580,7 @@ public class View extends GLCanvas {
     			viewDir = R0.times(R).getMatrix(0, 2, 2, 2).getColumnPackedCopy();
     		}
     		gl2.glDisable(GL2.GL_LIGHTING);
-    		gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
+    		setLineColorAndWidth(gl2, onlyOutline);
 	    	for (int f = 0; f < part3d.getNrFacets(); f++) {
 	    		int[] facet = part3d.getFacet(f).getIndices();
 	    		if (perspective) {
@@ -4672,7 +4672,7 @@ public class View extends GLCanvas {
 			edgeNormal[i][2] = diff[0]*top[i][1]-diff[1]*top[i][0];
 		}
 		gl2.glDisable(GL2.GL_LIGHTING);
-		gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
+		setLineColorAndWidth(gl2, onlyOutline);
 		for (int i = 0; i < elemNodes.length; i++) {
     		int j = (i+1)%elemNodes.length;
 			boolean outline = SimLive.contains(outlineEdge[elemNodes[i]], elemNodes[j]) ||
@@ -4709,6 +4709,7 @@ public class View extends GLCanvas {
     			pElementScreenPolys[element.getID()][i*4+3] = modelToScreenCoordinates(p2);
     		}
     	}
+    	gl2.glLineWidth(1);
     	if (uniColor != null) {
 			gl2.glColor3fv(uniColor, 0);
 		}
@@ -5138,6 +5139,17 @@ public class View extends GLCanvas {
     	}
 	}
 	
+	private void setLineColorAndWidth(GL2 gl2, boolean onlyOutline) {
+		if (onlyOutline) {
+			gl2.glColor3fv(SimLive.COLOR_DARK_SELECTION, 0);
+			gl2.glLineWidth(2);
+		}
+		else {
+			gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
+			gl2.glLineWidth(1);
+		}    	
+	}
+	
 	private void renderLineElementAndPointMass(GL2 gl2, Element element, ArrayList<Set> connectSets0, ArrayList<Set> connectSets1,
 			float width, GLU glu, GLUquadric outside, GLUquadric inside, double lineElementRadius, double scaling, double zoom, float[] uniColor, boolean onlyOutline) {
 		ScalarPlot scalarPlot = null;
@@ -5153,7 +5165,7 @@ public class View extends GLCanvas {
 			gl2.glTranslated(coords[0], coords[1], coords[2]);
 			if (scalarPlot != null || uniColor != null) {
 				gl2.glDisable(GL2.GL_LIGHTING);
-				gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
+				setLineColorAndWidth(gl2, onlyOutline);
 				drawSphereOutline(gl2, SimLive.POINT_MASS_RADIUS*2.0/width/zoom, coords);
 				if (uniColor != null) {
 					if (existing) gl2.glColor3fv(uniColor, 0);
@@ -5348,13 +5360,14 @@ public class View extends GLCanvas {
 	    	}
     		
     		gl2.glDisable(GL2.GL_LIGHTING);
-    		gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
+    		setLineColorAndWidth(gl2, onlyOutline);
     		if (!cylindric) {
     			drawLineElementSectionOutline(gl2, element, p[i], p[i+1], deltaL, start, end);
     		}
     		else {
     			drawLineElementCylindricOutline(gl2, p[i], p[i+1], hollow, start, end);
     		}
+    		gl2.glLineWidth(1);
     		gl2.glEnable(GL2.GL_LIGHTING);
     		
     		if (existing && animation == null) {
@@ -5419,7 +5432,7 @@ public class View extends GLCanvas {
 			
 			gl2.glPushMatrix();
 			gl2.glRotated(-90, 0, 1, 0);
-			gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
+			setLineColorAndWidth(gl2, onlyOutline);
 			gl2.glDisable(GL2.GL_LIGHTING);
 			drawCylinderOutline(gl2, lineElementRadius/2.0, sliceLength);
 			gl2.glEnable(GL2.GL_LIGHTING);
