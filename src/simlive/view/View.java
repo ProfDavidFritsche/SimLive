@@ -3489,6 +3489,7 @@ public class View extends GLCanvas {
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
 	    		lineElementRadius, scaling, zoom, pinnedAndConnectedSets, objects, false);
 	    
+	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	    /* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
 	    		lineElementRadius, scaling, zoom, selectedSets, objects, true);
@@ -5149,11 +5150,11 @@ public class View extends GLCanvas {
 	}
 	
 	private void setLineColorAndWidth(GL2 gl2, boolean onlyOutline) {
-		/*if (onlyOutline) {
+		if (onlyOutline) {
 			gl2.glColor3fv(SimLive.COLOR_DARK_SELECTION, 0);
 			gl2.glLineWidth(2);
 		}
-		else*/ {
+		else {
 			gl2.glColor3fv(SimLive.COLOR_BLACK, 0);
 			gl2.glLineWidth(1);
 		}    	
