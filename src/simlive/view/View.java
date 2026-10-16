@@ -5070,36 +5070,21 @@ public class View extends GLCanvas {
 			}
 		}
 		//draw cylinder outline
-		double lastScal = 0;
+		double lastCp = 0;
 		int kMax = hollow ? p0.length/2 : p0.length;
 		for (int k = 0; k < kMax; k++) {
-			double[] a = new double[3];
-			a[0] = p1[k][0]-p0[k][0];
-			a[1] = p1[k][1]-p0[k][1];
-			a[2] = p1[k][2]-p0[k][2];
 			int k1 = k == kMax-1 ? 1 : k+1;
-			double[] b = new double[3];
-			b[0] = p0[k1][0]-p0[k][0];
-			b[1] = p0[k1][1]-p0[k][1];
-			b[2] = p0[k1][2]-p0[k][2];
-			double[] normal = new double[3];
-			normal[0] = a[1]*b[2]-a[2]*b[1];
-			normal[1] = a[2]*b[0]-a[0]*b[2];
-			normal[2] = a[0]*b[1]-a[1]*b[0];
-			double[] viewDir = new double[]{0, 0, 1};
-			if (perspective) {
-				viewDir[0] = rotPoint[0]-p0[k][0];
-				viewDir[1] = rotPoint[1]-p0[k][1];
-				viewDir[2] = rotPoint[2]-p0[k][2];
-			}
-			double scal = normal[0]*viewDir[0]+normal[1]*viewDir[1]+normal[2]*viewDir[2];
-			if (lastScal*scal < 0) {
+			double[] a = modelToScreenCoordinates(p0[k]);
+			double[] b = modelToScreenCoordinates(p1[k]);
+			double[] c = modelToScreenCoordinates(p0[k1]);
+			double cp = (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+			if (lastCp*cp < 0) {
 				gl2.glBegin(GL2.GL_LINES);
 				gl2.glVertex3dv(p0[k], 0);
 				gl2.glVertex3dv(p1[k], 0);
 				gl2.glEnd();
 			}
-			lastScal = scal;
+			lastCp = cp;
 		}
 	}
 	
