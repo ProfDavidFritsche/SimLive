@@ -3313,7 +3313,8 @@ public class View extends GLCanvas {
 			}
 		}
 		if (SimLive.mode == SimLive.Mode.CONTACTS) {
-			for (int i = 0; i < objects.size(); i++) if (!(Model.twoDimensional && ((ContactPair) objects.get(i)).hasStoredEdges())) {
+			for (int i = 0; i < objects.size(); i++) if (!(Model.twoDimensional && ((ContactPair) objects.get(i)).hasStoredEdges()) &&
+					((ContactPair) objects.get(i)).getType() != Type.RIGID_DEFORMABLE) {
 				connectSets1.addAll(((ContactPair) objects.get(i)).getMasterSets());
 			}
 		}
