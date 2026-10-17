@@ -3485,17 +3485,16 @@ public class View extends GLCanvas {
 			renderPart3d(gl2, part3d, scaling, false, true, false);
 	    }
     	switchSingleDoubleSided(gl2, false);
-    	for (int p = 0; p < selectedParts3d.size(); p++) {
-	    	Part3d part3d = selectedParts3d.get(p);
-	    	renderPart3d(gl2, part3d, scaling, false, false, true);
-	    }
-	    
-	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+    	gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
     	/* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
 	    		lineElementRadius, scaling, zoom, pinnedAndConnectedSets, objects, false);
 	    
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+    	for (int p = 0; p < selectedParts3d.size(); p++) {
+	    	Part3d part3d = selectedParts3d.get(p);
+	    	renderPart3d(gl2, part3d, scaling, false, false, true);
+	    }
 	    /* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
 	    		lineElementRadius, scaling, zoom, selectedSets, objects, true);
