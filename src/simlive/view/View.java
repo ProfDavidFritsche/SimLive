@@ -3289,10 +3289,8 @@ public class View extends GLCanvas {
 		
 		for (int p = 0; p < SimLive.model.getParts3d().size(); p++) {
 	    	Part3d part3d = SimLive.model.getParts3d().get(p);
-	    	if (!connectParts3d.contains(part3d)) {
-		    	switchSingleDoubleSided(gl2, part3d.doubleSided);
-				renderPart3d(gl2, part3d, scaling, selectedParts3d.contains(part3d), false, false);
-	    	}
+	    	switchSingleDoubleSided(gl2, part3d.doubleSided);
+			renderPart3d(gl2, part3d, scaling, selectedParts3d.contains(part3d), connectParts3d.contains(part3d), false);
 	    }
 		gl2.glEnable(GL2.GL_LIGHTING);
 		switchSingleDoubleSided(gl2, false);
@@ -3479,19 +3477,16 @@ public class View extends GLCanvas {
 		}
 		
     	gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-    	for (int p = 0; p < connectParts3d.size(); p++) {
-	    	Part3d part3d = connectParts3d.get(p);
-	    	switchSingleDoubleSided(gl2, part3d.doubleSided);
-			renderPart3d(gl2, part3d, scaling, false, true, false);
-	    }
-    	switchSingleDoubleSided(gl2, false);
-    	gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
     	/* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
 	    		lineElementRadius, scaling, zoom, pinnedAndConnectedSets, objects, false);
 	    
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-    	for (int p = 0; p < selectedParts3d.size(); p++) {
+	    for (int p = 0; p < connectParts3d.size(); p++) {
+	    	Part3d part3d = connectParts3d.get(p);
+	    	renderPart3d(gl2, part3d, scaling, false, true, true);
+	    }
+	    for (int p = 0; p < selectedParts3d.size(); p++) {
 	    	Part3d part3d = selectedParts3d.get(p);
 	    	renderPart3d(gl2, part3d, scaling, false, false, true);
 	    }
@@ -4581,6 +4576,7 @@ public class View extends GLCanvas {
     		}
     		gl2.glDisable(GL2.GL_LIGHTING);
     		setLineColorAndWidth(gl2, onlyOutline);
+    		if (connected && onlyOutline) gl2.glColor3fv(SimLive.COLOR_DARK_RED, 0);
 	    	for (int f = 0; f < part3d.getNrFacets(); f++) {
 	    		int[] facet = part3d.getFacet(f).getIndices();
 	    		if (perspective) {
@@ -4600,10 +4596,10 @@ public class View extends GLCanvas {
 	    	}
     	}
     	
-    	if (selected) {
+    	if (selected && !onlyOutline) {
     		gl2.glColor3fv(SimLive.COLOR_SELECTION, 0);
     	}
-    	else if (connected) {
+    	else if (connected && !onlyOutline) {
     		gl2.glColor3fv(SimLive.COLOR_RED, 0);
     	}
     	else {
