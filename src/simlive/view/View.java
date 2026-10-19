@@ -4562,6 +4562,7 @@ public class View extends GLCanvas {
 				}
 	    	}
 		}
+    	gl2.glLineWidth(1);
 	}
 	
 	private void renderPart3d(GL2 gl2, Part3d part3d, double scaling, boolean selected, boolean connected, boolean onlyOutline) {
@@ -4629,6 +4630,7 @@ public class View extends GLCanvas {
 	    	}
 			gl2.glEnd();
     	}
+    	gl2.glLineWidth(1);
 	}
 	
 	private void renderPlaneElement(GL2 gl2, Element element, float[] projection, float[] modelview, float[] uniColor, boolean selected, boolean onlyOutline) {
