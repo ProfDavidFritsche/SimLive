@@ -4678,13 +4678,13 @@ public class View extends GLCanvas {
     		double[] p2 = new double[]{coords[i][0]+bottom[i][0], coords[i][1]+bottom[i][1], coords[i][2]+bottom[i][2]};
     		double[] p3 = new double[]{coords[j][0]+bottom[j][0], coords[j][1]+bottom[j][1], coords[j][2]+bottom[j][2]};
 			
-			if ((Settings.isShowEdges && !onlyOutline) || outline) {
+			if ((Settings.isShowEdges || onlyOutline) || outline) {
 				gl2.glBegin(GL2.GL_LINES);
 				gl2.glVertex3dv(p0, 0);
 				gl2.glVertex3dv(p1, 0);
 				gl2.glVertex3dv(p2, 0);
 				gl2.glVertex3dv(p3, 0);
-				if ((Settings.isShowEdges && !onlyOutline) || isCornerNode[elemNodes[i]]) {
+				if ((Settings.isShowEdges || onlyOutline) || isCornerNode[elemNodes[i]]) {
 					gl2.glVertex3dv(p0, 0);
 					gl2.glVertex3dv(p2, 0);
 				}
@@ -5241,8 +5241,8 @@ public class View extends GLCanvas {
 			gl2.glTranslated(t*length, y, z);
 			boolean start, end;
 			if (existing) {
-				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || Settings.isShowEdges);
-				end = i == lineDivisions && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || Settings.isShowEdges);
+				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || Settings.isShowEdges || onlyOutline);
+				end = i == lineDivisions && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || Settings.isShowEdges || onlyOutline);
 			}
 			else {
 				start = i == 0;
@@ -5284,8 +5284,8 @@ public class View extends GLCanvas {
 			t = i/(double) lineDivisions;
 			boolean start, end;
 			if (existing) {
-				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || Settings.isShowEdges);
-				end = i == lineDivisions-1 && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || Settings.isShowEdges);
+				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || Settings.isShowEdges || onlyOutline);
+				end = i == lineDivisions-1 && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || Settings.isShowEdges || onlyOutline);
 			}
 			else {
 				start = i == 0;
