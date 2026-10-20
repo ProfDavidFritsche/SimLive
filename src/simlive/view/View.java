@@ -5242,9 +5242,15 @@ public class View extends GLCanvas {
 			t = i/(double) lineDivisions;
 			gl2.glTranslated(t*length, y, z);
 			boolean start, end;
-			start = i == 0;
-			end = i == lineDivisions;
-			if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
+			if (existing) {
+				start = i == 0 && (SimLive.contains(outlineEdge[elemNodes[0]], elemNodes[0]) || Settings.isShowEdges || onlyOutline);
+				end = i == lineDivisions && (SimLive.contains(outlineEdge[elemNodes[1]], elemNodes[1]) || Settings.isShowEdges || onlyOutline);
+			}
+			else {
+				start = i == 0;
+				end = i == lineDivisions;
+			}
+	    	if (element.getType() == Element.Type.BEAM && SimLive.mode == Mode.RESULTS) {
 				Beam beam = (Beam) element;
 				double[][] angles = beamAngles[beam.getID()];
 				Matrix R1 = Beam.rotationMatrixFromAngles(new Matrix(beam.interpolateAnglesInCoRotatedFrame(t, angles), 3));
