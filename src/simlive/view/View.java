@@ -1817,7 +1817,7 @@ public class View extends GLCanvas {
 			double dist = Math.sqrt((cameraRefPos[0]-rotPoint[0])*(cameraRefPos[0]-rotPoint[0])+
     				(cameraRefPos[1]-rotPoint[1])*(cameraRefPos[1]-rotPoint[1])+
     				(cameraRefPos[2]-rotPoint[2])*(cameraRefPos[2]-rotPoint[2]));
-			double nearClip = Settings.meshSize/100.0;
+			double nearClip = 1.0/zoom/100.0;
 			Matrix dir = R0.getMatrix(0, 2, 2, 2);
 			if (dist + (1.0/SimLive.ZOOM_FACTOR - 1.0)*dist > nearClip) {
 				cameraRefPos[0] = cameraRefPos[0] + (1.0/SimLive.ZOOM_FACTOR - 1.0)*dir.get(0, 0)*dist;
@@ -1939,7 +1939,7 @@ public class View extends GLCanvas {
 			GL2 gl2 = SimLive.glcontext.getGL().getGL2();
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
-			double farClip = Settings.meshSize*100.0;
+			double farClip = 1.0/zoom*100.0;
 			gl2.glOrtho(-1.0/zoom, 1.0/zoom, -aspectRatio/zoom, aspectRatio/zoom, -farClip, farClip); //TODO
 			gl2.glMatrixMode(GL2.GL_MODELVIEW);
 			fitToViewOrtho();
@@ -5697,8 +5697,8 @@ public class View extends GLCanvas {
 	private void setProjection(GL2 gl2, float width, float height) {
 		float aspectRatio = height / width;
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
-		double nearClip = Settings.meshSize/100.0;
-		double farClip = Settings.meshSize*100.0;
+		double nearClip = 1.0/zoom/100.0;
+		double farClip = 1.0/zoom*100.0;
 		if (perspective) {
 			GLU glu = new GLU();
 			glu.gluPerspective(fovy*180/Math.PI, width/height, nearClip, farClip);
@@ -5859,7 +5859,7 @@ public class View extends GLCanvas {
 		double aspectRatio = height / width;
 		double scale = 0;
 		if (perspective) {
-			double nearClip = Settings.meshSize/100.0;
+			double nearClip = 1.0/zoom/100.0;
 			double depth = 2.0*nearClip; //larger than distance to nearClip
 			double top = depth*Math.tan(fovy/2);
 			double right = top/aspectRatio;
