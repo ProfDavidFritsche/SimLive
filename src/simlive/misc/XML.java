@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -1768,10 +1770,9 @@ public class XML {
 			setIntegerAttribute(element, "rows", matrix.getRowDimension());
 			setIntegerAttribute(element, "columns", matrix.getColumnDimension());
 			for (int c = 0; c < matrix.getColumnDimension(); c++) {
-				String string = new String();
-				for (int r = 0; r < matrix.getRowDimension(); r++) {
-					string += Double.toString(matrix.get(r, c)) + " ";
-				}
+				String string = Arrays.toString(matrix.getMatrix(0, matrix.getRowDimension()-1, c, c).getColumnPackedCopy());
+				string = string.substring(1, string.length()-1);
+				string = string.replace(",", "");
 				org.jdom.Element column = new org.jdom.Element("column");
 				setStringAttribute(column, "values", string);
 				element.addContent(column);
