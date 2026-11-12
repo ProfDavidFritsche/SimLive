@@ -13,7 +13,8 @@ public class LagrangeMultipliers extends ConstraintMethod {
 	public Matrix getConstrainedMatrix(Matrix matrix, boolean keep, Matrix G) {
 		int nDofs = G.getColumnDimension();
 		int nLambdas = G.getRowDimension();
-		double[][] array = matrix.getArray();
+		Matrix X = keep ? matrix.copy() : matrix;
+		double[][] array = X.getArray();
 		for (int r = 0; r < nDofs; r++) {
 			array[r] = Arrays.copyOf(array[r], nDofs+nLambdas);
 		}
@@ -21,10 +22,10 @@ public class LagrangeMultipliers extends ConstraintMethod {
 		for (int r = nDofs; r < nDofs+nLambdas; r++) {
 			array[r] = new double[nDofs+nLambdas];
 		}
-		Matrix matrixConstr = new Matrix(array);
-		matrixConstr.setMatrix(nDofs, 0, G);
-		matrixConstr.setMatrix(0, nDofs, G.transpose());
-		return matrixConstr;
+		X = new Matrix(array);
+		X.setMatrix(nDofs, 0, G);
+		X.setMatrix(0, nDofs, G.transpose());
+		return X;
 	}
 
 	@Override
