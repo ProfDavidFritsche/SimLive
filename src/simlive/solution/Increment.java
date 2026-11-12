@@ -1568,6 +1568,9 @@ public class Increment {
 			
 			packTable(table);
 		}
+		else {
+			table.clearAll();
+		}
 		table.setRedraw(true);
 	}
 	
