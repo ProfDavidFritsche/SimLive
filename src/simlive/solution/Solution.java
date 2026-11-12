@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import Jama.EigenvalueDecomposition;
-import Jama.LUDecomposition;
 import Jama.Matrix;
 import simlive.SimLive;
 import simlive.dialog.SolutionDialog;
@@ -423,7 +422,6 @@ public class Solution {
 				Matrix delta_u_constr = null;
 				
 				try {
-					LUDecomposition.copyFlag = isWriteMatrixView;
 					if (Model.twoDimensional) {
 						K_constr = getMatrix2d(K_constr);
 						delta_f_constr = getVector2d(delta_f_constr, false);
@@ -573,7 +571,6 @@ public class Solution {
 			
 			Matrix a_constr = null;
 			try {
-				LUDecomposition.copyFlag = isWriteMatrixView;
 				if (Model.twoDimensional) {
 					M_constr = getMatrix2d(M_constr);
 					delta_f_constr = getVector2d(delta_f_constr, false);
@@ -667,7 +664,6 @@ public class Solution {
 				M_constr = getMatrix2d(M_constr);
 				K_constr = getMatrix2d(K_constr);
 			}
-			LUDecomposition.copyFlag = false;
 			Matrix A = M_constr.solve(K_constr);
 			
 			logBuffer += "Calculate Eigenmodes...\n";
