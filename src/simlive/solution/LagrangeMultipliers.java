@@ -20,7 +20,7 @@ public class LagrangeMultipliers extends ConstraintMethod {
 	}
 
 	@Override
-	public Matrix getConstrainedRHS(Matrix rhs, Matrix C_global, Matrix matrix, Matrix G, Matrix g) {
+	public Matrix getConstrainedRHS(Matrix rhs, Matrix C_global, Matrix G, Matrix g) {
 		int nDofs = rhs.getRowDimension();
 		int nLambdas = g.getRowDimension();
 		Matrix rhsConstr = new Matrix(nDofs+nLambdas, 1);
@@ -48,7 +48,7 @@ public class LagrangeMultipliers extends ConstraintMethod {
 	}
 
 	@Override
-	public Matrix getConstraintForce(Matrix C_global, Matrix solutionConstr, Matrix G, Matrix g, Matrix matrix) {
+	public Matrix getConstraintForce(Matrix C_global, Matrix solutionConstr, Matrix G, Matrix g) {
 		int nDofs = G.getColumnDimension();
 		int nLambdas = G.getRowDimension();
 		Matrix lambda = solutionConstr.getMatrix(nDofs, nDofs+nLambdas-1, 0, 0);

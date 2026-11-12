@@ -9,7 +9,7 @@ public abstract class ConstraintMethod {
 
 	public abstract Matrix getConstrainedMatrix(Matrix matrix, Matrix G);
 	
-	public abstract Matrix getConstrainedRHS(Matrix rhs, Matrix C_global, Matrix matrix, Matrix G, Matrix g);
+	public abstract Matrix getConstrainedRHS(Matrix rhs, Matrix C_global, Matrix G, Matrix g);
 	
 	public abstract Matrix getFullSolution(Matrix solutionConstr, Matrix G);
 	
@@ -17,7 +17,7 @@ public abstract class ConstraintMethod {
 	
 	public abstract Matrix removeInvalidEigenvectors(Matrix V, Matrix G);
 	
-	public abstract Matrix getConstraintForce(Matrix C_global, Matrix solutionConstr, Matrix G, Matrix g, Matrix matrix);
+	public abstract Matrix getConstraintForce(Matrix C_global, Matrix solutionConstr, Matrix G, Matrix g);
 	
 	public abstract String[] getGlobalDofNames(Matrix G, Model refModel);
 

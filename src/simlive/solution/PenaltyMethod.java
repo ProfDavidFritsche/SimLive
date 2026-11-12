@@ -9,23 +9,24 @@ import simlive.model.Node;
 public class PenaltyMethod extends ConstraintMethod {
 	
 	private double PENALTY_FACTOR;
+	private double penalty;
 	
 	public PenaltyMethod(double penaltyFactor) {
 		PENALTY_FACTOR = penaltyFactor;
 	}
 	
-	private double getPenaltyValue(Matrix matrix) {
+	private void setPenaltyValue(Matrix matrix) {
 		int nDofs = matrix.getRowDimension();
 		double maxDiag = 0;
 		for (int i = 0; i < nDofs; i++) {
 			if (Math.abs(matrix.get(i,i)) > maxDiag) maxDiag = Math.abs(matrix.get(i,i));				
 		}
-		return maxDiag * PENALTY_FACTOR;		
+		penalty = maxDiag * PENALTY_FACTOR;		
 	}
 	
 	@Override
 	public Matrix getConstrainedMatrix(Matrix matrix, Matrix G) {
-		double penalty = getPenaltyValue(matrix);
+		setPenaltyValue(matrix);
 		Matrix X = matrix.copy();
 		int m = G.getRowDimension();
 		int n = G.getColumnDimension();
@@ -53,8 +54,7 @@ public class PenaltyMethod extends ConstraintMethod {
 	}
 
 	@Override
-	public Matrix getConstrainedRHS(Matrix rhs, Matrix C_global, Matrix matrix, Matrix G, Matrix g) {
-		double penalty = getPenaltyValue(matrix);
+	public Matrix getConstrainedRHS(Matrix rhs, Matrix C_global, Matrix G, Matrix g) {
 		return rhs.plus(G.transpose().times(g.times(penalty)));
 	}
 
@@ -76,8 +76,7 @@ public class PenaltyMethod extends ConstraintMethod {
 	}
 
 	@Override
-	public Matrix getConstraintForce(Matrix C_global, Matrix solutionConstr, Matrix G, Matrix g, Matrix matrix) {
-		double penalty = getPenaltyValue(matrix);
+	public Matrix getConstraintForce(Matrix C_global, Matrix solutionConstr, Matrix G, Matrix g) {
 		return G.transpose().times(g.minus(G.times(solutionConstr)).times(penalty));
 	}
 

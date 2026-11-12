@@ -425,7 +425,7 @@ public class Solution {
 				Matrix g_load = increments[i].getLoadPartOfgMatrix(nDofs, u_global);
 				g = increments[i].getAssembledgMatrix(G, g_connect, g_contact, g_load);
 				K_constr = constraintMethod.getConstrainedMatrix(K_global, G);
-				delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), C_reaction_global.plus(C_coupling_global), K_global, G, g);
+				delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), C_reaction_global.plus(C_coupling_global), G, g);
 				
 				try {
 					if (Model.twoDimensional) {
@@ -444,16 +444,16 @@ public class Solution {
 				Matrix delta_u_global = constraintMethod.getFullSolution(delta_u_constr, G);
 				u_global = increments[i].updateSolution(u_global, delta_u_global);
 				f_int = increments[i].assembleForceParallel(nDofs, u_global);
-				delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), C_reaction_global.plus(C_coupling_global), K_global, G, g);
+				delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), C_reaction_global.plus(C_coupling_global), G, g);
 				if (Model.twoDimensional) {
 					delta_f_constr = getVector2d(delta_f_constr, false);
 				}
 				
 				Matrix G_onlyCoupling = increments[i].getAssembledGMatrix(nDofs, G_support.getEmptyCopy(), G_connect, G_contact, G_load.getEmptyCopy());
-				C_coupling_global = constraintMethod.getConstraintForce(C_coupling_global, delta_u_constr, G_onlyCoupling, g, K_global);
+				C_coupling_global = constraintMethod.getConstraintForce(C_coupling_global, delta_u_constr, G_onlyCoupling, g);
 				
 				Matrix G_onlyReaction = increments[i].getAssembledGMatrix(nDofs, G_support, G_connect.getEmptyCopy(), G_contact.getEmptyCopy(), G_load);
-				C_reaction_global = constraintMethod.getConstraintForce(C_reaction_global, delta_u_constr, G_onlyReaction, g, K_global);
+				C_reaction_global = constraintMethod.getConstraintForce(C_reaction_global, delta_u_constr, G_onlyReaction, g);
 				
 				if (iter == 0) {
 					norm0 = delta_u_global.normF();
@@ -567,7 +567,7 @@ public class Solution {
 			Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, G);
 			Matrix f_int = increment.assembleForceParallel(nDofs, u_global);
 			f_int = increment.addDampingForce(nDofs, f_int, u_global, v_global, dStiffElems, dMassElems);
-			Matrix delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), new Matrix(nDofs, 1), M_global, G, g);
+			Matrix delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), new Matrix(nDofs, 1), G, g);
 			
 			Matrix a_constr = null;
 			try {
@@ -608,7 +608,7 @@ public class Solution {
 			v_global = u_global_new.minus(u_global_old).times(1.0/(2.0*timeStep));
 			
 			Matrix G_onlyCoupling = increment.getAssembledGMatrix(nDofs, G_support.getEmptyCopy(), G_connect, G_contact, G_load.getEmptyCopy());
-			C_coupling_global = constraintMethod.getConstraintForce(new Matrix(nDofs, 1), a_constr, G_onlyCoupling, g, M_global);
+			C_coupling_global = constraintMethod.getConstraintForce(new Matrix(nDofs, 1), a_constr, G_onlyCoupling, g);
 			
 			/* post increment */
 			if (i%(nInc/step.nIncrements) == 0) {
@@ -617,7 +617,7 @@ public class Solution {
 				dialog.updateLog();
 				
 				Matrix G_onlyReaction = increment.getAssembledGMatrix(nDofs, G_support, G_connect.getEmptyCopy(), G_contact.getEmptyCopy(), G_load);
-				Matrix C_reaction_global = constraintMethod.getConstraintForce(new Matrix(nDofs, 1), a_constr, G_onlyReaction, g, M_global);
+				Matrix C_reaction_global = constraintMethod.getConstraintForce(new Matrix(nDofs, 1), a_constr, G_onlyReaction, g);
 				
 				increment.setResults(u_global.copy(), v_global.copy(), a_global, C_reaction_global);
 				
