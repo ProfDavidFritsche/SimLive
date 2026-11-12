@@ -374,12 +374,6 @@ public class Solution {
 		if (startInc > 0) {
 			u_global = increments[startInc-1].get_u_global().copy();
 		}
-		Matrix delta_u_constr = null;
-		Matrix K_global = null;
-		Matrix G = null;
-		Matrix g = null;
-		Matrix K_constr = null;
-		Matrix delta_f_constr = null;
 		double norm0 = 0.0;
 		
 		logBuffer += "STATIC SOLUTION\n";
@@ -406,7 +400,6 @@ public class Solution {
 			}
 			Matrix C_reaction_global = new Matrix(nDofs, 1);
 			Matrix f_int = increments[i].assembleForceParallel(nDofs, u_global);
-			Matrix f_ext = null;
 			
 			for (int iter = 0; iter < maxIterations; iter++) {
 				
@@ -414,19 +407,20 @@ public class Solution {
 				Contact.search(contacts, refModel.getContactPairs(), this, u_global, u_global0, C_coupling_global);
 				
 				Matrix f_fric = increments[i].getFrictionForce(nDofs, contacts, C_coupling_global, null, null, 0.0);
-				f_ext = increments[i].getExternalForce(nDofs, step, f_gravity, u_global).plus(f_fric);
+				Matrix f_ext = increments[i].getExternalForce(nDofs, step, f_gravity, u_global).plus(f_fric);
 				
-				K_global = increments[i].assembleStiffnessParallel(nDofs, u_global);
+				Matrix K_global = increments[i].assembleStiffnessParallel(nDofs, u_global);
 				Matrix G_connect = increments[i].getConnectorPartOfGMatrix(nDofs, u_global);
 				Matrix G_contact = increments[i].getContactPartOfGMatrix(nDofs, contacts, u_global);
 				Matrix G_load = increments[i].getLoadPartOfGMatrix(nDofs, u_global);
-				G = increments[i].getAssembledGMatrix(nDofs, G_support, G_connect, G_contact, G_load);
+				Matrix G = increments[i].getAssembledGMatrix(nDofs, G_support, G_connect, G_contact, G_load);
 				Matrix g_connect = increments[i].getConnectorPartOfgMatrix(nDofs, u_global);
 				Matrix g_contact = increments[i].getContactPartOfgMatrix(nDofs, contacts);
 				Matrix g_load = increments[i].getLoadPartOfgMatrix(nDofs, u_global);
-				g = increments[i].getAssembledgMatrix(G, g_connect, g_contact, g_load);
-				K_constr = constraintMethod.getConstrainedMatrix(K_global, isWriteMatrixView, G);
-				delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), C_reaction_global.plus(C_coupling_global), G, g);
+				Matrix g = increments[i].getAssembledgMatrix(G, g_connect, g_contact, g_load);
+				Matrix K_constr = constraintMethod.getConstrainedMatrix(K_global, isWriteMatrixView, G);
+				Matrix delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), C_reaction_global.plus(C_coupling_global), G, g);
+				Matrix delta_u_constr = null;
 				
 				try {
 					LUDecomposition.copyFlag = isWriteMatrixView;
@@ -457,6 +451,7 @@ public class Solution {
 				Matrix G_onlyReaction = increments[i].getAssembledGMatrix(nDofs, G_support, G_connect.getEmptyCopy(), G_contact.getEmptyCopy(), G_load);
 				C_reaction_global = constraintMethod.getConstraintForce(C_reaction_global, delta_u_constr, G_onlyReaction, g);
 				
+				boolean converged = false;
 				if (iter == 0) {
 					norm0 = delta_u_global.normF();
 				}
@@ -471,11 +466,23 @@ public class Solution {
 					if (ratio < CONV_RATIO) {
 						logBuffer += "     Convergence after "+(iter+1)+" iterations.\n";
 						dialog.updateLog();
-						break;
+						
+						converged = true;
 					}
 					if (ratio > DIV_RATIO) {
 						return divergenceError(i);
 					}
+				}
+				
+				if (converged || iter+1 == maxIterations) {
+					if (isWriteMatrixView) {
+						Matrix u_global_old = u_global.minus(delta_u_global);
+						Matrix[] K_elem = increments[i].getElementStiffnessArray(u_global_old);
+						increments[i].setResultsForMatrixView(K_elem, null, null, K_global, f_ext, f_int,
+								G, K_constr, null, delta_f_constr);
+					}
+					
+					break;
 				}
 			}
 			
@@ -498,13 +505,6 @@ public class Solution {
 			
 			increments[i].setResults(u_global, v_global, a_global, C_reaction_global);
 				
-			if (isWriteMatrixView) {
-				Matrix u_global_old = u_global.minus(constraintMethod.getFullSolution(delta_u_constr, G));
-				Matrix[] K_elem = increments[i].getElementStiffnessArray(u_global_old);
-				increments[i].setResultsForMatrixView(K_elem, null, null, K_global, f_ext, f_int,
-						G, K_constr, null, delta_f_constr);
-			}
-			
 			dialog.incrementProgressBar();
 		}
 		
