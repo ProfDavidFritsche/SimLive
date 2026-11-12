@@ -7,7 +7,7 @@ public abstract class ConstraintMethod {
 	
 	public enum Type {LAGRANGE_MULTIPLIERS, PENALTY_METHOD}
 
-	public abstract Matrix getConstrainedMatrix(Matrix matrix, Matrix G);
+	public abstract Matrix getConstrainedMatrix(Matrix matrix, boolean keep, Matrix G);
 	
 	public abstract Matrix getConstrainedRHS(Matrix rhs, Matrix C_global, Matrix G, Matrix g);
 	

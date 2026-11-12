@@ -1,6 +1,7 @@
 package simlive.solution;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import Jama.Matrix;
 import simlive.model.Model;
@@ -9,11 +10,18 @@ import simlive.model.Node;
 public class LagrangeMultipliers extends ConstraintMethod {
 
 	@Override
-	public Matrix getConstrainedMatrix(Matrix matrix, Matrix G) {
+	public Matrix getConstrainedMatrix(Matrix matrix, boolean keep, Matrix G) {
 		int nDofs = G.getColumnDimension();
 		int nLambdas = G.getRowDimension();
-		Matrix matrixConstr = new Matrix(nDofs+nLambdas, nDofs+nLambdas);
-		matrixConstr.setMatrix(0, 0, matrix);
+		double[][] array = matrix.getArray();
+		for (int r = 0; r < nDofs; r++) {
+			array[r] = Arrays.copyOf(array[r], nDofs+nLambdas);
+		}
+		array = Arrays.copyOf(array, nDofs+nLambdas);
+		for (int r = nDofs; r < nDofs+nLambdas; r++) {
+			array[r] = new double[nDofs+nLambdas];
+		}
+		Matrix matrixConstr = new Matrix(array);
 		matrixConstr.setMatrix(nDofs, 0, G);
 		matrixConstr.setMatrix(0, nDofs, G.transpose());
 		return matrixConstr;

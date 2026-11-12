@@ -35,6 +35,8 @@ public class LUDecomposition implements java.io.Serializable {
    @serial pivot vector.
    */
    private int[] piv;
+   
+   public static boolean copyFlag = true;
 
 /* ------------------------
    Constructor
@@ -130,7 +132,8 @@ public class LUDecomposition implements java.io.Serializable {
 
    public LUDecomposition (Matrix A) {
       // Initialize.
-      LU = A.getArrayCopy();
+      LU = copyFlag ? A.getArrayCopy() : A.getArray();
+      copyFlag = true;
       m = A.getRowDimension();
       n = A.getColumnDimension();
       piv = new int[m];
