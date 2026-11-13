@@ -255,7 +255,7 @@ public class SimLive {
 	private static Table table;
 	public static boolean toggleNonZeroEntries;
 	
-	private static SashForm sashForm, sashForm_1, sashForm_2, sashFormMatrixView;
+	private static SashForm sashForm, sashForm_1, sashForm_2, sashForm_3, sashFormMatrixView;
 	private static int[] sashForm_Weights;
 	private static int sashForm_SashWidth;
 	private static int[] sashForm_1_Weights;
@@ -312,6 +312,7 @@ public class SimLive {
 			}
 		});
 		shell.layout();
+		setSashForm_3_Default();
 		newFile(null);
 		
 		while (!shell.isDisposed()) {
@@ -1276,6 +1277,7 @@ public class SimLive {
 						if (model.settings.isWriteMatrixView && post != null) {
 							post.getPostIncrement().updateTable(table, tree);
 						}
+						setSashForm_3_Default();
 					}
 				});
 				menu.setVisible(true);
@@ -1283,7 +1285,16 @@ public class SimLive {
 		});
 		tltmLayout.setText("Layout");
 		
-		tabFolderModel = new CTabFolder(shell, SWT.BORDER | SWT.SINGLE);
+		sashForm_3 = new SashForm(shell, SWT.HORIZONTAL);
+		sashForm_3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		sashForm_3.addListener(SWT.Resize, event -> {
+			if (sashForm_3.getClientArea().width-tabFolderModel.getBounds().width-sashForm_3.getSashWidth() > 0) {
+				sashForm_3.setWeights(new int[]{tabFolderModel.getBounds().width+1,
+						sashForm_3.getClientArea().width-tabFolderModel.getBounds().width-sashForm_3.getSashWidth()});
+			}
+		});
+		
+		tabFolderModel = new CTabFolder(sashForm_3, SWT.BORDER | SWT.SINGLE);
 		CTabItem tabItem = new CTabItem(tabFolderModel, SWT.NONE);
 		tabItem.setText("Model");
 		
@@ -1343,7 +1354,6 @@ public class SimLive {
 		});
 		tabFolderModel.setSingle(false);
 		GridData gd_tabFolderStructure = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
-		gd_tabFolderStructure.widthHint = 400;
 		tabFolderModel.setLayoutData(gd_tabFolderStructure);
 		tabFolderModel.setSimple(false);
 		tabFolderModel.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
@@ -1875,7 +1885,7 @@ public class SimLive {
 		compositeLeft.setLayout(new GridLayout());
 		sashForm_2.setWeights(new int[] {1, 3});
 		
-		sashForm = new SashForm(shell, SWT.VERTICAL);
+		sashForm = new SashForm(sashForm_3, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
 		sashForm_1 = new SashForm(sashForm, SWT.NONE);
@@ -2322,6 +2332,10 @@ public class SimLive {
 			sashForm_1.setWeights(sashForm_1_Weights);
 			sashForm_1.setSashWidth(sashForm_1_SashWidth);
 		}
+	}
+	
+	private void setSashForm_3_Default() {
+		sashForm_3.setWeights(new int[] {400, sashForm_3.getClientArea().width-400-sashForm_3.getSashWidth()});		
 	}
 	
 	private void resetState() {
