@@ -418,7 +418,7 @@ public class Solution {
 				Matrix g_contact = increments[i].getContactPartOfgMatrix(nDofs, contacts);
 				Matrix g_load = increments[i].getLoadPartOfgMatrix(nDofs, u_global);
 				Matrix g = increments[i].getAssembledgMatrix(G, g_connect, g_contact, g_load);
-				Matrix K_constr = constraintMethod.getConstrainedMatrix(K_global, G);
+				Matrix K_constr = constraintMethod.getConstrainedMatrix(K_global, isWriteMatrixView, G);
 				Matrix delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), C_reaction_global.plus(C_coupling_global), G, g);
 				Matrix delta_u_constr = null;
 				
@@ -566,7 +566,7 @@ public class Solution {
 			Matrix g_contact = increment.getContactPartOfgMatrix(nDofs, contacts);
 			Matrix g_load = increment.getLoadPartOfgMatrix(nDofs, u_global_with_delta);
 			Matrix g = increment.getAssembledgMatrix(G, g_connect, g_contact, g_load).times(1.0/(timeStep*timeStep));
-			Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, G);
+			Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, true, G);
 			Matrix f_int = increment.assembleForceParallel(nDofs, u_global);
 			f_int = increment.addDampingForce(nDofs, f_int, u_global, v_global, dStiffElems, dMassElems);
 			Matrix delta_f_constr = constraintMethod.getConstrainedRHS(f_ext.minus(f_int), new Matrix(nDofs, 1), G, g);
@@ -659,8 +659,8 @@ public class Solution {
 		Matrix G_contact = new Matrix(0, nDofs);
 		Matrix G_load = new Matrix(0, nDofs);
 		Matrix G = increment.getAssembledGMatrix(nDofs, G_support, G_connect, G_contact, G_load);
-		Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, G);
-		Matrix K_constr = constraintMethod.getConstrainedMatrix(K_global, G);
+		Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, false, G);
+		Matrix K_constr = constraintMethod.getConstrainedMatrix(K_global, false, G);
 		
 		try {
 			if (Model.twoDimensional) {
@@ -874,8 +874,8 @@ public class Solution {
 				Matrix G_contact = new Matrix(0, nDofs);
 				Matrix G_load = new Matrix(0, nDofs);
 				Matrix G = increments[i].getAssembledGMatrix(nDofs, G_support, G_connect, G_contact, G_load);
-				Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, G);
-				Matrix K_constr = constraintMethod.getConstrainedMatrix(K_global, G);
+				Matrix M_constr = constraintMethod.getConstrainedMatrix(M_global, true, G);
+				Matrix K_constr = constraintMethod.getConstrainedMatrix(K_global, true, G);
 				if (Model.twoDimensional) {
 					M_constr = getMatrix2d(M_constr);
 					K_constr = getMatrix2d(K_constr);
