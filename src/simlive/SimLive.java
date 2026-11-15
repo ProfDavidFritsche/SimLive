@@ -2308,7 +2308,6 @@ public class SimLive {
 	}
 	
 	private void swapDiagramMatrixView() {
-		shell.setRedraw(false);
 		if (tbtmMatrixView.isDisposed()) showArea(true);
 		if (tbtmDiagram.isDisposed()) showArea(false);
 		int[] sashForm_Weights = sashForm.getWeights();
@@ -2320,7 +2319,6 @@ public class SimLive {
 		swapped = !swapped;
 		if (tbtmMatrixView.isDisposed()) hideArea(true);
 		if (tbtmDiagram.isDisposed()) hideArea(false);
-		shell.setRedraw(true);
 	}
 	
 	private void setSashForm_2(int height) {
