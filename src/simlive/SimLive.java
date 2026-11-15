@@ -1928,7 +1928,7 @@ public class SimLive {
 			@Override
 			public void controlResized(ControlEvent arg0) {
 				if (tree.getItemCount() == 0) {
-					sashFormMatrixView.setMaximizedControl(sashFormMatrixView.getChildren()[0]);
+					sashFormMatrixView.setWeights(new int[] {1, 0});
 				}
 				else {
 					if (sashFormMatrixView.getClientArea().width-tree.getBounds().width-sashFormMatrixView.getSashWidth() > 0) {
@@ -1936,7 +1936,7 @@ public class SimLive {
 								sashFormMatrixView.getClientArea().width-tree.getBounds().width-sashFormMatrixView.getSashWidth()});
 					}
 					else {
-						sashFormMatrixView.setWeights(new int[] {sashFormMatrixView.getClientArea().width, 0});
+						sashFormMatrixView.setWeights(new int[] {1, 0});
 					}
 				}
 			}
