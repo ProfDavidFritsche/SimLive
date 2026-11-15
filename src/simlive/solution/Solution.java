@@ -42,6 +42,7 @@ public class Solution {
 			"Update Model...", "Reorder Nodes...", "Calculating...", "No Solution"};
 	private boolean isWriteMatrixView;
 	private int nIncrements;
+	private double minElemLength = Double.MAX_VALUE;
 	private Contact[] contacts; //parallelStream
 	private int nSuppressedDofs = 0; //solve2d
 	private boolean[] suppressedDof = null; //solve2d
@@ -79,7 +80,7 @@ public class Solution {
 		warnings = "";
 	}
 	
-	private void initialize() {
+	public void initialize() {
 		ArrayList<Node> nodes = refModel.getNodes();
 		ArrayList<Element> elements = refModel.getElements();
 		
@@ -115,6 +116,26 @@ public class Solution {
 			
 			setSuppressedDofs2d();
 		}
+		
+		contacts = new Contact[refModel.getNodes().size()];
+		
+		for (int e = 0; e < refModel.getElements().size(); e++) {
+			refModel.getElements().get(e).initMelem(refModel.getNodes());
+			if (refModel.getElements().get(e).isPlaneElement()) {
+				((PlaneElement) refModel.getElements().get(e)).initKelem(refModel.getNodes());
+			}
+			int[] elemNodes = refModel.getElements().get(e).getElementNodes();
+			for (int i = 1; i < elemNodes.length; i++) {
+				double[] coords0 = refModel.getNodes().get(elemNodes[i-1]).getCoords();
+				double[] coords1 = refModel.getNodes().get(elemNodes[i]).getCoords();
+				minElemLength = Math.min(minElemLength, (coords1[0]-coords0[0])*(coords1[0]-coords0[0])+
+						(coords1[1]-coords0[1])*(coords1[1]-coords0[1])+
+						(coords1[2]-coords0[2])*(coords1[2]-coords0[2]));
+			}
+		}
+		minElemLength = Math.sqrt(minElemLength);
+		
+		C_coupling_global = new Matrix(nDofs, 1);
 	}
 	
 	public boolean checkModel() {
@@ -304,27 +325,6 @@ public class Solution {
 		
 		int startInc = 0;
 		double startTime = 0.0;
-		double minElemLength = Double.MAX_VALUE;
-		
-		contacts = new Contact[refModel.getNodes().size()];
-		
-		for (int e = 0; e < refModel.getElements().size(); e++) {
-			refModel.getElements().get(e).initMelem(refModel.getNodes());
-			if (refModel.getElements().get(e).isPlaneElement()) {
-				((PlaneElement) refModel.getElements().get(e)).initKelem(refModel.getNodes());
-			}
-			int[] elemNodes = refModel.getElements().get(e).getElementNodes();
-			for (int i = 1; i < elemNodes.length; i++) {
-				double[] coords0 = refModel.getNodes().get(elemNodes[i-1]).getCoords();
-				double[] coords1 = refModel.getNodes().get(elemNodes[i]).getCoords();
-				minElemLength = Math.min(minElemLength, (coords1[0]-coords0[0])*(coords1[0]-coords0[0])+
-						(coords1[1]-coords0[1])*(coords1[1]-coords0[1])+
-						(coords1[2]-coords0[2])*(coords1[2]-coords0[2]));
-			}
-		}
-		minElemLength = Math.sqrt(minElemLength);
-		
-		C_coupling_global = new Matrix(nDofs, 1);
 		
 		for (int s = 0; s < refModel.getSteps().size(); s++) {
 			Step step = refModel.getSteps().get(s);
@@ -334,7 +334,7 @@ public class Solution {
 			
 			switch (step.type) {
 			
-				case MECHANICAL_STATIC:	if (!staticSolution(dialog, step, startInc, startTime, minElemLength)) {
+				case MECHANICAL_STATIC:	if (!staticSolution(dialog, step, startInc, startTime)) {
 											return;
 										}
 										break;
@@ -357,7 +357,7 @@ public class Solution {
 		}
 	}
 	
-	private boolean staticSolution(SolutionDialog dialog, Step step, int startInc, double startTime, double minElemLength) {
+	private boolean staticSolution(SolutionDialog dialog, Step step, int startInc, double startTime) {
 		
 		final double CONV_RATIO = 0.01;
 		final double DIV_RATIO = 1E20;

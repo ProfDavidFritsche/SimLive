@@ -952,41 +952,47 @@ public class XML {
 			Document document = (Document) builder.build(xmlFile);
 			org.jdom.Element XMLroot = document.getRootElement();
 			org.jdom.Element XMLsolution = XMLroot.getChild("solution");
-			org.jdom.Element XMLincrements = XMLsolution.getChild("increments");
-			Object[] list = XMLincrements.getChildren().toArray();
 			
-			Increment[] increments = new Increment[list.length];
-			
-			for (int i = 0; i < list.length; i++) {
-
-				org.jdom.Element XMLincrement = (org.jdom.Element) list[i];
-				double time = getDoubleAttribute(XMLincrement, "time");
-				int stepNr = getIntegerAttribute(XMLincrement, "stepNr");
-				increments[i] = new Increment(solution, time, stepNr);
-				
-				Matrix[] M_elem = XMLToMatrixArray(XMLincrement.getChild("M_elem"));
-				Matrix[] K_elem = XMLToMatrixArray(XMLincrement.getChild("K_elem"));
-				Matrix M_global = XMLToMatrix(XMLincrement.getChild("M_global"));
-				Matrix K_global = XMLToMatrix(XMLincrement.getChild("K_global"));
-				Matrix f_ext = XMLToMatrix(XMLincrement.getChild("f_ext"));
-				Matrix f_int = XMLToMatrix(XMLincrement.getChild("f_int"));
-				Matrix u_global = XMLToMatrix(XMLincrement.getChild("u_global"));
-				Matrix v_global = XMLToMatrix(XMLincrement.getChild("v_global"));
-				Matrix a_global = XMLToMatrix(XMLincrement.getChild("a_global"));
-				Matrix G = XMLToMatrix(XMLincrement.getChild("G"));
-				Matrix r_global = XMLToMatrix(XMLincrement.getChild("r_global"));
-				Matrix K_constr = XMLToMatrix(XMLincrement.getChild("K_constr"));
-				Matrix M_constr = XMLToMatrix(XMLincrement.getChild("M_constr"));
-				Matrix delta_f_constr = XMLToMatrix(XMLincrement.getChild("delta_f_constr"));
-				
-				increments[i].setResults(u_global, v_global, a_global, r_global);
-				increments[i].setResultsForMatrixView(K_elem, M_elem, M_global, K_global, f_ext, f_int, G, K_constr, M_constr, delta_f_constr);
+			if (XMLsolution.getChild("D") != null && XMLsolution.getChild("V") != null) {
+				solution.setD(XMLToMatrix(XMLsolution.getChild("D")));
+				solution.setV(XMLToMatrix(XMLsolution.getChild("V")));
+				solution.initialize();
+				solution.calculateIncrementsForEigenmode(0);
 			}
-			
-			solution.setIncrements(increments);
-			
-			solution.setD(XMLToMatrix(XMLsolution.getChild("D")));
-			solution.setV(XMLToMatrix(XMLsolution.getChild("V")));
+			else {
+				org.jdom.Element XMLincrements = XMLsolution.getChild("increments");
+				Object[] list = XMLincrements.getChildren().toArray();
+				
+				Increment[] increments = new Increment[list.length];
+				
+				for (int i = 0; i < list.length; i++) {
+	
+					org.jdom.Element XMLincrement = (org.jdom.Element) list[i];
+					double time = getDoubleAttribute(XMLincrement, "time");
+					int stepNr = getIntegerAttribute(XMLincrement, "stepNr");
+					increments[i] = new Increment(solution, time, stepNr);
+					
+					Matrix[] M_elem = XMLToMatrixArray(XMLincrement.getChild("M_elem"));
+					Matrix[] K_elem = XMLToMatrixArray(XMLincrement.getChild("K_elem"));
+					Matrix M_global = XMLToMatrix(XMLincrement.getChild("M_global"));
+					Matrix K_global = XMLToMatrix(XMLincrement.getChild("K_global"));
+					Matrix f_ext = XMLToMatrix(XMLincrement.getChild("f_ext"));
+					Matrix f_int = XMLToMatrix(XMLincrement.getChild("f_int"));
+					Matrix u_global = XMLToMatrix(XMLincrement.getChild("u_global"));
+					Matrix v_global = XMLToMatrix(XMLincrement.getChild("v_global"));
+					Matrix a_global = XMLToMatrix(XMLincrement.getChild("a_global"));
+					Matrix G = XMLToMatrix(XMLincrement.getChild("G"));
+					Matrix r_global = XMLToMatrix(XMLincrement.getChild("r_global"));
+					Matrix K_constr = XMLToMatrix(XMLincrement.getChild("K_constr"));
+					Matrix M_constr = XMLToMatrix(XMLincrement.getChild("M_constr"));
+					Matrix delta_f_constr = XMLToMatrix(XMLincrement.getChild("delta_f_constr"));
+					
+					increments[i].setResults(u_global, v_global, a_global, r_global);
+					increments[i].setResultsForMatrixView(K_elem, M_elem, M_global, K_global, f_ext, f_int, G, K_constr, M_constr, delta_f_constr);
+				}
+				
+				solution.setIncrements(increments);
+			}
 			
 			Solution.log = getStringAttribute(XMLsolution, "log");
 			Solution.warnings = getStringAttribute(XMLsolution, "warnings");
@@ -1477,33 +1483,36 @@ public class XML {
 				org.jdom.Element XMLsolution = new org.jdom.Element("solution");
 				
 				Solution solution = SimLive.post.getSolution();
-				org.jdom.Element XMLincrements = new org.jdom.Element("increments");
-				for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
-					org.jdom.Element XMLincrement = new org.jdom.Element("increment");
-					setDoubleAttribute(XMLincrement, "time", solution.getIncrement(i).getTime());
-					setIntegerAttribute(XMLincrement, "stepNr", solution.getIncrement(i).getStepNr());
-					
-					matrixArrayToXML(solution.getIncrement(i).get_M_elem(), new org.jdom.Element("M_elem"), XMLincrement);
-					matrixArrayToXML(solution.getIncrement(i).get_K_elem(), new org.jdom.Element("K_elem"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_M_global(), new org.jdom.Element("M_global"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_K_global(), new org.jdom.Element("K_global"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_f_ext(), new org.jdom.Element("f_ext"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_f_int(), new org.jdom.Element("f_int"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_u_global(), new org.jdom.Element("u_global"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_v_global(), new org.jdom.Element("v_global"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_a_global(), new org.jdom.Element("a_global"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_G(), new org.jdom.Element("G"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_r_global(), new org.jdom.Element("r_global"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_K_constr(), new org.jdom.Element("K_constr"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_M_constr(), new org.jdom.Element("M_constr"), XMLincrement);
-					matrixToXML(solution.getIncrement(i).get_delta_f_constr(), new org.jdom.Element("delta_f_constr"), XMLincrement);
-					
-					XMLincrements.addContent(XMLincrement);
+				if (solution.getD() != null && solution.getV() != null) {
+					matrixToXML(solution.getD(), new org.jdom.Element("D"), XMLsolution);
+					matrixToXML(solution.getV(), new org.jdom.Element("V"), XMLsolution);
 				}
-				XMLsolution.addContent(XMLincrements);
-				
-				matrixToXML(solution.getD(), new org.jdom.Element("D"), XMLsolution);
-				matrixToXML(solution.getV(), new org.jdom.Element("V"), XMLsolution);
+				else {
+					org.jdom.Element XMLincrements = new org.jdom.Element("increments");
+					for (int i = 0; i < solution.getNumberOfIncrements()+1; i++) {
+						org.jdom.Element XMLincrement = new org.jdom.Element("increment");
+						setDoubleAttribute(XMLincrement, "time", solution.getIncrement(i).getTime());
+						setIntegerAttribute(XMLincrement, "stepNr", solution.getIncrement(i).getStepNr());
+						
+						matrixArrayToXML(solution.getIncrement(i).get_M_elem(), new org.jdom.Element("M_elem"), XMLincrement);
+						matrixArrayToXML(solution.getIncrement(i).get_K_elem(), new org.jdom.Element("K_elem"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_M_global(), new org.jdom.Element("M_global"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_K_global(), new org.jdom.Element("K_global"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_f_ext(), new org.jdom.Element("f_ext"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_f_int(), new org.jdom.Element("f_int"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_u_global(), new org.jdom.Element("u_global"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_v_global(), new org.jdom.Element("v_global"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_a_global(), new org.jdom.Element("a_global"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_G(), new org.jdom.Element("G"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_r_global(), new org.jdom.Element("r_global"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_K_constr(), new org.jdom.Element("K_constr"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_M_constr(), new org.jdom.Element("M_constr"), XMLincrement);
+						matrixToXML(solution.getIncrement(i).get_delta_f_constr(), new org.jdom.Element("delta_f_constr"), XMLincrement);
+						
+						XMLincrements.addContent(XMLincrement);
+					}
+					XMLsolution.addContent(XMLincrements);
+				}
 				
 				setStringAttribute(XMLsolution, "log", Solution.log);
 				setStringAttribute(XMLsolution, "errors", Solution.errors);
