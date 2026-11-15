@@ -256,13 +256,11 @@ public class SimLive {
 	public static boolean toggleNonZeroEntries;
 	
 	private static SashForm sashForm, sashForm_1, sashForm_2, sashFormMatrixView;
-	private static int[] sashForm_Weights;
-	private static int sashForm_SashWidth;
-	private static int[] sashForm_1_Weights;
-	private static int sashForm_1_SashWidth;
-	private static int sashFormMatrixView_sashWidth;
+	private CTabFolder tabFolderMatrixView;
+	private CTabFolder tabFolderDiagram;
 	private CTabItem tbtmMatrixView;
 	private CTabItem tbtmDiagram;
+	private static boolean swapped;
 	
 	private Thread checkModel;
 	/**
@@ -305,6 +303,14 @@ public class SimLive {
 		END_ICON = resize(END_ICON, ICON_HEIGHT_FACTORS[0]);
 		createContents();
 		shell.open();
+		/*GridData gd_modelTree = new GridData();
+		gd_modelTree.heightHint = 200;
+		System.out.println(modelTree.getItemHeight());
+		modelTree.setLayoutData(gd_modelTree);
+		modelTree.layout();*/
+		//modelTree.pack();
+		//sashForm_2_Default = sashForm_2.getWeights();
+		
 		shell.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent arg0) {
@@ -1218,32 +1224,13 @@ public class SimLive {
 				
 				new MenuItem(menu, SWT.SEPARATOR);
 				
-				final MenuItem menuItem_horizontal = new MenuItem(menu, SWT.CHECK);
-				menuItem_horizontal.setText("Switch Matrix View Horizontal/Vertical");
-				menuItem_horizontal.setSelection(sashForm.getOrientation() == SWT.HORIZONTAL);
-				menuItem_horizontal.addSelectionListener(new SelectionAdapter() {
+				final MenuItem menuItem_swap = new MenuItem(menu, SWT.NONE);
+				menuItem_swap.setText("Swap Diagram/Matrix View");
+				menuItem_swap.setEnabled(!(tbtmDiagram.isDisposed() && tbtmMatrixView.isDisposed()));
+				menuItem_swap.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						if (sashForm.getOrientation() == SWT.HORIZONTAL) {
-							sashForm.setOrientation(SWT.VERTICAL);
-						}
-						else {
-							sashForm.setOrientation(SWT.HORIZONTAL);
-						}
-					}
-				});
-				final MenuItem menuItem_vertical = new MenuItem(menu, SWT.CHECK);
-				menuItem_vertical.setText("Switch Diagram View Horizontal/Vertical");
-				menuItem_vertical.setSelection(sashForm_1.getOrientation() == SWT.VERTICAL);
-				menuItem_vertical.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						if (sashForm_1.getOrientation() == SWT.VERTICAL) {
-							sashForm_1.setOrientation(SWT.HORIZONTAL);
-						}
-						else {
-							sashForm_1.setOrientation(SWT.VERTICAL);
-						}
+						swapDiagramMatrixView();
 					}
 				});
 				
@@ -1254,12 +1241,9 @@ public class SimLive {
 				menuItem_reset.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						sashForm.setOrientation(SWT.VERTICAL);
-						sashForm_Weights = new int[]{4, 1};
-						sashForm.setWeights(sashForm_Weights);
-						sashForm_1.setOrientation(SWT.HORIZONTAL);
-						sashForm_1_Weights = new int[]{3, 1};
-						sashForm_1.setWeights(sashForm_1_Weights);
+						sashForm.setWeights(new int[]{4, 1});
+						sashForm_1.setWeights(new int[]{3, 1});
+						if (swapped) swapDiagramMatrixView();
 						if (!menuItem_showDiagramView.getSelection()) {
 							initArea(false);
 						}
@@ -1269,7 +1253,7 @@ public class SimLive {
 						if (tree.getItemCount() > 0) {
 							setSashFormMatrixView(tree.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
 						}
-						sashForm_2.setWeights(new int[] {1, 3});
+						setSashForm_2(modelTree.getItemHeight()*modelTree.getItemCount()+2*modelTree.getBorderWidth());
 						//
 						toggleNonZeroEntries = false;
 						table.setFont(shell.getDisplay().getSystemFont());
@@ -1286,6 +1270,12 @@ public class SimLive {
 		tabFolderModel = new CTabFolder(shell, SWT.BORDER | SWT.SINGLE);
 		CTabItem tabItem = new CTabItem(tabFolderModel, SWT.NONE);
 		tabItem.setText("Model");
+		
+		sashForm = new SashForm(shell, SWT.VERTICAL);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		
+		sashForm_1 = new SashForm(sashForm, SWT.HORIZONTAL);
+		sashForm_1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
 		tabFolderModel.setSelection(tabItem);
 		
@@ -1350,6 +1340,9 @@ public class SimLive {
 		
 		sashForm_2 = new SashForm(tabFolderModel, SWT.VERTICAL);
 		tabItem.setControl(sashForm_2);
+		sashForm_2.addListener(SWT.Resize, event -> {
+			setSashForm_2(modelTree.getBounds().height);
+		});
 		
 		modelTree = new Tree(sashForm_2, SWT.MULTI | SWT.BORDER);
 		final TreeEditor editor = new TreeEditor(modelTree);
@@ -1617,6 +1610,7 @@ public class SimLive {
 			TreeItem item = new TreeItem(modelTree, SWT.NONE);
 			item.setText(str[i]);
 		}
+		modelTree.setSize(tabFolderModel.getClientArea().width, modelTree.getItemHeight()*modelTree.getItemCount()+2*modelTree.getBorderWidth());
 		
 		final Menu rightClickMenu = new Menu(modelTree);
 	    modelTree.setMenu(rightClickMenu);	   
@@ -1873,12 +1867,6 @@ public class SimLive {
 		
 		compositeLeft = new Composite(sashForm_2, SWT.BORDER);
 		compositeLeft.setLayout(new GridLayout());
-		sashForm_2.setWeights(new int[] {1, 3});
-		
-		sashForm = new SashForm(shell, SWT.VERTICAL);
-		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		
-		sashForm_1 = new SashForm(sashForm, SWT.NONE);
 		
 		CTabFolder tabFolderView = new CTabFolder(sashForm_1, SWT.BORDER | SWT.SINGLE);
 		tabFolderView.addMouseListener(new MouseAdapter() {
@@ -1905,7 +1893,7 @@ public class SimLive {
         
 		tbtmView.setControl(view);
 		
-		CTabFolder tabFolderDiagram = new CTabFolder(sashForm_1, SWT.BORDER | SWT.CLOSE | SWT.SINGLE);
+		tabFolderDiagram = new CTabFolder(sashForm_1, SWT.BORDER | SWT.CLOSE | SWT.SINGLE);
 		tabFolderDiagram.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent arg0) {
@@ -1925,7 +1913,7 @@ public class SimLive {
 		tbtmDiagram.setControl(diagramArea);
 		tabFolderDiagram.setSelection(tbtmDiagram);
 		
-		CTabFolder tabFolderMatrixView = new CTabFolder(sashForm, SWT.BORDER | SWT.CLOSE | SWT.SINGLE);
+		tabFolderMatrixView = new CTabFolder(sashForm, SWT.BORDER | SWT.CLOSE | SWT.SINGLE);
 		tabFolderMatrixView.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent arg0) {
@@ -1940,11 +1928,16 @@ public class SimLive {
 			@Override
 			public void controlResized(ControlEvent arg0) {
 				if (tree.getItemCount() == 0) {
-					sashFormMatrixView.setWeights(new int[] {1, 0});
-					if (sashFormMatrixView_sashWidth == 0) {
-						sashFormMatrixView_sashWidth = sashFormMatrixView.getSashWidth();
+					sashFormMatrixView.setMaximizedControl(sashFormMatrixView.getChildren()[0]);
+				}
+				else {
+					if (sashFormMatrixView.getClientArea().width-tree.getBounds().width-sashFormMatrixView.getSashWidth() > 0) {
+						sashFormMatrixView.setWeights(new int[] {tree.getBounds().width+1,
+								sashFormMatrixView.getClientArea().width-tree.getBounds().width-sashFormMatrixView.getSashWidth()});
 					}
-					sashFormMatrixView.setSashWidth(0);
+					else {
+						sashFormMatrixView.setWeights(new int[] {sashFormMatrixView.getClientArea().width, 0});
+					}
 				}
 			}
 		});
@@ -2023,8 +2016,8 @@ public class SimLive {
 		});*/
 		//new TableCursor(table, SWT.NONE);
 		
-		sashForm_1.setWeights(new int[] {3, 1});
 		sashForm.setWeights(new int[] {4, 1});
+		sashForm_1.setWeights(new int[] {3, 1});
 		
 		compositeStatusBar = new Composite(shell, SWT.NONE);
 		GridLayout gl_compositeStatusBar = new GridLayout(19, false);
@@ -2273,7 +2266,6 @@ public class SimLive {
 	private void initArea(boolean matrixArea) {
 		CTabItem tabItem = null;
 		if (matrixArea) {
-			CTabFolder tabFolderMatrixView = (CTabFolder) sashForm.getChildren()[1];
 			tbtmMatrixView = new CTabItem(tabFolderMatrixView, SWT.NONE);
 			tbtmMatrixView.setText("Matrix View");
 			tbtmMatrixView.setControl(sashFormMatrixView);
@@ -2281,7 +2273,6 @@ public class SimLive {
 			tabItem = tbtmMatrixView;
 		}
 		else {
-			CTabFolder tabFolderDiagram = (CTabFolder) sashForm_1.getChildren()[1];
 			tbtmDiagram = new CTabItem(tabFolderDiagram, SWT.NONE);
 			tbtmDiagram.setText("Diagram View");
 			tbtmDiagram.setControl(diagramArea);
@@ -2298,29 +2289,47 @@ public class SimLive {
 	
 	private static void hideArea(boolean matrixArea) {
 		if (!shellClosed) {
-			if (matrixArea) {
-				sashForm_Weights = sashForm.getWeights();
-				sashForm_SashWidth = sashForm.getSashWidth();
-				sashForm.setWeights(new int[] {1, 0});
-				sashForm.setSashWidth(0);
+			if (matrixArea && !swapped || !matrixArea && swapped) {
+				sashForm.setMaximizedControl(sashForm.getChildren()[0]);
 			}
 			else {
-				sashForm_1_Weights = sashForm_1.getWeights();
-				sashForm_1_SashWidth = sashForm_1.getSashWidth();
-				sashForm_1.setWeights(new int[] {1, 0});
-				sashForm_1.setSashWidth(0);
+				sashForm_1.setMaximizedControl(sashForm_1.getChildren()[0]);
 			}
 		}
 	}
 	
 	private static void showArea(boolean matrixArea) {
-		if (matrixArea) {
-			sashForm.setWeights(sashForm_Weights);
-			sashForm.setSashWidth(sashForm_SashWidth);
+		if (matrixArea && !swapped || !matrixArea && swapped) {
+			sashForm.setMaximizedControl(null);
 		}
 		else {
-			sashForm_1.setWeights(sashForm_1_Weights);
-			sashForm_1.setSashWidth(sashForm_1_SashWidth);
+			sashForm_1.setMaximizedControl(null);
+		}
+	}
+	
+	private void swapDiagramMatrixView() {
+		shell.setRedraw(false);
+		if (tbtmMatrixView.isDisposed()) showArea(true);
+		if (tbtmDiagram.isDisposed()) showArea(false);
+		int[] sashForm_Weights = sashForm.getWeights();
+		int[] sashForm_1_Weights = sashForm_1.getWeights();
+		tabFolderDiagram.setParent(swapped ? sashForm_1 : sashForm);
+		tabFolderMatrixView.setParent(swapped ? sashForm : sashForm_1);
+		sashForm.setWeights(sashForm_Weights);
+		sashForm_1.setWeights(sashForm_1_Weights);
+		swapped = !swapped;
+		if (tbtmMatrixView.isDisposed()) hideArea(true);
+		if (tbtmDiagram.isDisposed()) hideArea(false);
+		shell.setRedraw(true);
+	}
+	
+	private void setSashForm_2(int height) {
+		if (sashForm_2.getClientArea().height-height-sashForm_2.getSashWidth() > 0) {
+			sashForm_2.setMaximizedControl(null);
+			sashForm_2.setWeights(new int[] {height+1, sashForm_2.getClientArea().height-height-sashForm_2.getSashWidth()});
+		}
+		else {
+			sashForm_2.setMaximizedControl(modelTree);
 		}
 	}
 	
@@ -2490,9 +2499,7 @@ public class SimLive {
 					if (post != null) {
 						post.getPostIncrement().initTree(tree, post.getPostIncrementID());
 						int leftWidth = tree.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-						if (sashFormMatrixView_sashWidth != 0) {
-							sashFormMatrixView.setSashWidth(sashFormMatrixView_sashWidth);
-						}
+						sashFormMatrixView.setMaximizedControl(null);
 						setSashFormMatrixView(leftWidth);
 						table.setFont(shell.getDisplay().getSystemFont());
 						toggleNonZeroEntries = false;
