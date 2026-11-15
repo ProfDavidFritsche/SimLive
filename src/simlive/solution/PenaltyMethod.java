@@ -25,9 +25,9 @@ public class PenaltyMethod extends ConstraintMethod {
 	}
 	
 	@Override
-	public Matrix getConstrainedMatrix(Matrix matrix, boolean keep, Matrix G) {
+	public Matrix getConstrainedMatrix(Matrix matrix, Matrix G) {
 		setPenaltyValue(matrix);
-		Matrix X = keep ? matrix.copy() : matrix;
+		Matrix X = matrix.copy();
 		int m = G.getRowDimension();
 		int n = G.getColumnDimension();
 	    int[] NumberNonZeroIndices = new int[n];
