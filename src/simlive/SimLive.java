@@ -65,6 +65,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.wb.swt.SWTResourceManager;
+
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawableFactory;
@@ -1924,6 +1926,7 @@ public class SimLive {
 		tabFolderMatrixView.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));		
 		
 		sashFormMatrixView = new SashForm(tabFolderMatrixView, SWT.NONE);
+		sashFormMatrixView.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		sashFormMatrixView.addControlListener(new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent arg0) {
@@ -2002,6 +2005,13 @@ public class SimLive {
 	        public void handleEvent(Event event){
 	        	toggleNonZeroEntries = !toggleNonZeroEntries;
 	        	post.getPostIncrement().updateTable(table, tree);
+	        }
+	    });
+		table.addListener(SWT.Resize, new Listener(){
+	        public void handleEvent(Event event){
+	        	table.setVisible(false);
+	        	table.getParent().update();
+	        	table.setVisible(true);
 	        }
 	    });
 		/*table.addMouseTrackListener(new MouseTrackAdapter() {
@@ -2305,6 +2315,9 @@ public class SimLive {
 		else {
 			sashForm_1.setMaximizedControl(null);
 		}
+		table.setVisible(false);
+    	table.getParent().update();
+    	table.setVisible(true);
 	}
 	
 	private void swapDiagramMatrixView() {
