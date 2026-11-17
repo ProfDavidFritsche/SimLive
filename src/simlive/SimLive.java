@@ -87,7 +87,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
 
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -184,7 +183,7 @@ public class SimLive {
 	public static final float[] COLOR_DARK_BLUE = new float[]{0f, 0f, 0.5f};
 	public static final float[] COLOR_TRANSPARENT = new float[]{1f, 1f, 1f, 0.4f};
 	public static final double ZERO_TOL = 1E-8;
-	public static final double UNIT_SIZE = 1.0;
+	public static final double UNIT_SIZE = Display.getDefault().getDPI().x/120.0;
 	public static final double NODE_RADIUS = 12.0*UNIT_SIZE;
 	public static final double SNAP_TOL = 3.0*UNIT_SIZE;
 	public static final double LINE_ELEMENT_RADIUS = 8.0*UNIT_SIZE;
@@ -286,7 +285,7 @@ public class SimLive {
 		FontData fontData = display.getSystemFont().getFontData()[0];
 		fontData.setStyle(SWT.BOLD);
 		FONT_BOLD = new Font(display, fontData);
-		fontHeight = fontData.getHeight()*Toolkit.getDefaultToolkit().getScreenResolution() / 72f;
+		fontHeight = new GC(display).getFontMetrics().getAscent()+new GC(display).getFontMetrics().getDescent();
 		OK_ICON = new Image(display, SimLive.class.getResourceAsStream("ok-32.png"));
 		INFO_ICON = new Image(display, SimLive.class.getResourceAsStream("info-40.png"));
 		WARNING_ICON = new Image(display, SimLive.class.getResourceAsStream("warning-40.png"));
@@ -1335,7 +1334,13 @@ public class SimLive {
 		});
 		tabFolderModel.setSingle(false);
 		GridData gd_tabFolderStructure = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
-		gd_tabFolderStructure.widthHint = 400;
+		{
+			GC gc = new GC(shell);
+			char[] c = new char[12];
+			Arrays.fill(c, '0');
+			gd_tabFolderStructure.widthHint = gc.stringExtent(new String(c)).x*4;
+			gc.dispose();
+		}
 		tabFolderModel.setLayoutData(gd_tabFolderStructure);
 		tabFolderModel.setSimple(false);
 		tabFolderModel.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));

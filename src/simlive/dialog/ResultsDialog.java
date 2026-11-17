@@ -279,7 +279,7 @@ public class ResultsDialog extends Composite {
 			lblEigenModes.setText("Eigen Modes");
 			
 			Label lblFrequency = new Label(this, SWT.NONE);
-			lblFrequency.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+			lblFrequency.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 			lblFrequency.setText("Frequency:");
 			
 			combo = new Combo(this, SWT.READ_ONLY);
