@@ -21,21 +21,26 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.opengl.GLData;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.newt.event.KeyAdapter;
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.MouseListener;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.newt.swt.NewtCanvasSWT;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-
-import org.eclipse.swt.opengl.GLCanvas;
 
 import Jama.Matrix;
 import simlive.SimLive;
@@ -97,21 +102,10 @@ import simlive.model.Step.GRAVITY;
 import simlive.postprocessing.ScalarPlot;
 import simlive.postprocessing.Post.Layer;
 
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.MouseTrackAdapter;
-import org.eclipse.swt.events.MouseWheelListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 
-public class View extends GLCanvas {
+public class View {
 
 	public static boolean perspective = false;
 	private double fovy = 0;
@@ -172,6 +166,8 @@ public class View extends GLCanvas {
 	private TextRenderer rendererBold;
 	private float descent;
 	
+	public boolean noRender = true;
+	
 	public enum Side {NONE, X, MINUS_X, Y, MINUS_Y, Z, MINUS_Z}
 	public static Side side = Side.NONE;
 	
@@ -187,52 +183,61 @@ public class View extends GLCanvas {
 	//public static int edgeIndex = -1;
 	//private static ContactPair selectedContactPair = null;
 	
-	public View(Composite parent, int style, GLData gldata) {
-		super(parent, style, gldata);
+	public View(GLWindow glWindow, NewtCanvasSWT canvas) {
 		
-		addControlListener(new ControlAdapter() {
-			@Override
-			public void controlResized(ControlEvent arg0) {
-				initFOV();
-			}
+		glWindow.addGLEventListener(new GLEventListener() {
+            @Override
+            public void init(GLAutoDrawable drawable) {
+            	// TODO Auto-generated method stub
+            }
+
+            @Override
+            public void display(GLAutoDrawable drawable) {
+            	if (!noRender) {
+            		render(drawable.getGL().getGL2(), canvas.getBounds().width, canvas.getBounds().height);
+	                
+			        SimLive.diagramArea.redraw();
+			        SimLive.diagramArea.update();
+            	}
+            }
+
+            @Override
+            public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+                GL2 gl = drawable.getGL().getGL2();
+                gl.glViewport(0, 0, width, height);
+                initFOV(width, height);
+            }
+
+            @Override
+            public void dispose(GLAutoDrawable drawable) {
+            	// TODO Auto-generated method stub
+            }
+        });
+		
+		glWindow.addWindowListener(new WindowAdapter() {
+		    @Override
+		    public void windowGainedFocus(WindowEvent e) {
+		    	CTabFolder tabFolder = (CTabFolder) canvas.getParent();
+		    	tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+		    	tabFolder.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+				tabFolder.setFont(SimLive.FONT_BOLD);
+		    }
+
+		    @Override
+		    public void windowLostFocus(WindowEvent e) {
+		    	CTabFolder tabFolder = (CTabFolder) canvas.getParent();
+		    	tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		    	tabFolder.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+				tabFolder.setFont(Display.getCurrent().getSystemFont());
+		    }
 		});
-		SimLive.addFocusListener(this, (CTabFolder) parent);
-		addMouseTrackListener(new MouseTrackAdapter() {
-			@Override
-			public void mouseExit(MouseEvent e) {
-				//SimLive.shell.setFocus();
-				labelAtMousePos = null;
-				SimLive.statusBar.setText("");
-				SimLive.xCoord.setText("");
-				SimLive.yCoord.setText("");
-				SimLive.zCoord.setText("");
-				redraw();
-			}
-			@Override
-			public void mouseEnter(MouseEvent e) {
-				//setFocus();
-				setCursor(new Cursor(getDisplay(), SWT.CURSOR_CROSS));
-				mousePos[0] = e.x;
-				mousePos[1] = e.y;
-			}
-		});
-		addMouseWheelListener(new MouseWheelListener() {
-			public void mouseScrolled(MouseEvent arg0) {
-				if (arg0.count > 0) /* zoom in */ {
-					zoomIn(mousePos[0]-getSize().x/2, mousePos[1]-getSize().y/2);
-				}
-				else /* zoom out */ {
-					zoomOut(mousePos[0]-getSize().x/2, mousePos[1]-getSize().y/2);
-				}
-				redraw();
-			}
-		});
-		addKeyListener(new KeyAdapter() {
+		
+		glWindow.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				/* empty keyListener required to get focus on canvas if clicked */
-				timeControlByKeys(e);
-				if (e.keyCode == SWT.DEL) {
+				timeControlByKeys(e.getKeyCode(), new int[]{KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT,
+						KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN});
+				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
 					deleteSelectedLabel();
 					deleteSelectedMeasurement();
 					
@@ -246,49 +251,40 @@ public class View extends GLCanvas {
 						SimLive.model.updateModel(true);
 					}
 				}
-				if (e.keyCode == SWT.ESC) {
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 					deselectAllAndDisposeDialogs();
 				}
 				redraw();
 			}
 		});
-		addMouseMoveListener(new MouseMoveListener() {
-			public void mouseMove(MouseEvent arg0) {
-				if (robotMove) {
-					robotMove = false;
-					return;
-				}
-				/* drag threshold */
-				if (!isMouseDragged && mouseButton > 0 &&
-						Math.abs(arg0.x-mouseDown[0]) < SimLive.SNAP_TOL &&
-						Math.abs(arg0.y-mouseDown[1]) < SimLive.SNAP_TOL) return;
-				
-				isMouseDragged = mouseButton > 0;
+		
+		final Menu popup = new Menu(SimLive.shell, SWT.POP_UP);
+        canvas.setMenu(popup);
+
+		glWindow.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(com.jogamp.newt.event.MouseEvent arg0) {
+				// TODO Auto-generated method stub			
+			}
+			@Override
+			public void mouseDragged(com.jogamp.newt.event.MouseEvent arg0) {
+				isMouseDragged = true;
 				
 				int[] mousePosOld = new int[2];
 				mousePosOld[0] = mousePos[0];
 				mousePosOld[1] = mousePos[1];
 				
-				mousePos[0] = arg0.x;
-				mousePos[1] = arg0.y;
+				mousePos[0] = arg0.getX();
+				mousePos[1] = arg0.getY();
 				
 				int[] mousePosDelta = new int[2];
 				mousePosDelta[0] = mousePos[0]-mousePosOld[0];
 				mousePosDelta[1] = mousePos[1]-mousePosOld[1];
 				
-				if (!isMouseDragged && animation == null) {
-					selectedLabel = Search.getLabelAtPoint(mousePos);
-					selectedMeasurement = selectedLabel == null ? Search.getMeasurementAtPoint(mousePos) : null; 
-				}
-				
-				if (mouseButton == 0) {
-					Snap.initData(mousePos, true, true);
-				}
-					
 				if (rotAroundAxis) /*rotate around axis*/ {
 					Snap.initData(mousePos, false, false);
-					int xMove = arg0.x-mouseDown[0];
-					int yMove = -(arg0.y-mouseDown[1]);
+					int xMove = arg0.getX()-mouseDown[0];
+					int yMove = -(arg0.getY()-mouseDown[1]);
 					R = rotateAroundAxis(xMove, yMove);
 					if (animation == null) redraw();
 					return;
@@ -477,237 +473,103 @@ public class View extends GLCanvas {
 					
 				}
 				
-				if (mouseButton == 0 && SimLive.mode == Mode.PARTS &&
-					SimLive.dialogArea instanceof GeometricAreaDialog && !SimLive.dialogArea.isDisposed()) {
-					Node node = Snap.node != null ? Snap.node : new Node(Snap.coords2d[0], Snap.coords2d[1], 0);
-					((GeometricAreaDialog) SimLive.dialogArea).updateDialog(node);
-				}
-				
-				/*if (mouseButton == 1 && selectionBox == null) {
-					
-					if (selectedMeasurement != null &&
-						Search.getMeasurementAtPoint(mousePosOld) == selectedMeasurement)  move measurement  {
-						Snap.initData(mousePos, getNewPointInit(), false, false);
-						
-						selectedMeasurement.toFront();			
-						int[] spmOld = selectedMeasurement.getMovedPoint(toScreenCoords(selectedMeasurement.getStartPoint()));
-						selectedMeasurement.addToMove(mousePosDelta);
-						int[] spm = selectedMeasurement.getMovedPoint(toScreenCoords(selectedMeasurement.getStartPoint()));
-						View.this.mouseMove(mousePosOld[0]+spm[0]-spmOld[0]-mousePos[0],
-								mousePosOld[1]+spm[1]-spmOld[1]-mousePos[1]);
-					}
-					else {
-						selectedMeasurement = null;
-					}
-				}
-
-				if (mouseButton == 1 && selectionBox == null) {
-					
-					if (selectedLabel != null &&
-						Search.getLabelAtPoint(mousePosOld) == selectedLabel)  move label  {
-						Snap.initData(mousePos, getNewPointInit(), false, false);
-						
-						selectedLabel.toFront();
-						selectedLabel.addToMove(mousePosDelta);
-					}
-					else {
-						selectedLabel = null;
-					}
-				}
-					
-				if (mouseButton == 1 && (Sim2d.select == Sim2d.Select.NODES || Sim2d.select == Sim2d.Select.PARTS ||
-						Sim2d.select == Sim2d.Select.PARTS_3D) &&
-						selectedMeasurement == null && selectedLabel == null) {
-					
-					if (selectedNodes.size() == 1 && selectedNodes.get(0) == moveNode &&
-							Sim2d.mode == Mode.PARTS && selectionBox == null &&
-							!isControlKeyPressed)  move node  {
-						Snap.initData(mousePos, getNewPointInit(), true, true);
-						
-						double[] coords = null;
-						if (Snap.node != null) {
-							coords = Snap.node.getCoords();
-						}
-						else {
-							coords = Snap.coords;
-						}
-						double[] deltaCoords = new double[2];
-						deltaCoords[0] = coords[0]-selectedNodes.get(0).getXCoord();
-						deltaCoords[1] = coords[1]-selectedNodes.get(0).getYCoord();
-						((NodeDialog) ((PartsDialog) Sim2d.dialogArea).getDialog()).updateDialog(deltaCoords);				
-					}
-					else if (!selectedParts3d.isEmpty() && selectedParts3d.contains(Snap.part3d) &&
-							Sim2d.mode == Mode.PARTS && selectionBox == null &&
-							!isControlKeyPressed)  move parts3d  {
-						Snap.initData(mousePos, getNewPointInit(), false, false);
-						
-						double[] deltaCoords = new double[2];
-						deltaCoords[0] = deltaCoords[1] = Double.MAX_VALUE;
-						for (int s = 0; s < selectedParts3d.size(); s++) {
-							for (int n = 0; n < selectedParts3d.get(s).getNrVertices(); n++) {
-								Vertex3d vertex = selectedParts3d.get(s).getVertex(n);
-								int[] mousePosNode = toScreenCoords(vertex.getCoords());
-								mousePosNode[0] += mousePosDelta[0];
-								mousePosNode[1] += mousePosDelta[1];
-								
-								if (mousePosNode[0] < 0 || mousePosNode[0] > getSize().x ||
-									mousePosNode[1] < 0 || mousePosNode[1] > getSize().y) {
-									continue;
-								}
-									
-								Node node = Search.getNodeAtGridLine(fromScreenCoords(mousePosNode),
-										Sim2d.SNAP_TOL/zoom);
-								if (node != null) {
-									double diff = node.getCoords()[0]-vertex.getCoords()[0];
-									if (Math.abs(diff) < Math.abs(deltaCoords[0])) {
-										deltaCoords[0] = diff;
-									}
-									diff = node.getCoords()[1]-vertex.getCoords()[1];
-									if (Math.abs(diff) < Math.abs(deltaCoords[1])) {
-										deltaCoords[1] = diff;
-									}
-								}
-							}
-						}
-						
-						if (deltaCoords[0] != Double.MAX_VALUE || deltaCoords[1] != Double.MAX_VALUE) {
-							int[] move = new int[2];
-							move[0] = (int) Math.round(deltaCoords[0]*zoom);
-							move[1] = (int) Math.round(-deltaCoords[1]*zoom);
-							View.this.mouseMove(move[0]-mousePosDelta[0], move[1]-mousePosDelta[1]);
-						}
-						else {
-							deltaCoords[0] = mousePosDelta[0]/zoom;
-							deltaCoords[1] = -mousePosDelta[1]/zoom;
-						}
-						((Part3dDialog) ((PartsDialog) Sim2d.dialogArea).getDialog()).updateDialog(deltaCoords);
-					}
-					else if (!selectedSets.isEmpty() && selectedSets.contains(Sim2d.model.getSetByElement(Snap.element)) &&
-							Sim2d.mode == Mode.PARTS && selectionBox == null &&
-							!isControlKeyPressed)  move elements  {
-						Snap.initData(mousePos, getNewPointInit(), false, false);
-						
-						double[] deltaCoords = new double[2];
-						deltaCoords[0] = deltaCoords[1] = Double.MAX_VALUE;
-						for (int s = 0; s < selectedSets.size(); s++) {
-							for (int n = 0; n < selectedSets.get(s).getNodes().size(); n++) {
-								Node elementNode = selectedSets.get(s).getNodes().get(n);
-								int[] mousePosNode = toScreenCoords(elementNode.getCoords());
-								mousePosNode[0] += mousePosDelta[0];
-								mousePosNode[1] += mousePosDelta[1];
-								
-								if (mousePosNode[0] < 0 || mousePosNode[0] > getSize().x ||
-									mousePosNode[1] < 0 || mousePosNode[1] > getSize().y) {
-									continue;
-								}
-									
-								Node node = Search.getNodeAtGridLine(fromScreenCoords(mousePosNode),
-										Sim2d.SNAP_TOL/zoom);
-								if (node != null) {
-									double diff = node.getCoords()[0]-elementNode.getCoords()[0];
-									if (Math.abs(diff) < Math.abs(deltaCoords[0])) {
-										deltaCoords[0] = diff;
-									}
-									diff = node.getCoords()[1]-elementNode.getCoords()[1];
-									if (Math.abs(diff) < Math.abs(deltaCoords[1])) {
-										deltaCoords[1] = diff;
-									}
-								}
-							}
-						}
-						
-						if (deltaCoords[0] != Double.MAX_VALUE || deltaCoords[1] != Double.MAX_VALUE) {
-							int[] move = new int[2];
-							move[0] = (int) Math.round(deltaCoords[0]*zoom);
-							move[1] = (int) Math.round(-deltaCoords[1]*zoom);
-							View.this.mouseMove(move[0]-mousePosDelta[0], move[1]-mousePosDelta[1]);
-						}
-						else {
-							deltaCoords[0] = mousePosDelta[0]/zoom;
-							deltaCoords[1] = -mousePosDelta[1]/zoom;
-						}
-						((PartDialog) ((PartsDialog) Sim2d.dialogArea).getDialog()).updateDialog(deltaCoords);
-					}
-					else if (Sim2d.mode == Mode.CONNECTORS && selectionBox == null &&
-							((ConnectorsDialog) Sim2d.dialogArea).getSelection() == Snap.connector &&
-							!isControlKeyPressed)  move connector  {
-						Snap.initData(mousePos, getNewPointInit(), true, true);
-						
-						Connector connector = ((ConnectorsDialog) Sim2d.dialogArea).getSelection();
-						connector.setCoordinates(Snap.coords);
-						((ConnectorsDialog) Sim2d.dialogArea).updateDialog();
-					}
-					else  selection box  {
-						
-						Snap.initData(mousePos, getNewPointInit(), false, false);
-						
-						if (selectionBox == null) {
-							if (!isControlKeyPressed) {
-								deselectAll();
-							}
-							selectionBox = new Rectangle(mousePos[0], mousePos[1],
-									mousePosDelta[0], mousePosDelta[1]);
-						}
-						else {
-							selectionBox.width += mousePosDelta[0];
-							selectionBox.height += mousePosDelta[1];
-						}
-						
-						if (Sim2d.select == Sim2d.Select.NODES) {
-							selectNodesInBox();
-						}
-						if (Sim2d.select == Sim2d.Select.PARTS) {
-							selectSetsInBox();
-						}
-						if (Sim2d.select == Sim2d.Select.PARTS_3D) {
-							selectParts3dInBox();
-						}
-					}
-				}
-				
-				if (mouseButton == 2)  move view  {
-					Snap.initData(mousePos, getNewPointInit(), false, false);
-					setCursor(new Cursor(getDisplay(), SWT.CURSOR_SIZEALL));
-					origin[0] += mousePosDelta[0];
-					origin[1] += mousePosDelta[1];
-				}
-				
-				if (mouseButton == 0 && (Sim2d.select == Sim2d.Select.NODES || Sim2d.select == Sim2d.Select.PARTS ||
-					Sim2d.select == Sim2d.Select.PARTS_3D)) {
-					Snap.initData(mousePos, getNewPointInit(), true, true);
-					
-					if (Sim2d.mode == Mode.PARTS && ((PartsDialog) Sim2d.dialogArea).getDialog() instanceof GeometricAreaDialog) {
-						((GeometricAreaDialog) ((PartsDialog) Sim2d.dialogArea).getDialog()).updateDialog(
-							new Node(Snap.coords[0], Snap.coords[1]));
-					}
-				}
-				
-				if (mouseButton == 0 && (Sim2d.select == Sim2d.Select.DISTANCE || Sim2d.select == Sim2d.Select.ANGLE)) {
-					Snap.initData(mousePos, getNewPointInit(), true, true);
-					
-					measuring(false);
-				}
-				
-				if (mouseButton == 0 && Sim2d.select == Sim2d.Select.LABEL) {
-					Snap.initData(mousePos, getNewPointInit(), true, true);
-				}*/
-				
-				if (!isMouseDragged) {
-					setSideOfCoordinateSystem(mousePos[0], mousePos[1]);
-				}
 				if (animation == null) {
 					Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);
 					redraw();
 				}
 			}
-		});
-		
-		final Menu popup = new Menu(SimLive.shell, SWT.POP_UP);
-        setMenu(popup);
-
-		addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseUp(MouseEvent e) {
+			public void mouseEntered(com.jogamp.newt.event.MouseEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void mouseExited(com.jogamp.newt.event.MouseEvent arg0) {
+				labelAtMousePos = null;
+				SimLive.statusBar.setText("");
+				SimLive.xCoord.setText("");
+				SimLive.yCoord.setText("");
+				SimLive.zCoord.setText("");
+				redraw();
+			}
+			@Override
+			public void mouseMoved(com.jogamp.newt.event.MouseEvent arg0) {
+				canvas.setCursor(new Cursor(canvas.getDisplay(), SWT.CURSOR_CROSS));
+				if (SimLive.model == null) return;
+				if (robotMove) {
+					robotMove = false;
+					return;
+				}
+				
+				int[] mousePosOld = new int[2];
+				mousePosOld[0] = mousePos[0];
+				mousePosOld[1] = mousePos[1];
+				
+				mousePos[0] = arg0.getX();
+				mousePos[1] = arg0.getY();
+				
+				int[] mousePosDelta = new int[2];
+				mousePosDelta[0] = mousePos[0]-mousePosOld[0];
+				mousePosDelta[1] = mousePos[1]-mousePosOld[1];
+				
+				if (animation == null) {
+					selectedLabel = Search.getLabelAtPoint(mousePos);
+					selectedMeasurement = selectedLabel == null ? Search.getMeasurementAtPoint(mousePos) : null; 
+				}
+				
+				Snap.initData(mousePos, true, true);
+					
+				if (rotAroundAxis) /*rotate around axis*/ {
+					Snap.initData(mousePos, false, false);
+					int xMove = arg0.getX()-mouseDown[0];
+					int yMove = -(arg0.getY()-mouseDown[1]);
+					R = rotateAroundAxis(xMove, yMove);
+					if (animation == null) redraw();
+					return;
+				}
+				
+				if (SimLive.mode == Mode.PARTS &&
+					SimLive.dialogArea instanceof GeometricAreaDialog && !SimLive.dialogArea.isDisposed()) {
+					Node node = Snap.node != null ? Snap.node : new Node(Snap.coords2d[0], Snap.coords2d[1], 0);
+					((GeometricAreaDialog) SimLive.dialogArea).updateDialog(node);
+				}
+				
+				setSideOfCoordinateSystem(mousePos[0], mousePos[1]);
+				
+				if (animation == null) {
+					Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);
+					redraw();
+				}
+			}
+			@Override
+			public void mousePressed(com.jogamp.newt.event.MouseEvent arg0) {
+				isMouseDown = true;
+				mouseButton = arg0.getButton();
+				
+				rotAroundAxis = side != Side.NONE;
+				
+				if (Snap.node != null && Snap.node.getID() <= Model.maxUsedNodeID) {
+					moveNode = Snap.node;
+				}
+				movePoint = Snap.coords3d;
+				
+				mouseDown[0] = mousePos[0];
+				mouseDown[1] = mousePos[1];
+				
+				if (!selectedNodes.isEmpty()) {
+					SimLive.boxSelect = BoxSelect.NODES;
+				}
+				else if (!selectedParts3d.isEmpty()) {
+					SimLive.boxSelect = BoxSelect.PARTS_3D;
+				}				
+				else if (!selectedEdges.isEmpty()) {
+					SimLive.boxSelect = BoxSelect.EDGES;
+				}
+				else {
+					SimLive.boxSelect = BoxSelect.PARTS;
+				}
+			}
+			@Override
+			public void mouseReleased(com.jogamp.newt.event.MouseEvent arg0) {
 				popup.setVisible(false);
 				if (!isMouseDown) return;
 				isMouseDown = false;
@@ -728,7 +590,7 @@ public class View extends GLCanvas {
 					measurements.get(measurements.size()-2).toFront();
 				}
 				
-				if (setFocusPoint && e.button == 1 && !isMouseDragged) {
+				if (setFocusPoint && arg0.getButton() == 1 && !isMouseDragged) {
 					if (Snap.node != null) {
 						focusPoint = Label.getNewLabelForNode(Snap.node);
 					}
@@ -776,17 +638,17 @@ public class View extends GLCanvas {
 					}
 					else {
 					
-						if (e.button == 2)  /* middle click */ {
+						if (arg0.getButton() == 2)  /* middle click */ {
 							fitToView();
 						}
 						
-						if (e.button == 3)  /* right click */ {
+						if (arg0.getButton() == 3)  /* right click */ {
 							popupMenu(popup);
 						}
 						
 						boolean labelAdded = false;
 						
-						if (e.button == 1) {
+						if (arg0.getButton() == 1) {
 							/* orientation */
 							if (side != Side.NONE) {
 								R0 = getViewMatrix();
@@ -820,7 +682,7 @@ public class View extends GLCanvas {
 							}
 						}
 						
-						if (e.button == 1 && !labelAdded && SimLive.select != Select.DISTANCE && SimLive.select != Select.ANGLE &&
+						if (arg0.getButton() == 1 && !labelAdded && SimLive.select != Select.DISTANCE && SimLive.select != Select.ANGLE &&
 								SimLive.select != Select.LABEL && selectedLabel == null && selectedMeasurement == null &&
 								side == Side.NONE) {
 							
@@ -1140,70 +1002,36 @@ public class View extends GLCanvas {
 				}
 			}
 			@Override
-			public void mouseDown(MouseEvent e) {
-				isMouseDown = true;
-				mouseButton = e.button;
-				
-				rotAroundAxis = side != Side.NONE;
-				
-				if (Snap.node != null && Snap.node.getID() <= Model.maxUsedNodeID) {
-					moveNode = Snap.node;
+			public void mouseWheelMoved(com.jogamp.newt.event.MouseEvent arg0) {
+				if (arg0.getRotation()[1] > 0) /* zoom in */ {
+					zoomIn(mousePos[0]-canvas.getBounds().width/2, mousePos[1]-canvas.getBounds().height/2);
 				}
-				movePoint = Snap.coords3d;
-				
-				mouseDown[0] = mousePos[0];
-				mouseDown[1] = mousePos[1];
-				
-				if (!selectedNodes.isEmpty()) {
-					SimLive.boxSelect = BoxSelect.NODES;
+				else /* zoom out */ {
+					zoomOut(mousePos[0]-canvas.getBounds().width/2, mousePos[1]-canvas.getBounds().height/2);
 				}
-				else if (!selectedParts3d.isEmpty()) {
-					SimLive.boxSelect = BoxSelect.PARTS_3D;
-				}				
-				else if (!selectedEdges.isEmpty()) {
-					SimLive.boxSelect = BoxSelect.EDGES;
-				}
-				else {
-					SimLive.boxSelect = BoxSelect.PARTS;
-				}
-			}
-		});
-		addPaintListener(new PaintListener() {
-			public void paintControl(PaintEvent arg0) {
-				/*fix required to open Sim2d in WindowBuilder editor*/
-				if (SimLive.model == null) return;
-				
-				Rectangle rectangle = getClientArea();
-                setCurrent();
-                SimLive.glcontext.makeCurrent();
-                render(SimLive.glcontext.getGL().getGL2(), rectangle.width, rectangle.height);
-                swapBuffers();
-                SimLive.glcontext.release();
-		        
-		        SimLive.diagramArea.redraw();
-		        SimLive.diagramArea.update();
+				redraw();
 			}
 		});
 	}
 	
-	public void timeControlByKeys(KeyEvent e) {
+	public void timeControlByKeys(int keyCode, int[] keyCodes) {
 		if (SimLive.mode == Mode.RESULTS) {
 			int old = SimLive.post.getPostIncrementID();
-			if (e.keyCode == SWT.ARROW_LEFT) {
+			if (keyCode == keyCodes[0]) {
 				SimLive.post.setPostIncrementID(Math.max(old-1, 0));
 			}
-			if (e.keyCode == SWT.ARROW_RIGHT) {
+			if (keyCode == keyCodes[1]) {
 				SimLive.post.setPostIncrementID(Math.min(old+1,
 						SimLive.post.getSolution().getNumberOfIncrements()));
 			}
-			if (e.keyCode == SWT.ARROW_UP) {
+			if (keyCode == keyCodes[2]) {
 				SimLive.post.setPostIncrementIDtoStartOfStep();
 				if (SimLive.post.getPostIncrementID() == old) {
 					SimLive.post.setPostIncrementID(Math.max(old-1, 0));
 					SimLive.post.setPostIncrementIDtoStartOfStep();
 				}
 			}
-			if (e.keyCode == SWT.ARROW_DOWN) {
+			if (keyCode == keyCodes[3]) {
 				SimLive.post.setPostIncrementIDtoEndOfStep();
 				if (SimLive.post.getPostIncrementID() == old) {
 					SimLive.post.setPostIncrementID(Math.min(old+1,
@@ -1211,10 +1039,10 @@ public class View extends GLCanvas {
 					SimLive.post.setPostIncrementIDtoEndOfStep();
 				}
 			}
-			if (e.keyCode == SWT.PAGE_UP) {
+			if (keyCode == keyCodes[4]) {
 				SimLive.post.setPostIncrementID(0);
 			}
-			if (e.keyCode == SWT.PAGE_DOWN) {
+			if (keyCode == keyCodes[5]) {
 				SimLive.post.setPostIncrementID(SimLive.post.getSolution().getNumberOfIncrements());
 			}
 			((ResultsDialog) SimLive.dialogArea).setSliderValue(SimLive.post.getPostIncrementID());
@@ -1920,15 +1748,16 @@ public class View extends GLCanvas {
 			if (screen[1] > max_y) max_y = screen[1];
 		}
 		/* fit to canvas size */
+		int[] viewport = getViewport();
 		if (focusPoint != null) {
 			double[] coords = focusPoint.getCoordinatesWithDeformation();
 			double[] point = modelToScreenCoordinates(coords);
-			xyScaling[0] = getSize().x*SimLive.FIT_TO_VIEW/(2.0*Math.max(max_x-point[0], point[0]-min_x));
-			xyScaling[1] = getSize().y*SimLive.FIT_TO_VIEW/(2.0*Math.max(max_y-point[1], point[1]-min_y));
+			xyScaling[0] = viewport[2]*SimLive.FIT_TO_VIEW/(2.0*Math.max(max_x-point[0], point[0]-min_x));
+			xyScaling[1] = viewport[3]*SimLive.FIT_TO_VIEW/(2.0*Math.max(max_y-point[1], point[1]-min_y));
 		}
 		else {
-			xyScaling[0] = getSize().x*SimLive.FIT_TO_VIEW/(max_x-min_x);
-			xyScaling[1] = getSize().y*SimLive.FIT_TO_VIEW/(max_y-min_y);
+			xyScaling[0] = viewport[2]*SimLive.FIT_TO_VIEW/(max_x-min_x);
+			xyScaling[1] = viewport[3]*SimLive.FIT_TO_VIEW/(max_y-min_y);
 		}
 	}
 	
@@ -1936,7 +1765,7 @@ public class View extends GLCanvas {
 		if (perspective) {
 			int[] viewport = getViewport();
 			float aspectRatio = (float) viewport[3] / (float) viewport[2];
-			GL2 gl2 = SimLive.glcontext.getGL().getGL2();
+			GL2 gl2 = SimLive.glWindow.getGL().getGL2();
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
 			double farClip = 1.0/zoom*100.0;
@@ -2497,6 +2326,10 @@ public class View extends GLCanvas {
 		redraw();
 	}
 	
+	public void redraw() {
+		SimLive.glWindow.display();		
+	}
+
 	public void deleteAllMeasurements() {
 		measurements.clear();
 		selectedMeasurement = null;
@@ -2906,7 +2739,7 @@ public class View extends GLCanvas {
 				mousePos[0] += deltaX;
 				mousePos[1] += deltaY;
 				Robot r = new Robot();
-				Point p = toDisplay(mousePos[0], mousePos[1]);
+				Point p = SimLive.canvas.toDisplay(mousePos[0], mousePos[1]);
 				int count = 0;
 				while (MouseInfo.getPointerInfo().getLocation().x != p.x ||
 						MouseInfo.getPointerInfo().getLocation().y != p.y) {
@@ -3223,6 +3056,7 @@ public class View extends GLCanvas {
 		
 		double scaling = 0.0;
 		if (SimLive.mode == Mode.RESULTS) {
+			if (SimLive.post == null) return;
 			scaling = SimLive.post.getScaling();
 		}
 		//before setTransformation
@@ -4104,7 +3938,7 @@ public class View extends GLCanvas {
 	    gl2.glMatrixMode(GL2.GL_PROJECTION);
 	    gl2.glPushMatrix();
 	    gl2.glLoadIdentity();
-	    gl2.glOrtho(0.0, getSize().x, getSize().y, 0.0, -1.0, 10.0);
+	    gl2.glOrtho(0.0, width, height, 0.0, -1.0, 10.0);
 	    gl2.glMatrixMode(GL2.GL_MODELVIEW);
 	    gl2.glPushMatrix();
 	    gl2.glLoadIdentity();
@@ -5634,7 +5468,7 @@ public class View extends GLCanvas {
 		R0 = Matrix.identity(3, 3);
 		rotPoint = new double[3];
 		int[] viewport = getViewport();
-		GL2 gl2 = SimLive.glcontext.getGL().getGL2();
+		GL2 gl2 = SimLive.glWindow.getGL().getGL2();
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
 		gl2.glLoadIdentity();
 		setProjection(gl2, viewport[2], viewport[3]);
@@ -5670,9 +5504,7 @@ public class View extends GLCanvas {
 		rendererBold = new TextRenderer(font, true, false);
 	}
 	
-	private void initFOV() {
-		double width = getBounds().width;
-		double height = getBounds().height;
+	private void initFOV(double width, double height) {
 		if (width > height) {
 			fovy = Math.atan(height/width);
 		}
@@ -6968,14 +6800,14 @@ public class View extends GLCanvas {
 	}
 	
 	private static double[] getModelViewMatrix() {
-		GL2 gl2 = SimLive.glcontext.getGL().getGL2();
+        GL2 gl2 = SimLive.glWindow.getGL().getGL2();
 		double[] modelview = new double[16];
 	    gl2.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, modelview, 0);
 	    return modelview;
 	}
 	
 	public static int[] getViewport() {
-		GL2 gl2 = SimLive.glcontext.getGL().getGL2();
+		GL2 gl2 = SimLive.glWindow.getGL().getGL2();
 		int[] viewport = new int[4];
 	    gl2.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
 		return viewport;
@@ -6983,7 +6815,7 @@ public class View extends GLCanvas {
 	
 	public static double[] modelToScreenCoordinates(double[] modelCoords) {
 		double[] screenCoords = new double[3];
-		GL2 gl2 = SimLive.glcontext.getGL().getGL2();
+		GL2 gl2 = SimLive.glWindow.getGL().getGL2();
 		double[] modelview = new double[16];
 	    gl2.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, modelview, 0);
 	    double[] projection = new double[16];
@@ -7044,7 +6876,7 @@ public class View extends GLCanvas {
 	
 	public static double[] screenToModelCoordinates(double screenX, double screenY) {
 		double[] modelCoords = new double[3];
-		GL2 gl2 = SimLive.glcontext.getGL().getGL2();
+		GL2 gl2 = SimLive.glWindow.getGL().getGL2();
 		double[] modelview = new double[16];
 	    gl2.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, modelview, 0);
 	    double[] projection = new double[16];

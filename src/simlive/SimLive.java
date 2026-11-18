@@ -60,16 +60,16 @@ import simlive.view.View;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.opengl.GLData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.newt.swt.NewtCanvasSWT;
 import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLDrawableFactory;
+import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 
 import de.javagl.obj.FloatTuple;
@@ -234,8 +234,9 @@ public class SimLive {
 	public static Composite compositeStatusBar;
 	public static Composite dialogArea;
 	
-	public static GLContext glcontext;
 	public static View view;
+	public static NewtCanvasSWT canvas;
+	public static GLWindow glWindow;
 	public static DiagramArea diagramArea;
 	
 	CTabFolder tabFolderModel;
@@ -304,6 +305,7 @@ public class SimLive {
 		END_ICON = resize(END_ICON, ICON_HEIGHT_FACTORS[0]);
 		createContents();
 		shell.open();
+		glWindow.getContext().makeCurrent();
 		/*GridData gd_modelTree = new GridData();
 		gd_modelTree.heightHint = 200;
 		System.out.println(modelTree.getItemHeight());
@@ -472,12 +474,8 @@ public class SimLive {
 							Mode oldMode = mode;
 							mode = Mode.NONE;
 							freezeGUI(true);
-							if (newFile(fileDialog.getFilterPath()+
+							if (!newFile(fileDialog.getFilterPath()+
 									System.getProperty("file.separator")+fileDialog.getFileName())) {
-								
-								view.fitToView();
-							}
-							else {
 								model = oldModel;
 								model.settings = oldSettings;
 						        mode = oldMode;
@@ -615,7 +613,7 @@ public class SimLive {
 						fileDialog.setFilterExtensions(filter);
 						view.redraw();
 						if (fileDialog.open() != null) {
-							GL2 gl2 = glcontext.getGL().getGL2();
+							GL2 gl2 = glWindow.getGL().getGL2();
 							int[] viewport = View.getViewport();
 							FloatBuffer buffer = FloatBuffer.allocate(3*viewport[2]*viewport[3]);
 							gl2.glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3], GL2.GL_BGR, GL2.GL_FLOAT, buffer);
@@ -1327,7 +1325,7 @@ public class SimLive {
 						composite_2.layout();					
 						SimLive.post.updateMinMaxLabels();
 						updateMatrixView();
-						((CTabFolder) view.getParent()).getItem(0).setText("Results View");
+						((CTabFolder) sashForm_1.getChildren()[0]).getItem(0).setText("Results View");
 						break;
 				}
 			}
@@ -1500,6 +1498,7 @@ public class SimLive {
 							if (!view.getSelectedParts3d().isEmpty()) {
 								SimLive.dialogArea = new Part3dDialog(SimLive.compositeLeft, SWT.NONE, view.getSelectedParts3d(), model.settings);
 							}
+							view.redraw();
 							break;
 						
 						case 1:	
@@ -1879,7 +1878,7 @@ public class SimLive {
 		tabFolderView.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent arg0) {
-				view.setFocus();
+				canvas.setFocus();
 			}
 		});
 		tabFolderView.setSimple(false);
@@ -1889,16 +1888,14 @@ public class SimLive {
 		
 		tabFolderView.setSelection(tbtmView);
 		
-		GLData gldata = new GLData();
-        gldata.doubleBuffer = true;
-        // need SWT.NO_BACKGROUND to prevent SWT from clearing the window
-        // at the wrong times (we use glClear for this instead)
-        view = new View( tabFolderView, SWT.NO_BACKGROUND, gldata );
-        view.setCurrent();
-        GLProfile glprofile = GLProfile.getDefault();
-        glcontext = GLDrawableFactory.getFactory( glprofile ).createExternalGLContext();
+		GLProfile glProfile = GLProfile.getDefault();
+        GLCapabilities glCapabilities = new GLCapabilities(glProfile);
+        glWindow = GLWindow.create(glCapabilities);
         
-		tbtmView.setControl(view);
+        canvas = new NewtCanvasSWT(tabFolderView, SWT.NO_BACKGROUND, glWindow);
+        view = new View(glWindow, canvas);
+
+		tbtmView.setControl(canvas);
 		
 		tabFolderDiagram = new CTabFolder(sashForm_1, SWT.BORDER | SWT.CLOSE | SWT.SINGLE);
 		tabFolderDiagram.addMouseListener(new MouseAdapter() {
@@ -2124,12 +2121,14 @@ public class SimLive {
 			@Override
 			public void focusGained(FocusEvent arg0) {
 				tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+				tabFolder.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 				tabFolder.setFont(SimLive.FONT_BOLD);
 			}
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-				tabFolder.setFont(SimLive.shell.getDisplay().getSystemFont());
+				tabFolder.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+				tabFolder.setFont(Display.getCurrent().getSystemFont());
 			}
 		});
 	}
@@ -2361,10 +2360,10 @@ public class SimLive {
 		//view.deselectAll();
 		statusBar.setText("");
 		setDisplayPartsLabel();
-		view.setCursor(null);
+		sashForm_1.getChildren()[0].setCursor(null);
 		View.Rr = null;
 		SimLive.model.updateModel(true);
-		((CTabFolder) view.getParent()).getItem(0).setText("Model View");
+		((CTabFolder) sashForm_1.getChildren()[0]).getItem(0).setText("Model View");
 		SimLive.view.lockSelectParts3d = false;
 		view.redraw();
 	}
@@ -2388,6 +2387,7 @@ public class SimLive {
 		for (int i = 0; i < modelTree.getItemCount(); i++) {
 			modelTree.getItems()[i].setExpanded(false);
 		}
+		tabFolderModel.setFocus();
 	}
 	
 	public static void setDisplayPartsLabel() {
@@ -2499,10 +2499,10 @@ public class SimLive {
 		if (model.settings.isWriteMatrixView) {			
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					if (post != null) {
+					try {
 						post.getPostIncrement().updateTree(tree, post.getPostIncrementID());
 						post.getPostIncrement().updateTable(table, tree);
-					}
+					} catch (Exception e) {}
 				}
 			});
 		}
@@ -2723,7 +2723,7 @@ public class SimLive {
 					public void run() {
 						SimLive.shell.getDisplay().syncExec(new Runnable() {
 							public void run() {
-								if (!isModelAndResultConsistent()) {
+								if (post != null && !isModelAndResultConsistent()) {
 									resetPost();
 								}
 							}
@@ -2785,6 +2785,7 @@ public class SimLive {
 			view.initializeZoomAndOrigin(Settings.meshSize);
 			
 			view.initViewForNewFile();
+			view.noRender = false;
 			
 			/* default materials */
 			model.getMaterials().addAll(Material.getDefaultMaterials());
@@ -2802,7 +2803,10 @@ public class SimLive {
 			shell.setText(APPLICATION_NAME+" "+VERSION_NAME);
 		}
 		else {
+			view.noRender = true;
+			
 			if (!XML.readFileAndGenerateModel(fileName)) {
+				view.noRender = false;
 				return false;
 			}
 			
@@ -2813,6 +2817,8 @@ public class SimLive {
 			Solution.resetLog();
 			
 			view.initViewForNewFile();
+			view.noRender = false;
+			view.fitToView();
 			
 			XML.readFileAndGenerateSolution(fileName);
 			XML.setFilePath(fileName);

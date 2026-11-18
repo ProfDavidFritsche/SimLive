@@ -46,7 +46,8 @@ public class DiagramArea extends Canvas {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				/* empty keyListener required to get focus on canvas if clicked */
-				SimLive.view.timeControlByKeys(e);
+				SimLive.view.timeControlByKeys(e.keyCode, new int[]{SWT.ARROW_LEFT, SWT.ARROW_RIGHT,
+						SWT.ARROW_UP, SWT.ARROW_DOWN, SWT.PAGE_UP, SWT.PAGE_DOWN});
 				simlive.SimLive.view.redraw();
 			}
 		});
