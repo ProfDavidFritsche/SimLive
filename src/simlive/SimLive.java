@@ -8,7 +8,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.SWT;
@@ -68,7 +67,6 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.newt.swt.NewtCanvasSWT;
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 
@@ -91,7 +89,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -236,7 +233,6 @@ public class SimLive {
 	
 	public static View view;
 	public static NewtCanvasSWT canvas;
-	public static GLWindow glWindow;
 	public static DiagramArea diagramArea;
 	
 	CTabFolder tabFolderModel;
@@ -305,7 +301,6 @@ public class SimLive {
 		END_ICON = resize(END_ICON, ICON_HEIGHT_FACTORS[0]);
 		createContents();
 		shell.open();
-		glWindow.getContext().makeCurrent();
 		/*GridData gd_modelTree = new GridData();
 		gd_modelTree.heightHint = 200;
 		System.out.println(modelTree.getItemHeight());
@@ -613,23 +608,7 @@ public class SimLive {
 						fileDialog.setFilterExtensions(filter);
 						view.redraw();
 						if (fileDialog.open() != null) {
-							GL2 gl2 = glWindow.getGL().getGL2();
-							int[] viewport = View.getViewport();
-							FloatBuffer buffer = FloatBuffer.allocate(3*viewport[2]*viewport[3]);
-							gl2.glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3], GL2.GL_BGR, GL2.GL_FLOAT, buffer);
-							/* flip array */
-							byte[] array = new byte[3*viewport[2]*viewport[3]];
-							for (int r = 0; r < viewport[3]; r++) {
-								/* convert floats to bytes */
-								byte[] byteRow = new byte[3*viewport[2]];
-								for (int c = 0; c < 3*viewport[2]; c++) {
-									float value = buffer.get(r*3*viewport[2]+c);
-									byteRow[c] = (byte) Math.floor(value >= 1.0 ? 255 : value * 256.0);
-								}
-								System.arraycopy(byteRow, 0, array, (viewport[3]-1-r)*3*viewport[2], 3*viewport[2]);
-							}
-							PaletteData palette = new PaletteData(0xFF , 0xFF00 , 0xFF0000);
-							ImageData sourceData = new ImageData(viewport[2], viewport[3], 24, palette, 1, array);
+							ImageData sourceData = View.getScreenShot();
 							ImageLoader loader = new ImageLoader();
 							loader.data = new ImageData[] {sourceData};
 							loader.save(fileDialog.getFilterPath()+
@@ -1890,7 +1869,7 @@ public class SimLive {
 		
 		GLProfile glProfile = GLProfile.getDefault();
         GLCapabilities glCapabilities = new GLCapabilities(glProfile);
-        glWindow = GLWindow.create(glCapabilities);
+        GLWindow glWindow = GLWindow.create(glCapabilities);
         
         canvas = new NewtCanvasSWT(tabFolderView, SWT.NO_BACKGROUND, glWindow);
         view = new View(glWindow, canvas);

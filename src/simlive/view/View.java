@@ -19,6 +19,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
@@ -107,6 +109,7 @@ import org.eclipse.swt.events.SelectionEvent;
 
 public class View {
 
+	private static GLWindow glWindow;
 	public static boolean perspective = false;
 	private double fovy = 0;
 	private static double[] cameraRefPos = {0, 0, 0};
@@ -184,11 +187,12 @@ public class View {
 	//private static ContactPair selectedContactPair = null;
 	
 	public View(GLWindow glWindow, NewtCanvasSWT canvas) {
+		View.glWindow = glWindow;
 		
 		glWindow.addGLEventListener(new GLEventListener() {
             @Override
             public void init(GLAutoDrawable drawable) {
-            	// TODO Auto-generated method stub
+            	glWindow.getContext().makeCurrent();
             }
 
             @Override
@@ -1765,7 +1769,7 @@ public class View {
 		if (perspective) {
 			int[] viewport = getViewport();
 			float aspectRatio = (float) viewport[3] / (float) viewport[2];
-			GL2 gl2 = SimLive.glWindow.getGL().getGL2();
+			GL2 gl2 = glWindow.getGL().getGL2();
 			gl2.glMatrixMode(GL2.GL_PROJECTION);
 			gl2.glLoadIdentity();
 			double farClip = 1.0/zoom*100.0;
@@ -2327,7 +2331,7 @@ public class View {
 	}
 	
 	public void redraw() {
-		SimLive.glWindow.display();		
+		glWindow.display();		
 	}
 
 	public void deleteAllMeasurements() {
@@ -5468,7 +5472,7 @@ public class View {
 		R0 = Matrix.identity(3, 3);
 		rotPoint = new double[3];
 		int[] viewport = getViewport();
-		GL2 gl2 = SimLive.glWindow.getGL().getGL2();
+		GL2 gl2 = glWindow.getGL().getGL2();
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
 		gl2.glLoadIdentity();
 		setProjection(gl2, viewport[2], viewport[3]);
@@ -6799,15 +6803,35 @@ public class View {
 		gl2.glPopMatrix();
 	}
 	
+	public static ImageData getScreenShot() {
+		GL2 gl2 = glWindow.getGL().getGL2();
+		int[] viewport = View.getViewport();
+		FloatBuffer buffer = FloatBuffer.allocate(3*viewport[2]*viewport[3]);
+		gl2.glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3], GL2.GL_BGR, GL2.GL_FLOAT, buffer);
+		/* flip array */
+		byte[] array = new byte[3*viewport[2]*viewport[3]];
+		for (int r = 0; r < viewport[3]; r++) {
+			/* convert floats to bytes */
+			byte[] byteRow = new byte[3*viewport[2]];
+			for (int c = 0; c < 3*viewport[2]; c++) {
+				float value = buffer.get(r*3*viewport[2]+c);
+				byteRow[c] = (byte) Math.floor(value >= 1.0 ? 255 : value * 256.0);
+			}
+			System.arraycopy(byteRow, 0, array, (viewport[3]-1-r)*3*viewport[2], 3*viewport[2]);
+		}
+		PaletteData palette = new PaletteData(0xFF , 0xFF00 , 0xFF0000);
+		return new ImageData(viewport[2], viewport[3], 24, palette, 1, array);		
+	}
+	
 	private static double[] getModelViewMatrix() {
-        GL2 gl2 = SimLive.glWindow.getGL().getGL2();
+        GL2 gl2 = glWindow.getGL().getGL2();
 		double[] modelview = new double[16];
 	    gl2.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, modelview, 0);
 	    return modelview;
 	}
 	
 	public static int[] getViewport() {
-		GL2 gl2 = SimLive.glWindow.getGL().getGL2();
+		GL2 gl2 = glWindow.getGL().getGL2();
 		int[] viewport = new int[4];
 	    gl2.glGetIntegerv(GL2.GL_VIEWPORT, viewport, 0);
 		return viewport;
@@ -6815,7 +6839,7 @@ public class View {
 	
 	public static double[] modelToScreenCoordinates(double[] modelCoords) {
 		double[] screenCoords = new double[3];
-		GL2 gl2 = SimLive.glWindow.getGL().getGL2();
+		GL2 gl2 = glWindow.getGL().getGL2();
 		double[] modelview = new double[16];
 	    gl2.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, modelview, 0);
 	    double[] projection = new double[16];
@@ -6876,7 +6900,7 @@ public class View {
 	
 	public static double[] screenToModelCoordinates(double screenX, double screenY) {
 		double[] modelCoords = new double[3];
-		GL2 gl2 = SimLive.glWindow.getGL().getGL2();
+		GL2 gl2 = glWindow.getGL().getGL2();
 		double[] modelview = new double[16];
 	    gl2.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, modelview, 0);
 	    double[] projection = new double[16];
