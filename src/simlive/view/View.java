@@ -257,7 +257,18 @@ public class View {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 					deselectAllAndDisposeDialogs();
 				}
+				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+					isControlKeyPressed = true;
+					measuring(false);
+				}
 				redraw();
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+					isControlKeyPressed = false;
+					measuring(false);
+				}
 			}
 		});
 		
@@ -1821,7 +1832,7 @@ public class View {
 		rotPoint[2] *= lengthFactor;
 	}
 	
-	public void measuring(boolean mouseUp) {
+	private void measuring(boolean mouseUp) {
 		Measurement measurement = null;
 		if (!measurements.isEmpty() &&
 				!measurements.get(measurements.size()-1).isFinalized()) {
@@ -1867,7 +1878,7 @@ public class View {
 			if (!measurements.get(measurements.size()-1).isFinalized()) {
 				measurements.remove(measurements.size()-1);
 			}
-			redraw();
+			//redraw();
 		}
 	}
 	
