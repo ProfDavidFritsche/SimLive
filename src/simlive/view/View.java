@@ -199,8 +199,10 @@ public class View {
             	if (!noRender) {
             		render(drawable.getGL().getGL2(), canvas.getBounds().width, canvas.getBounds().height);
 	                
-			        SimLive.diagramArea.redraw();
-			        SimLive.diagramArea.update();
+			        if (SimLive.post != null && SimLive.post.getScalarPlot() != null) {
+	            		SimLive.diagramArea.redraw();
+				        SimLive.diagramArea.update();
+			        }
             	}
             }
 
@@ -2709,7 +2711,7 @@ public class View {
 			double incrementID = SimLive.post.getPostIncrementID();
 			public void run() {
 				if (!SimLive.shell.isDisposed()) {
-					SimLive.shell.getDisplay().asyncExec(new Runnable() {
+					SimLive.shell.getDisplay().syncExec(new Runnable() {
 						public void run() {
 							if (isAnimationRunning()) {
 								double delta = Math.min(SimLive.post.getAnimationSpeed(), SimLive.post.getSolution().getNumberOfIncrements());
