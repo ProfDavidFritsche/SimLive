@@ -1642,6 +1642,7 @@ public class SimLive {
 									for (int i = 0; i < objects.size(); i++) {
 										((Support) objects.get(i)).isShifted = !((Support) objects.get(i)).isShifted;
 									}
+									view.redraw();
 								}
 							});
 		        			new MenuItem(rightClickMenu, SWT.SEPARATOR);
@@ -1687,6 +1688,7 @@ public class SimLive {
 									for (int i = 0; i < objects.size(); i++) {
 										((AbstractLoad) objects.get(i)).isShifted = !((AbstractLoad) objects.get(i)).isShifted;
 									}
+									view.redraw();
 								}
 							});
 		        			new MenuItem(rightClickMenu, SWT.SEPARATOR);

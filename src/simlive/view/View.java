@@ -503,6 +503,10 @@ public class View {
 					robotMove = false;
 					return;
 				}
+				/* drag threshold */
+				if (mouseButton > 0 &&
+						Math.abs(arg0.getX()-mouseDown[0]) < SimLive.SNAP_TOL &&
+						Math.abs(arg0.getY()-mouseDown[1]) < SimLive.SNAP_TOL) return;
 				
 				int[] mousePosOld = new int[2];
 				mousePosOld[0] = mousePos[0];
