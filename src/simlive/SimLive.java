@@ -2124,11 +2124,13 @@ public class SimLive {
 			@Override
 			public void focusGained(FocusEvent arg0) {
 				tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+				tabFolder.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 				tabFolder.setFont(SimLive.FONT_BOLD);
 			}
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				tabFolder.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+				tabFolder.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 				tabFolder.setFont(SimLive.shell.getDisplay().getSystemFont());
 			}
 		});

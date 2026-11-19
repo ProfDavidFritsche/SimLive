@@ -126,7 +126,6 @@ public class View extends GLCanvas {
 	private static double zoom0 = 1;
 	public ArrayList<Label> labels = new ArrayList<Label>();
 	public ArrayList<Measurement> measurements = new ArrayList<Measurement>();
-	private boolean isMouseDown = false;
 	private boolean isMouseDragged = false;
 	private Node moveNode = null;
 	private double[] movePoint = new double[3];
@@ -709,8 +708,6 @@ public class View extends GLCanvas {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				popup.setVisible(false);
-				if (!isMouseDown) return;
-				isMouseDown = false;
 				mouseButton = 0;
 				
 				rotAroundAxis = false;
@@ -1141,7 +1138,6 @@ public class View extends GLCanvas {
 			}
 			@Override
 			public void mouseDown(MouseEvent e) {
-				isMouseDown = true;
 				mouseButton = e.button;
 				
 				rotAroundAxis = side != Side.NONE;
