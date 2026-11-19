@@ -2250,6 +2250,7 @@ public class SimLive {
 				SimLive.model.updateModel(true);
 				SimLive.view.deselectAllAndDisposeDialogs();
 				SimLive.view.fitToView();
+				SimLive.view.redraw();
 				SimLive.freezeGUI(false);
 			}
 			catch (Exception e) {
