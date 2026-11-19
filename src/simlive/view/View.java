@@ -2857,7 +2857,7 @@ public class View extends GLCanvas {
 			double incrementID = SimLive.post.getPostIncrementID();
 			public void run() {
 				if (!SimLive.shell.isDisposed()) {
-					SimLive.shell.getDisplay().syncExec(new Runnable() {
+					SimLive.shell.getDisplay().asyncExec(new Runnable() {
 						public void run() {
 							if (isAnimationRunning()) {
 								double delta = Math.min(SimLive.post.getAnimationSpeed(), SimLive.post.getSolution().getNumberOfIncrements());
