@@ -123,7 +123,6 @@ public class View {
 	private static double zoom0 = 1;
 	public ArrayList<Label> labels = new ArrayList<Label>();
 	public ArrayList<Measurement> measurements = new ArrayList<Measurement>();
-	private boolean isMouseDown = false;
 	private boolean isMouseDragged = false;
 	private Node moveNode = null;
 	private double[] movePoint = new double[3];
@@ -550,7 +549,6 @@ public class View {
 			}
 			@Override
 			public void mousePressed(com.jogamp.newt.event.MouseEvent arg0) {
-				isMouseDown = true;
 				mouseButton = arg0.getButton();
 				
 				rotAroundAxis = side != Side.NONE;
@@ -579,8 +577,6 @@ public class View {
 			@Override
 			public void mouseReleased(com.jogamp.newt.event.MouseEvent arg0) {
 				popup.setVisible(false);
-				if (!isMouseDown) return;
-				isMouseDown = false;
 				mouseButton = 0;
 				
 				rotAroundAxis = false;
