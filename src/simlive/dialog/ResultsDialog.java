@@ -528,8 +528,8 @@ public class ResultsDialog extends Composite {
 								btnShowMinmax.setEnabled(post.getScalarPlot() != null);
 								post.updateMinMaxLabels();
 								SimLive.freezeGUI(false);
-								SimLive.view.redraw();
 								SimLive.diagramArea.setDisplay(scalarPlot);
+								SimLive.view.redraw();
 								if (dialog != null) {
 									dialog.dispose();
 									parent.layout();									

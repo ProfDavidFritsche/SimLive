@@ -199,10 +199,8 @@ public class View {
             	if (!noRender) {
             		render(drawable.getGL().getGL2(), canvas.getBounds().width, canvas.getBounds().height);
 	                
-			        if (SimLive.post != null && SimLive.post.getScalarPlot() != null) {
-	            		SimLive.diagramArea.redraw();
-				        SimLive.diagramArea.update();
-			        }
+            		SimLive.diagramArea.redraw();
+			        SimLive.diagramArea.update();
             	}
             }
 

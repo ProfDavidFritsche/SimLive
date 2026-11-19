@@ -195,7 +195,7 @@ public class DiagramArea extends Canvas {
 		gcImage.setBackground(SimLive.floatToColor(SimLive.COLOR_WHITE));
 		gcImage.fillGradientRectangle(0, 0, getSize().x, getSize().y, true);
 		
-		if (SimLive.mode == Mode.RESULTS) {
+		if (SimLive.post != null && SimLive.post.getScalarPlot() != null) {
 			if (display != Display.NONE) {
 				renderHistoryImage(gcImage);
 			}
