@@ -385,6 +385,9 @@ public class SimLive {
             		model.updateModel(true);
             		view.redraw();
             	}
+            	if(arg0.keyCode == SWT.CONTROL) {
+            		view.isControlKeyPressed = true;
+            	}
             	if(arg0.keyCode == SWT.ESC && SolutionDialog.thread != null && SolutionDialog.thread.isAlive()) {
             		if (!((SolutionDialog) SimLive.dialogArea).resultsAvailable()) {
             			resetPost();
@@ -401,6 +404,13 @@ public class SimLive {
 						SimLive.messageBox(true, "Solution stopped by user.");
 					}
             		catch (Exception e) {}
+            	}
+			}
+        });
+		shell.getDisplay().addFilter(SWT.KeyUp, new Listener() {
+            public void handleEvent(Event arg0) {
+            	if(arg0.keyCode == SWT.CONTROL) {
+            		view.isControlKeyPressed = false;
             	}
 			}
         });
