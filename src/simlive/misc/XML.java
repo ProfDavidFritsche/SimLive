@@ -948,6 +948,7 @@ public class XML {
 
 			SimLive.model.finalUpdateModel();
 			Solution solution = new Solution(SimLive.model);
+			solution.initialize();
 			
 			Document document = (Document) builder.build(xmlFile);
 			org.jdom.Element XMLroot = document.getRootElement();
@@ -956,7 +957,6 @@ public class XML {
 			if (XMLsolution.getChild("D") != null && XMLsolution.getChild("V") != null) {
 				solution.setD(XMLToMatrix(XMLsolution.getChild("D")));
 				solution.setV(XMLToMatrix(XMLsolution.getChild("V")));
-				solution.initialize();
 				solution.calculateIncrementsForEigenmode(0);
 			}
 			else {
