@@ -686,6 +686,9 @@ public class View {
 										labels.add(labelAtMousePos);
 										labelAdded = true;
 									}
+									else {
+										deselectAllAndDisposeDialogs();
+									}
 								}
 								
 								if (selectedLabel == null) {
