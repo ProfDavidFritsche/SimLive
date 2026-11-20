@@ -346,17 +346,12 @@ public class Post {
 		SimLive.view.labels.add(1, maxLabel);
 	}
 	
-	public void removeMinMaxLabels() {
+	public void updateMinMaxLabels() {		
 		SimLive.view.labels.remove(minLabel);
 		SimLive.view.labels.remove(maxLabel);
-	}
-	
-	public void updateMinMaxLabels() {		
+		
 		if (SimLive.mode == Mode.RESULTS && isShowMinMax()) {
-			if (getScalarPlot() == null) {
-				removeMinMaxLabels();
-			}
-			else {
+			if (getScalarPlot() != null) {
 				int[] minLabelMove = minLabel.getMove();
 				int[] maxLabelMove = maxLabel.getMove();
 				boolean minLabelSide = minLabel.isOnRightHandSide();
@@ -364,7 +359,6 @@ public class Post {
 				boolean selectedLabelIsMinLabel = SimLive.view.selectedLabel == minLabel;
 				boolean selectedLabelIsMaxLabel = SimLive.view.selectedLabel == maxLabel;
 				
-				removeMinMaxLabels();
 				addMinMaxLabels();
 				
 				if (selectedLabelIsMinLabel) SimLive.view.selectedLabel = minLabel;

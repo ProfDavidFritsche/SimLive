@@ -550,13 +550,13 @@ public class ResultsDialog extends Composite {
 		btnShowMinmax.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				post.setShowMinMax(btnShowMinmax.getSelection());
 				if (btnShowMinmax.getSelection()) {
 					SimLive.post.addMinMaxLabels();
 				}
 				else {
-					SimLive.post.removeMinMaxLabels();
+					SimLive.post.updateMinMaxLabels();
 				}
-				post.setShowMinMax(btnShowMinmax.getSelection());
 				SimLive.view.redraw();
 			}
 		});
