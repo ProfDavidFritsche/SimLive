@@ -1299,6 +1299,7 @@ public class SimLive {
 						dialogArea = new ResultsDialog(composite_2, SWT.NONE, post, model.settings);
 						composite_2.layout();					
 						SimLive.post.updateMinMaxLabels();
+						view.redraw();
 						updateMatrixView();
 						((CTabFolder) sashForm_1.getChildren()[0]).getItem(0).setText("Results View");
 						break;

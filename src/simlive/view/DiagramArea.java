@@ -16,6 +16,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import simlive.SimLive;
+import simlive.SimLive.Mode;
 import simlive.SimLive.Select;
 import simlive.dialog.ResultsDialog;
 import simlive.misc.GeomUtility;
@@ -194,7 +195,7 @@ public class DiagramArea extends Canvas {
 		gcImage.setBackground(SimLive.floatToColor(SimLive.COLOR_WHITE));
 		gcImage.fillGradientRectangle(0, 0, getSize().x, getSize().y, true);
 		
-		if (SimLive.post != null && SimLive.post.getScalarPlot() != null) {
+		if (SimLive.mode == Mode.RESULTS && SimLive.post != null && SimLive.post.getScalarPlot() != null) {
 			if (display != Display.NONE) {
 				renderHistoryImage(gcImage);
 			}
