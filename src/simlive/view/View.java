@@ -702,8 +702,8 @@ public class View {
 							}
 						}
 						
-						if (arg0.getButton() == 1 && !labelAdded && SimLive.select != Select.DISTANCE && SimLive.select != Select.ANGLE &&
-								SimLive.select != Select.LABEL && selectedLabel == null && selectedMeasurement == null &&
+						if (arg0.getButton() == 1 && !labelAdded && SimLive.select == Select.DEFAULT &&
+								selectedLabel == null && selectedMeasurement == null &&
 								side == Side.NONE) {
 							
 							{
