@@ -664,7 +664,6 @@ public class View {
 						
 						if (arg0.getButton() == 3)  /* right click */ {
 							popupMenu(popup);
-							isPopup = true;
 						}
 						
 						boolean labelAdded = false;
@@ -1119,6 +1118,7 @@ public class View {
 	}
 	
 	public void popupMenu(Menu popup) {
+		isPopup = true;
 		popup.setVisible(true);
 		MenuItem[] items = popup.getItems();
         for (int i = 0; i < items.length; i++) {
@@ -1608,6 +1608,7 @@ public class View {
 					}
 					SimLive.model.updateModel(true);
 					SimLive.synchronizeModelTreeWithViewSelection();
+					isPopup = false;
 				}
             });
         }
