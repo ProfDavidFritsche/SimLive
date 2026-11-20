@@ -123,6 +123,7 @@ public class View {
 	private static double zoom0 = 1;
 	public ArrayList<Label> labels = new ArrayList<Label>();
 	public ArrayList<Measurement> measurements = new ArrayList<Measurement>();
+	private boolean isPopup = false;
 	private boolean isMouseDragged = false;
 	private Node moveNode = null;
 	private double[] movePoint = new double[3];
@@ -282,6 +283,7 @@ public class View {
 			}
 			@Override
 			public void mouseDragged(com.jogamp.newt.event.MouseEvent arg0) {
+				if (isPopup) return;
 				isMouseDragged = true;
 				
 				int[] mousePosOld = new int[2];
@@ -587,7 +589,10 @@ public class View {
 			}
 			@Override
 			public void mouseReleased(com.jogamp.newt.event.MouseEvent arg0) {
-				popup.setVisible(false);
+				if (isPopup) {
+					isPopup = false;
+					return;
+				}
 				mouseButton = 0;
 				
 				rotAroundAxis = false;
@@ -659,6 +664,7 @@ public class View {
 						
 						if (arg0.getButton() == 3)  /* right click */ {
 							popupMenu(popup);
+							isPopup = true;
 						}
 						
 						boolean labelAdded = false;
