@@ -69,8 +69,6 @@ public class Solution {
 		}
 		this.increments = new Increment[this.nIncrements];
 		this.nIncrements--;
-		
-		this.initialize();
 	}
 	
 	public static void resetLog() {

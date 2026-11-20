@@ -236,6 +236,7 @@ public class SolutionDialog extends Composite {
 							solution = new Solution(model);
 							
 							if (solution.checkModel()) {
+								solution.initialize();
 								solution.calculate(SolutionDialog.this);
 								if (solution.getNumberOfIncrements() > 0) {
 									SimLive.initPost(solution);
