@@ -265,9 +265,10 @@ public class Post {
 		return solution.getIncrement(postIncrementID);
 	}
 
-	private void addMinMaxLabels() {
+	private Label[] getMinMaxLabels() {
 		ScalarPlot scalarPlot = getScalarPlot();
 		ArrayList<Element> elements = SimLive.model.getElements();
+		Label[] labels = new Label[2];
 		double minValue = Double.MAX_VALUE;
 		double maxValue = -Double.MAX_VALUE;
 		for (int elem = 0; elem < elements.size(); elem++) {
@@ -279,12 +280,12 @@ public class Post {
 						double value = scalarPlot.getValueAtNode(elemNodes[n], postIncrementID);
 						if (value < minValue) {
 							minValue = value;
-							minLabel = new Label((PlaneElement) element,
+							labels[0] = new Label((PlaneElement) element,
 									View.getCoordsWithScaledDisp(elemNodes[n]));
 						}
 						if (value > maxValue) {
 							maxValue = value;
-							maxLabel = new Label((PlaneElement) element,
+							labels[1] = new Label((PlaneElement) element,
 									View.getCoordsWithScaledDisp(elemNodes[n]));
 						}
 					}
@@ -310,19 +311,19 @@ public class Post {
 						if (value < minValue) {
 							minValue = value;
 							if (constValue) {
-								minLabel = new Label((LineElement) element, 0.5);
+								labels[0] = new Label((LineElement) element, 0.5);
 							}
 							else {
-								minLabel = new Label((LineElement) element, t);
+								labels[0] = new Label((LineElement) element, t);
 							}
 						}
 						if (value > maxValue) {
 							maxValue = value;
 							if (constValue) {
-								maxLabel = new Label((LineElement) element, 0.5);
+								labels[1] = new Label((LineElement) element, 0.5);
 							}
 							else {
-								maxLabel = new Label((LineElement) element, t);
+								labels[1] = new Label((LineElement) element, t);
 							}
 						}
 						t += 1.0/SimLive.LINE_DIVISIONS_MAX;
@@ -333,17 +334,16 @@ public class Post {
 					double value = scalarPlot.getValueAtNode(elemNodes[0], postIncrementID);
 					if (value < minValue) {
 						minValue = value;
-						minLabel = new Label((PointMass) element);
+						labels[0] = new Label((PointMass) element);
 					}
 					if (value > maxValue) {
 						maxValue = value;
-						maxLabel = new Label((PointMass) element);
+						labels[1] = new Label((PointMass) element);
 					}
 				}
 			}
 		}
-		SimLive.view.labels.add(0, minLabel);
-		SimLive.view.labels.add(1, maxLabel);
+		return labels;
 	}
 	
 	public void updateMinMaxLabels() {		
@@ -352,17 +352,19 @@ public class Post {
 		
 		if (SimLive.mode == Mode.RESULTS && isShowMinMax()) {
 			if (getScalarPlot() != null) {
-				int[] minLabelMove = minLabel != null ? minLabel.getMove() : new int[2];
-				int[] maxLabelMove = maxLabel != null ? maxLabel.getMove() : new int[2];
-				boolean minLabelSide = minLabel != null && minLabel.isOnRightHandSide();
-				boolean maxLabelSide = maxLabel != null && maxLabel.isOnRightHandSide();
 				
-				addMinMaxLabels();
+				Label[] labels = getMinMaxLabels();
 				
-				minLabel.addToMove(minLabelMove);
-				maxLabel.addToMove(maxLabelMove);
-				minLabel.setOnRightHandSide(minLabelSide);
-				maxLabel.setOnRightHandSide(maxLabelSide);
+				if (minLabel != null && maxLabel != null) {
+					labels[0].addToMove(minLabel.getMove());
+					labels[0].setOnRightHandSide(minLabel.isOnRightHandSide());
+					labels[1].addToMove(maxLabel.getMove());
+					labels[1].setOnRightHandSide(maxLabel.isOnRightHandSide());
+				}
+				minLabel = labels[0];
+				maxLabel = labels[1];
+				SimLive.view.labels.add(0, minLabel);
+				SimLive.view.labels.add(1, maxLabel);
 			}
 		}
 	}
