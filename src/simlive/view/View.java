@@ -2316,7 +2316,7 @@ public class View {
 		deselectAll();
 		redraw();
 		if (SimLive.mode != Mode.SOLUTION && SimLive.mode != Mode.RESULTS &&
-				SimLive.getModelTreeSelection().isEmpty()) {
+				SimLive.getModelTreeSelection().isEmpty() && SimLive.mode != Mode.GRID) {
 			SimLive.disposeDialogAreas();
 		}
 	}
