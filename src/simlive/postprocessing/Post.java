@@ -265,7 +265,7 @@ public class Post {
 		return solution.getIncrement(postIncrementID);
 	}
 
-	public void addMinMaxLabels() {
+	private void addMinMaxLabels() {
 		ScalarPlot scalarPlot = getScalarPlot();
 		ArrayList<Element> elements = SimLive.model.getElements();
 		double minValue = Double.MAX_VALUE;
@@ -352,17 +352,13 @@ public class Post {
 		
 		if (SimLive.mode == Mode.RESULTS && isShowMinMax()) {
 			if (getScalarPlot() != null) {
-				int[] minLabelMove = minLabel.getMove();
-				int[] maxLabelMove = maxLabel.getMove();
-				boolean minLabelSide = minLabel.isOnRightHandSide();
-				boolean maxLabelSide = maxLabel.isOnRightHandSide();
-				boolean selectedLabelIsMinLabel = SimLive.view.selectedLabel == minLabel;
-				boolean selectedLabelIsMaxLabel = SimLive.view.selectedLabel == maxLabel;
+				int[] minLabelMove = minLabel != null ? minLabel.getMove() : new int[2];
+				int[] maxLabelMove = maxLabel != null ? maxLabel.getMove() : new int[2];
+				boolean minLabelSide = minLabel != null && minLabel.isOnRightHandSide();
+				boolean maxLabelSide = maxLabel != null && maxLabel.isOnRightHandSide();
 				
 				addMinMaxLabels();
 				
-				if (selectedLabelIsMinLabel) SimLive.view.selectedLabel = minLabel;
-				if (selectedLabelIsMaxLabel) SimLive.view.selectedLabel = maxLabel;
 				minLabel.addToMove(minLabelMove);
 				maxLabel.addToMove(maxLabelMove);
 				minLabel.setOnRightHandSide(minLabelSide);
