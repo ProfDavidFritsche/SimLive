@@ -284,6 +284,10 @@ public class View {
 			@Override
 			public void mouseDragged(com.jogamp.newt.event.MouseEvent arg0) {
 				if (isPopup) return;
+				/* drag threshold */
+				if (Math.abs(arg0.getX()-mouseDown[0]) < SimLive.SNAP_TOL &&
+					Math.abs(arg0.getY()-mouseDown[1]) < SimLive.SNAP_TOL) return;
+				
 				isMouseDragged = true;
 				
 				int[] mousePosOld = new int[2];
