@@ -957,7 +957,6 @@ public class XML {
 			if (XMLsolution.getChild("D") != null && XMLsolution.getChild("V") != null) {
 				solution.setD(XMLToMatrix(XMLsolution.getChild("D")));
 				solution.setV(XMLToMatrix(XMLsolution.getChild("V")));
-				solution.calculateIncrementsForEigenmode(0);
 			}
 			else {
 				org.jdom.Element XMLincrements = XMLsolution.getChild("increments");
