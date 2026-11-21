@@ -115,8 +115,6 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
@@ -1594,16 +1592,7 @@ public class SimLive {
 		
 		final Menu rightClickMenu = new Menu(modelTree);
 	    modelTree.setMenu(rightClickMenu);	   
-	    rightClickMenu.addMenuListener(new MenuListener() {
-			@Override
-			public void menuHidden(MenuEvent arg0) {
-				view.redraw();
-			}
-			@Override
-			public void menuShown(MenuEvent arg0) {
-			}
-		});
-		modelTree.addListener(SWT.MouseDown, new Listener() {
+	    modelTree.addListener(SWT.MouseDown, new Listener() {
 	        public void handleEvent(Event event) {
 	        	if (event.button != 3) return;
 	        	modelTree.notifyListeners(SWT.Selection, new Event());

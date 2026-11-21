@@ -1612,6 +1612,7 @@ public class View {
 					SimLive.model.updateModel(true);
 					SimLive.synchronizeModelTreeWithViewSelection();
 					isPopup = false;
+					redraw();
 				}
             });
         }
