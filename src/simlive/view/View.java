@@ -128,7 +128,7 @@ public class View {
 	private Node moveNode = null;
 	private double[] movePoint = new double[3];
 	private int mouseButton = 0;
-	private int[] mousePos = new int[2];
+	private int[] mousePos = null;
 	private boolean robotMove = false;
 	private ArrayList<Part3d> selectedParts3d = new ArrayList<Part3d>();
 	private ArrayList<Set> selectedSets = new ArrayList<Set>();
@@ -1035,6 +1035,13 @@ public class View {
 				redraw();
 			}
 		});
+	}
+	
+	public void initMousePos(NewtCanvasSWT canvas) {
+		Point p = Display.getCurrent().getCursorLocation();
+		p = canvas.toControl(p);
+		mousePos = new int[]{p.x, p.y};
+		Snap.initData(mousePos, false, false);
 	}
 	
 	public void timeControlByKeys(int keyCode, int[] keyCodes) {

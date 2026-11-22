@@ -315,6 +315,7 @@ public class SimLive {
 		});
 		shell.layout();
 		newFile(null);
+		view.initMousePos(canvas);
 		
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {				
