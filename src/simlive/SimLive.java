@@ -300,8 +300,7 @@ public class SimLive {
 		createContents();
 		shell.open();
 		display.asyncExec(() -> {
-		    canvas.setCursor(new Cursor(canvas.getDisplay(), SWT.CURSOR_CROSS));
-			view.initMousePos(canvas);
+		    view.init(canvas);
 		});
 		/*GridData gd_modelTree = new GridData();
 		gd_modelTree.heightHint = 200;

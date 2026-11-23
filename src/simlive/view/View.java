@@ -217,6 +217,16 @@ public class View {
             	// TODO Auto-generated method stub
             }
         });
+	}
+	
+	public void init(NewtCanvasSWT canvas) {
+		canvas.setCursor(new Cursor(canvas.getDisplay(), SWT.CURSOR_CROSS));
+		
+		Point p = Display.getCurrent().getCursorLocation();
+		p = canvas.toControl(p);
+		mousePos = new int[]{p.x, p.y};
+		Snap.initData(mousePos, false, false);
+		Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);
 		
 		glWindow.addWindowListener(new WindowAdapter() {
 		    @Override
@@ -513,7 +523,6 @@ public class View {
 			}
 			@Override
 			public void mouseMoved(com.jogamp.newt.event.MouseEvent arg0) {
-				if (SimLive.model == null) return;
 				if (robotMove) {
 					robotMove = false;
 					return;
@@ -1034,14 +1043,6 @@ public class View {
 				redraw();
 			}
 		});
-	}
-	
-	public void initMousePos(NewtCanvasSWT canvas) {
-		Point p = Display.getCurrent().getCursorLocation();
-		p = canvas.toControl(p);
-		mousePos = new int[]{p.x, p.y};
-		Snap.initData(mousePos, false, false);
-		Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);
 	}
 	
 	public void timeControlByKeys(int keyCode, int[] keyCodes) {
