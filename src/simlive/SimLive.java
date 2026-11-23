@@ -2174,8 +2174,9 @@ public class SimLive {
 		filter[0] = "*.obj";
 		fileDialog.setFilterExtensions(filter);
 		if (fileDialog.open() != null) {
+			SimLive.freezeGUI(true);
+			view.noRender = true;
 			try {
-				SimLive.freezeGUI(true);
 				InputStream objInputStream = new FileInputStream(fileDialog.getFilterPath()+
 						System.getProperty("file.separator")+fileDialog.getFileName());
 				
@@ -2238,11 +2239,12 @@ public class SimLive {
 				SimLive.view.deselectAllAndDisposeDialogs();
 				SimLive.view.fitToView();
 				SimLive.view.redraw();
-				SimLive.freezeGUI(false);
 			}
 			catch (Exception e) {
 				SimLive.messageBox(true, "Error reading from file.");
 			}
+			view.noRender = false;
+			SimLive.freezeGUI(false);
 		}
 	}
 	
