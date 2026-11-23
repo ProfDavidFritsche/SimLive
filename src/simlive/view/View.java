@@ -225,8 +225,10 @@ public class View {
 		Point p = Display.getCurrent().getCursorLocation();
 		p = canvas.toControl(p);
 		mousePos = new int[]{p.x, p.y};
-		Snap.initData(mousePos, false, false);
-		Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);
+		if (canvas.getBounds().contains(p)) {
+			Snap.initData(mousePos, false, false);
+			Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);
+		}
 		
 		glWindow.addWindowListener(new WindowAdapter() {
 		    @Override
