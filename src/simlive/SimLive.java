@@ -299,6 +299,10 @@ public class SimLive {
 		END_ICON = resize(END_ICON, ICON_HEIGHT_FACTORS[0]);
 		createContents();
 		shell.open();
+		display.asyncExec(() -> {
+		    canvas.setCursor(new Cursor(canvas.getDisplay(), SWT.CURSOR_CROSS));
+			view.initMousePos(canvas);
+		});
 		/*GridData gd_modelTree = new GridData();
 		gd_modelTree.heightHint = 200;
 		System.out.println(modelTree.getItemHeight());
@@ -315,7 +319,6 @@ public class SimLive {
 		});
 		shell.layout();
 		newFile(null);
-		view.initMousePos(canvas);
 		
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {				

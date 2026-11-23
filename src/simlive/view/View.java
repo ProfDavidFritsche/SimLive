@@ -500,7 +500,7 @@ public class View {
 			}
 			@Override
 			public void mouseEntered(com.jogamp.newt.event.MouseEvent arg0) {
-				// TODO Auto-generated method stub
+				canvas.setCursor(new Cursor(canvas.getDisplay(), SWT.CURSOR_CROSS));
 			}
 			@Override
 			public void mouseExited(com.jogamp.newt.event.MouseEvent arg0) {
@@ -513,7 +513,6 @@ public class View {
 			}
 			@Override
 			public void mouseMoved(com.jogamp.newt.event.MouseEvent arg0) {
-				canvas.setCursor(new Cursor(canvas.getDisplay(), SWT.CURSOR_CROSS));
 				if (SimLive.model == null) return;
 				if (robotMove) {
 					robotMove = false;
@@ -1042,6 +1041,7 @@ public class View {
 		p = canvas.toControl(p);
 		mousePos = new int[]{p.x, p.y};
 		Snap.initData(mousePos, false, false);
+		Snap.snapAndSetText(mousePos, isMouseDragged, moveNode);
 	}
 	
 	public void timeControlByKeys(int keyCode, int[] keyCodes) {
