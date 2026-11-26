@@ -3249,7 +3249,7 @@ public class View {
 		
 		/* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
-	    		lineElementRadius, scaling, zoom, defaultSets, objects, false);
+	    		lineElementRadius, scaling, zoom, defaultSets, false);
 		
 	    /* rigid contacts */
 	    switchSingleDoubleSided(gl2, true);
@@ -3349,7 +3349,7 @@ public class View {
     	gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
     	/* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
-	    		lineElementRadius, scaling, zoom, pinnedAndConnectedSets, objects, false);
+	    		lineElementRadius, scaling, zoom, pinnedAndConnectedSets, false);
 	    
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	    for (int p = 0; p < connectParts3d.size(); p++) {
@@ -3362,7 +3362,7 @@ public class View {
 	    }
 	    /* sets */
 	    renderSets(gl2, glu, connectSets0, connectSets1, projection, width, inside, outside,
-	    		lineElementRadius, scaling, zoom, selectedSets, objects, true);
+	    		lineElementRadius, scaling, zoom, selectedSets, true);
 	    
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);		
 	    /* edges */
@@ -4385,7 +4385,7 @@ public class View {
 	private void renderSets(GL2 gl2, GLU glu, ArrayList<Set> connectSets0, ArrayList<Set> connectSets1,
 			float[] projection, float width, GLUquadric inside, GLUquadric outside,
 			double lineElementRadius, double scaling, double zoom,
-			ArrayList<Set> sets, ArrayList<Object> objects, boolean onlyOutline) {
+			ArrayList<Set> sets, boolean onlyOutline) {
 		
 		double arrowSize = SimLive.ORIENTATION_SIZE/width/zoom;
 		
