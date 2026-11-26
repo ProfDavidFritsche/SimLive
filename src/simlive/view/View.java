@@ -3149,7 +3149,7 @@ public class View {
 		
 		ArrayList<Part3d> connectParts3d = new ArrayList<Part3d>();
 		if (SimLive.mode == SimLive.Mode.CONNECTORS) {
-			for (int i = 0; i < objects.size(); i++) {
+			for (int i = 0; i < objects.size(); i++) if (objects.get(i) instanceof AbstractConnector) {
 				if (((AbstractConnector) objects.get(i)).getConnectorType() == ConnectorType.CONNECTOR_3D) {
 					connectParts3d.addAll(((Connector3d) objects.get(i)).getParts3d());
 				}
@@ -3168,7 +3168,7 @@ public class View {
 		ArrayList<Set> connectSets0 = new ArrayList<Set>();
 		ArrayList<Set> connectSets1 = new ArrayList<Set>();		
 		if (SimLive.mode == SimLive.Mode.CONNECTORS) {
-			for (int i = 0; i < objects.size(); i++) {
+			for (int i = 0; i < objects.size(); i++) if (objects.get(i) instanceof AbstractConnector) {
 				AbstractConnector connect = (AbstractConnector) objects.get(i);
 				if (connect.getConnectorType() == ConnectorType.CONNECTOR &&
 						((Connector) connect).getSet0() != null && ((Connector) connect).getSet1() != null) {
@@ -3181,7 +3181,8 @@ public class View {
 			}
 		}
 		if (SimLive.mode == SimLive.Mode.CONTACTS) {
-			for (int i = 0; i < objects.size(); i++) if (!(Model.twoDimensional && ((ContactPair) objects.get(i)).hasStoredEdges()) &&
+			for (int i = 0; i < objects.size(); i++) if (objects.get(i) instanceof ContactPair &&
+					!(Model.twoDimensional && ((ContactPair) objects.get(i)).hasStoredEdges()) &&
 					((ContactPair) objects.get(i)).getType() != Type.RIGID_DEFORMABLE) {
 				connectSets1.addAll(((ContactPair) objects.get(i)).getMasterSets());
 			}
@@ -3367,7 +3368,7 @@ public class View {
 	    gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);		
 	    /* edges */
 	    if (Model.twoDimensional && SimLive.mode == SimLive.Mode.CONTACTS) {
-	    	for (int c = 0; c < objects.size(); c++) {
+	    	for (int c = 0; c < objects.size(); c++) if (objects.get(c) instanceof ContactPair) {
 	    		ContactPair contactPair = (ContactPair) objects.get(c);
 	    		for (int e = 0; e < contactPair.getOutline().size(); e++) {
 	    			float[] uniColor = null;
@@ -3582,7 +3583,7 @@ public class View {
 		gl2.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 		/* reference systems */
 		if (SimLive.mode == Mode.LOADS) {
-			for (int i = 0; i < objects.size(); i++) {
+			for (int i = 0; i < objects.size(); i++) if (objects.get(i) instanceof AbstractLoad) {
 				Node referenceNode = null;
 				AbstractLoad abstractLoad = (AbstractLoad) objects.get(i);
 				if (abstractLoad != null) {
@@ -3612,7 +3613,7 @@ public class View {
 		
 		/* selected supports */
 		if (SimLive.mode == SimLive.Mode.SUPPORTS) {
-			for (int s = 0; s < objects.size(); s++) {			
+			for (int s = 0; s < objects.size(); s++) if (objects.get(s) instanceof Support) {			
 				Support support = (Support) objects.get(s);
 				if (support != null) {
 					renderSupport(gl2, support, arrowSize, glu, outside, inside, objects);
@@ -3621,7 +3622,7 @@ public class View {
 		}
 		/* selected loads and distributed loads */
 		if (SimLive.mode == SimLive.Mode.LOADS) {
-			for (int s = 0; s < objects.size(); s++) {			
+			for (int s = 0; s < objects.size(); s++) if (objects.get(s) instanceof AbstractLoad) {			
 				AbstractLoad abstractLoad = (AbstractLoad) objects.get(s);
 				if (abstractLoad != null && abstractLoad.getLoadType() == AbstractLoad.LoadType.LOAD) {
 					Load load = (Load) abstractLoad;
@@ -3677,7 +3678,7 @@ public class View {
 		
 		/* contact */
 		if (SimLive.mode == SimLive.Mode.CONTACTS) {
-			for (int i = 0; i < objects.size(); i++) {
+			for (int i = 0; i < objects.size(); i++) if (objects.get(i) instanceof ContactPair) {
 				ContactPair contactPair = (ContactPair) objects.get(i);
 				if (contactPair != null) {
 					/* slave nodes */
