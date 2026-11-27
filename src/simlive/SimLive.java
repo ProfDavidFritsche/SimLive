@@ -2744,6 +2744,8 @@ public class SimLive {
 	
 	private boolean newFile(String fileName) {
 		
+		view.noRender = true;
+		
 		if (fileName == null) {
 			modelHistory = new ArrayList<Model>();
 			modelPos = -1;
@@ -2756,7 +2758,6 @@ public class SimLive {
 			view.initializeZoomAndOrigin(Settings.meshSize);
 			
 			view.initViewForNewFile();
-			view.noRender = false;
 			
 			/* default materials */
 			model.getMaterials().addAll(Material.getDefaultMaterials());
@@ -2774,8 +2775,6 @@ public class SimLive {
 			shell.setText(APPLICATION_NAME+" "+VERSION_NAME);
 		}
 		else {
-			view.noRender = true;
-			
 			if (!XML.readFileAndGenerateModel(fileName)) {
 				view.noRender = false;
 				return false;
@@ -2788,13 +2787,14 @@ public class SimLive {
 			Solution.resetLog();
 			
 			view.initViewForNewFile();
-			view.noRender = false;
 			view.fitToView();
 			
 			XML.readFileAndGenerateSolution(fileName);
 			XML.setFilePath(fileName);
 			shell.setText(XML.getFilePath()+" - "+APPLICATION_NAME+" "+VERSION_NAME);
 		}
+		
+		view.noRender = false;
 		
 		boxSelect = BoxSelect.NODES;
 		select = Select.DEFAULT;
