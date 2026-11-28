@@ -35,6 +35,7 @@ public class NodeDialog extends Composite {
 	 */
 	public NodeDialog(Composite parent, int style, final Node node) {
 		super(parent, style);
+		this.setRedraw(false);
 		this.node = node;
 		this.setByNode = SimLive.model.getSetsByNode(node).get(0);
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
@@ -140,6 +141,7 @@ public class NodeDialog extends Composite {
 		updateDialog(new double[3]);
 		
 		parent.layout();
+		this.setRedraw(true);
 	}
 	
 	public void updateDialog(double[] deltaMove) {

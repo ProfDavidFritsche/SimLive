@@ -47,6 +47,7 @@ public class Part3dDialog extends Composite {
 	 */
 	public Part3dDialog(Composite parent, int style, final ArrayList<Part3d> parts3d, final Settings settings) {
 		super(parent, style);
+		this.setRedraw(false);
 		if (SimLive.dialogArea != null) SimLive.dialogArea.dispose();
 		this.parts3d.addAll(parts3d);
 		for (int s = 0; s < parts3d.size(); s++) {
@@ -337,6 +338,7 @@ public class Part3dDialog extends Composite {
 		updateDialog(new double[3]);
 		
 		parent.layout();
+		this.setRedraw(true);
 	}
 	
 	public void updateDialog(double[] deltaMove) {

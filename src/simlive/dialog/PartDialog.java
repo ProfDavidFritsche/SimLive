@@ -75,6 +75,7 @@ public class PartDialog extends Composite {
 	 */
 	public PartDialog(Composite parent, int style, final ArrayList<Set> sets, final Settings settings) {
 		super(parent, style);
+		this.setRedraw(false);
 		if (SimLive.dialogArea != null) SimLive.dialogArea.dispose();
 		addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent arg0) {
@@ -744,7 +745,8 @@ public class PartDialog extends Composite {
 		
 		updateDialog(new double[3]);
 		
-		parent.layout();
+		parent.layout();		
+		this.setRedraw(true);
 	}
 	
 	public void updateDialog(double[] deltaMove) {
