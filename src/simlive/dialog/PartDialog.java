@@ -39,12 +39,11 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.DisposeEvent;
 
 public class PartDialog extends Composite {
-	private ArrayList<Set> remainingSets = new ArrayList<Set>();
 	private ArrayList<Element> elementSet = new ArrayList<Element>();
-	private ArrayList<Node> nodes0;
-	private ArrayList<Node> nodes0rot;
-	private ArrayList<Connector> connectors0;
-	private ArrayList<Connector> connectors0rot;
+	private ArrayList<Node> nodes0 = new ArrayList<Node>();
+	private ArrayList<Node> nodes0rot = new ArrayList<Node>();
+	private ArrayList<Connector> connectors0 = new ArrayList<Connector>();
+	private ArrayList<Connector> connectors0rot = new ArrayList<Connector>();
 	private Matrix[] q0Array;
 	private Combo combo, combo_2;
 	private Text text;
@@ -87,19 +86,11 @@ public class PartDialog extends Composite {
 		});
 		for (int s = 0; s < sets.size(); s++) {
 			elementSet.addAll(sets.get(s).getElements());
-		}
-		this.remainingSets.addAll(SimLive.model.getSets());
-		this.remainingSets.removeAll(sets);
-		this.nodes0 = new ArrayList<Node>();
-		this.nodes0rot = new ArrayList<Node>();
-		for (int s = 0; s < sets.size(); s++) {
 			for (int n = 0; n < sets.get(s).getNodes().size(); n++) {
 				this.nodes0.add(sets.get(s).getNodes().get(n).clone());
 				this.nodes0rot.add(sets.get(s).getNodes().get(n).clone());
 			}
 		}
-		this.connectors0 = new ArrayList<Connector>();
-		this.connectors0rot = new ArrayList<Connector>();
 		for (int c = 0; c < SimLive.model.getConnectors().size(); c++) {
 			this.connectors0.add(SimLive.model.getConnectors().get(c).clone(SimLive.model));
 			this.connectors0rot.add(SimLive.model.getConnectors().get(c).clone(SimLive.model));
