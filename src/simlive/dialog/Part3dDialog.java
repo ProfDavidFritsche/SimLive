@@ -24,9 +24,9 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 public class Part3dDialog extends Composite {
-	private ArrayList<Part3d> parts3d;
-	private ArrayList<Vertex3d> vertices0;
-	private ArrayList<Vertex3d> vertices0rot;
+	private ArrayList<Part3d> parts3d = new ArrayList<Part3d>();
+	private ArrayList<Vertex3d> vertices0 = new ArrayList<Vertex3d>();
+	private ArrayList<Vertex3d> vertices0rot = new ArrayList<Vertex3d>();
 	private Text text_2;
 	private Text text_3;
 	private Text text_4;
@@ -48,10 +48,7 @@ public class Part3dDialog extends Composite {
 	public Part3dDialog(Composite parent, int style, final ArrayList<Part3d> parts3d, final Settings settings) {
 		super(parent, style);
 		if (SimLive.dialogArea != null) SimLive.dialogArea.dispose();
-		this.parts3d = new ArrayList<Part3d>();
 		this.parts3d.addAll(parts3d);
-		this.vertices0 = new ArrayList<Vertex3d>();
-		this.vertices0rot = new ArrayList<Vertex3d>();
 		for (int s = 0; s < parts3d.size(); s++) {
 			for (int n = 0; n < parts3d.get(s).getNrVertices(); n++) {
 				double[] coords = parts3d.get(s).getVertex(n).getCoords();
